@@ -1,7 +1,7 @@
 .user-posts_wrapper {
     display: grid;
     grid-template-columns: 400px 400px;
-    gap: 15px;
+    gap: 25px;
     font-family: "Nunito Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     justify-content: center;
     align-items: center;
@@ -11,8 +11,14 @@
 .user-post_item {
     display: grid;
     border-radius: 15px;
+    /* box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); */
     grid-template-columns: 180px 200px;
-    background-color: #F0F0F0	;
+    background-color: #F0F0F0;
+}
+
+.user-post_item:hover {
+    transition: 0.2s;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* .user-post_item:nth-of-type(1) {

@@ -13,7 +13,7 @@ button {
   cursor: pointer;
   color: grey;
   font-size: 1.1rem;
-  padding: 7px 20px;
+  padding: 10px 15px;
 }
 
 .categories-target:hover {

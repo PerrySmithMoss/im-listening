@@ -3,7 +3,9 @@ import { Button } from "../Button";
 import { Logo } from "../Logo/Logo";
 import "./navbar.css";
 
-const Headphones = require("../../assets/headphones.svg") as string;
+const UserAvatar = require("../../assets/user-avatar.jpeg") as string;
+const ChevronDown = require("../../assets/chevron-down.svg") as string;
+const HamburgerMenu = require("../../assets/hamburger-menu.svg") as string;
 
 export interface NavbarProps {
   user?: {};
@@ -42,9 +44,27 @@ export const Navbar: React.FC<NavbarProps> = ({
           </ul>
         </div>
 
-        <div>
+        <div className="user-state">
           {user ? (
-            <Button size="small" onClick={onLogout} label="Log out" />
+            <>
+              <div className="user-profile">
+                <a href="#">
+                  <img
+                    className="user-profile_image"
+                    src={UserAvatar}
+                    alt="User avatar"
+                  />
+                </a>
+                <a href="#">
+                  <img
+                    className="user-profile_expand"
+                    src={ChevronDown}
+                    alt="ChevronDown"
+                  />
+                </a>
+                {/* <Button size="small" onClick={onLogout} label="Log out" /> */}
+              </div>
+            </>
           ) : (
             <>
               <Button size="small" onClick={onLogin} label="Log in" />
@@ -57,6 +77,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               />
             </>
           )}
+          <div className="hamburger-menu">
+            <img
+              className="hamburger-menu_image"
+              src={HamburgerMenu}
+              alt="Hamburger menu"
+            />
+          </div>
         </div>
       </div>
     </header>
