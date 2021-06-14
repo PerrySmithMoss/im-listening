@@ -1,0 +1,33 @@
+.categories-wrap {
+  display: grid;
+  justify-content: center;
+  margin-top: 50px;
+  gap: 25px;
+  grid-auto-flow: column;
+}
+
+button {
+  border-radius: 20px;
+  background-color: transparent;
+  border: 0px;
+  cursor: pointer;
+  color: grey;
+  font-size: 1.1rem;
+  padding: 7px 20px;
+}
+
+.categories-target:hover {
+    background-color: #f3a140;
+    color: white;
+    /* background-color: #F45B49; */
+    /* color: #F45B49; */
+}
+
+.categories-target_active {
+  background-color: #f3a140;
+  color: white;
+}
+
+.categories-target_active:hover {
+    background-color: #f3a140;
+}

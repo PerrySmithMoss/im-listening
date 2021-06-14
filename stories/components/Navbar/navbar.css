@@ -1,0 +1,61 @@
+  .heading {
+    font-family: 'Nunito Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 10%;
+  }
+  
+
+  h1 {
+    font-weight: 900;
+    font-size: 20px;
+    line-height: 1;
+
+    display: inline-block;
+    vertical-align: top;
+  }
+  
+  button + button {
+    margin-left: 10px;
+  }
+
+  .navbar-heading {
+    display: inline;
+    margin-left: 20px;
+  }
+
+  .headphones-logo {
+    height: 40px;
+    width: 40px;
+  }
+  
+  .logo-heading_wrapper {
+    display: flex;
+    align-items: center;
+  }
+
+  li, a, button {
+    text-decoration: none;
+  }
+
+  .nav-links {
+    list-style: none;
+  }
+
+  .nav-links li {
+    display: inline-block;
+    padding: 0px 20px;
+    margin-top: 6px;
+    margin-bottom: 0px;
+  }
+
+  .nav-links li a {
+    transition: all 0.3s ease 0s;
+    color: grey;
+  }
+
+  .nav-links li a:hover {
+    color: #6c3db7;
+  }
+
