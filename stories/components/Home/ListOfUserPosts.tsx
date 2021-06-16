@@ -52,7 +52,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
             </p>
             <p
               style={{ color: "#383838", fontWeight: "bold" }}
-              className="user-username"
+              className="user-username with-padding"
             >
               Cole world!
             </p>
@@ -107,7 +107,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
             </p>
             <p
               style={{ color: "#383838", fontWeight: "bold" }}
-              className="user-username"
+              className="user-username with-padding"
             >
               Cole world!
             </p>
@@ -162,7 +162,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
             </p>
             <p
               style={{ color: "#383838", fontWeight: "bold" }}
-              className="user-username"
+              className="user-username with-padding" 
             >
               Cole world!
             </p>
@@ -217,7 +217,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
             </p>
             <p
               style={{ color: "#383838", fontWeight: "bold" }}
-              className="user-username"
+              className="user-username with-padding"
             >
               Cole world!
             </p>
@@ -272,7 +272,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
             </p>
             <p
               style={{ color: "#383838", fontWeight: "bold" }}
-              className="user-username"
+              className="user-username with-padding"
             >
               Cole world!
             </p>
@@ -327,7 +327,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
             </p>
             <p
               style={{ color: "#383838", fontWeight: "bold" }}
-              className="user-username"
+              className="user-username with-padding"
             >
               Cole world!
             </p>

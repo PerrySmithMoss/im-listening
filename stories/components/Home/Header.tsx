@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "../../components/Button";
+
 const HomeHeroBanner1 = require("../../assets/home-hero_image1.png") as string;
 
 interface HeaderProps {
@@ -10,7 +11,7 @@ export const Header: React.FC<HeaderProps> = ({ onCreateAccount }) => {
   return (
     <section className="cta-wrapper">
       <div className="cta-item_1">
-        <h2>Listening is everything</h2>
+        <h2 className="header-h2">Listening is everything</h2>
         <p className="header-p">Join the millions and share what you're listening to.</p>
         <Button
           primary

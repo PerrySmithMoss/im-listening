@@ -1,6 +1,7 @@
 .featured-artists_wrapper {
   display: grid;
   grid-template-columns: 300px 200px 200px;
+  /* grid-template-columns: repeat(auto-fit, 1fr); */
   gap: 5px;
   font-family: "Nunito Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   justify-content: center;
@@ -85,4 +86,29 @@
   font-size: 13px;
   color: white;
   display: inline;
+}
+
+@media only screen and (max-width: 710px) {
+  .featured-artists_wrapper{
+    grid-template-columns: 300px 200px;
+  }
+}
+
+@media only screen and (max-width: 505px) {
+  .featured-artists_wrapper{
+    grid-template-columns: 300px;
+  }
+}
+
+@media only screen and (max-width: 300px) {
+  .featured-artists_wrapper{
+    grid-template-columns: 270px;
+  }
+
+  .artists-grid {
+    margin-left: 20px;
+    display: grid;
+    grid-template-columns: 60px 60px 60px;
+    gap: 25px;
+  }
 }

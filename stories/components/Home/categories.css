@@ -17,10 +17,10 @@ button {
 }
 
 .categories-target:hover {
-    background-color: #f3a140;
-    color: white;
-    /* background-color: #F45B49; */
-    /* color: #F45B49; */
+  background-color: #f3a140;
+  color: white;
+  /* background-color: #F45B49; */
+  /* color: #F45B49; */
 }
 
 .categories-target_active {
@@ -29,5 +29,30 @@ button {
 }
 
 .categories-target_active:hover {
-    background-color: #f3a140;
+  background-color: #f3a140;
+}
+
+.select-wrapper {
+  display: none;
+}
+
+.category-select {
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  border: 6px solid transparent;
+  border-color: #f0f0f0 transparent transparent transparent;
+  padding: 15px;
+  font-weight: bold;
+}
+
+@media only screen and (max-width: 620px) {
+  .categories-wrap {
+    display: none;
+  }
+  .select-wrapper {
+    display: flex;
+    margin-top: 50px;
+    margin-bottom: 5px;
+    justify-content: center;
+  }
 }

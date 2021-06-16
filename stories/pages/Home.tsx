@@ -20,7 +20,7 @@ export const Home: React.FC<HomeProps> = ({
   onLogout,
   onCreateAccount,
 }) => (
-  <article>
+  <article className="home-container">
     <Navbar
       primary={true}
       user={user}
