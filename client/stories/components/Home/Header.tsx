@@ -1,7 +1,8 @@
 import React from "react";
-import { Button } from "../../components/Button";
+import { Button } from "../Old/Button";
+import HeaderStyles from "./home.module.css"
 
-const HomeHeroBanner1 = require("../../assets/home-hero_image1.png") as string;
+// const HomeHeroBanner1 = require("../../assets/home-hero_image1.png") as string;
 
 interface HeaderProps {
   onCreateAccount?: () => void;
@@ -9,10 +10,10 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onCreateAccount }) => {
   return (
-    <section className="cta-wrapper">
-      <div className="cta-item_1">
-        <h2 className="header-h2">Listening is everything</h2>
-        <p className="header-p">Join the millions and share what you're listening to.</p>
+    <section className={`${HeaderStyles.ctaWrapper}`}>
+      <div className={`${HeaderStyles.ctaItem1}`}>
+        <h2 className={`${HeaderStyles.headerH2}`}>Listening is everything</h2>
+        <p className={`${HeaderStyles.headerP}`}>Join the millions and share what you're listening to.</p>
         <Button
           primary
           color={true}
@@ -21,10 +22,10 @@ export const Header: React.FC<HeaderProps> = ({ onCreateAccount }) => {
           label="Share"
         />
       </div>
-      <div className="cta-item_2">
+      <div className={`${HeaderStyles.ctaItem2}`}>
         <img
-          className="home-hero_image"
-          src={HomeHeroBanner1}
+          className={`${HeaderStyles.homeHeroImage}`}
+          src="/assets/home-hero_image1.png"
           alt="Two people dancing to music"
         />
       </div>

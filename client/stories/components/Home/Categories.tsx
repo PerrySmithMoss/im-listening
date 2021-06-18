@@ -1,34 +1,42 @@
 import React from "react";
-import "./categories.css";
+import styles from "./categories.module.css";
 
 interface CategoriesProps {}
 
 export const Categories: React.FC<CategoriesProps> = ({}) => {
   return (
     <>
-      <section className="categories-wrap">
-        <div className="categories-button_wrap">
-          <button className="categories-target categories-target_active">
+      <section className={`${styles.categoriesWrap}`}>
+        <div className={`${styles.categoriesButtonWrap}`}>
+          <button
+            className={`${styles.categoriesTarget} ${styles.categoriesTargetActive}`}
+          >
             All Categories
           </button>
         </div>
-        <div className="categories-button_wrap">
-          <button className="categories-target">Hip-hop</button>
+        <div className={`${styles.categoriesButtonWrap}`}>
+          <button className={`${styles.categoriesTarget}`}>Hip-hop</button>
         </div>
-        <div className="categories-button_wrap">
-          <button className="categories-target">Dance</button>
+        <div className={`${styles.categoriesButtonWrap}`}>
+          <button className={`${styles.categoriesTarget}`}>Dance</button>
         </div>
-        <div className="categories-button_wrap">
-          <button className="categories-target">Electronic</button>
+        <div className={`${styles.categoriesButtonWrap}`}>
+          <button className={`${styles.categoriesTarget}`}>Electronic</button>
         </div>
-        <div className="categories-button_wrap">
-          <button className="categories-target">Pop</button>
+        <div className={`${styles.categoriesButtonWrap}`}>
+          <button className={`${styles.categoriesTarget}`}>Pop</button>
         </div>
       </section>
-      <section className="select-wrapper">
+      <section className={`${styles.selectWrapper}`}>
         <div>
-          <select name="category" id="category-select" className="category-select">
-            <option defaultChecked disabled value="">Select a category</option>
+          <select
+            name="category"
+            id="category-select"
+            className={`${styles.categorySelect}`}
+          >
+            <option defaultChecked disabled value="">
+              Select a category
+            </option>
             <option value="Hip-hop">Hip-hop</option>
             <option value="Dance">Dance</option>
             <option value="Electronic">Electronic</option>

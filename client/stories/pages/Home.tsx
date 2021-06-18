@@ -1,7 +1,6 @@
 import React from "react";
 
 import { Navbar } from "../components/Navbar/Navbar";
-import "./home.css";
 import { Header } from "../components/Home/Header";
 import { FeaturedArtists } from "../components/Home/FeaturedArtists";
 import { Categories } from "../components/Home/Categories";

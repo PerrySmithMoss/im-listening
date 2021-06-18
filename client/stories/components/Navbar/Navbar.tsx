@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { Button } from "../Button";
+import { Button } from "../Old/Button";
 import { Logo } from "../Logo/Logo";
-import "./navbar.css";
+import styles from "./navbar.module.css";
+import Image from "next/image";
 
-const UserAvatar = require("../../assets/user-avatar.jpeg") as string;
-const ChevronDown = require("../../assets/chevron-down.svg") as string;
-const HamburgerMenu = require("../../assets/hamburger-menu.svg") as string;
-const CloseMenu = require("../../assets/close.svg") as string;
+// const UserAvatar = require("../../assets/user-avatar.jpeg") as string;
+// const HamburgerMenu = require("../../assets/hamburger-menu.svg") as string;
+// const CloseMenu = require("../../assets/close.svg") as string;
 
 export interface NavbarProps {
   user?: {};
@@ -27,75 +27,101 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-      <div className={"navigation " + (sidebar ? "navigation-open" : "")}>
+      <div
+        className={
+          `${styles.navigation} ` + (sidebar ? `${styles.navigationOpen}` : "")
+        }
+      >
         <br></br>
-        <div className="sidebar-menu">
+        <div className={`${styles.sidebarMenu}`}>
           <div>
-            <span className="sidebar-heading">I'm Listening</span>
+            <span className={`${styles.sidebarHeading}`}>I'm Listening</span>
           </div>
           <div>
-            <img
+            <Image
               onClick={() => setSidebar(!sidebar)}
-              className="close-menu_image"
-              src={CloseMenu}
+              className={`${styles.closeMenuImage}`}
+              src="/assets/close.svg"
               alt="Close menu"
+              height={20}
+              width={20}
             />
           </div>
         </div>
-        <hr className="sidebar-divider" />
-        <ul>
-          <li>
-            <a href="">Home</a>
+        <hr className={`${styles.sidebarDivider}`} />
+        <ul className={`${styles.sidebarMenuUl}`}>
+          <li className={`${styles.sidebarMenuUlLi}`}>
+            <a className={`${styles.sidebarMenuUlLiA}`} href="">
+              Home
+            </a>
           </li>
-          <li>
-            <a href="">Latest</a>
+          <li className={`${styles.sidebarMenuUlLi}`}>
+            <a className={`${styles.sidebarMenuUlLiA}`} href="">
+              Latest
+            </a>
           </li>
-          <li>
-            <a href="">Popular</a>
+          <li className={`${styles.sidebarMenuUlLi}`}>
+            <a className={`${styles.sidebarMenuUlLiA}`} href="">
+              Popular
+            </a>
           </li>
-          <li>
-            <a href="">Archive</a>
+          <li className={`${styles.sidebarMenuUlLi}`}>
+            <a className={`${styles.sidebarMenuUlLiA}`} href="">
+              Archive
+            </a>
           </li>
         </ul>
       </div>
       <header>
-        <div className="heading">
-          <div className="logo-heading_wrapper">
+        <div className={`${styles.heading}`}>
+          <div className={`${styles.logoHeadingWrapper}`}>
             <Logo primary={primary} size="small" />
-            <h1 className="navbar-heading">I'm Listening</h1>
-            <ul className="nav-links">
-              <li>
-                <a href="#">Home</a>
+            <h1 className={`${styles.navbarHeading}`}>I'm Listening</h1>
+            <ul className={`${styles.navLinks}`}>
+              <li className={`${styles.navLinksLi}`}>
+                <a className={`${styles.navLinksLiA}`} href="#">
+                  Home
+                </a>
               </li>
-              <li>
-                <a href="#">Latest</a>
+              <li className={`${styles.navLinksLi}`}>
+                <a className={`${styles.navLinksLiA}`} href="#">
+                  Latest
+                </a>
               </li>
-              <li>
-                <a href="#">Popular</a>
+              <li className={`${styles.navLinksLi}`}>
+                <a className={`${styles.navLinksLiA}`} href="#">
+                  Popular
+                </a>
               </li>
-              <li>
-                <a href="#">Archive</a>
+              <li className={`${styles.navLinksLi}`}>
+                <a className={`${styles.navLinksLiA}`} href="#">
+                  Archive
+                </a>
               </li>
             </ul>
           </div>
 
-          <div className="user-state">
+          <div className={`${styles.userState}`}>
             {user ? (
               <>
-                <div className="user-profile">
+                <div className={`${styles.userProfile}`}>
                   <a href="#">
-                    <img
-                      className="user-profile_image"
-                      src={UserAvatar}
+                    <Image
+                      className={`${styles.userProfileImage}`}
+                      src="/assets/user-avatar.jpeg"
                       alt="User avatar"
+                      height={40}
+                      width={40}
                     />
                   </a>
                   <a href="#">
-                    <img
+                    {/* <Image
                       className="user-profile_expand"
                       src={ChevronDown}
                       alt="ChevronDown"
-                    />
+                      height={15}
+                      width={10}
+                    /> */}
                   </a>
                   {/* <Button size="small" onClick={onLogout} label="Log out" /> */}
                 </div>
@@ -112,13 +138,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                 />
               </>
             )}
-            <div className="hamburger-menu">
-              <img
+            <div className={`${styles.hamburgerMenu}`}>
+              <Image
                 onClick={() => setSidebar(!sidebar)}
-                id="hamburger-menu_image"
-                className="hamburger-menu_image"
-                src={HamburgerMenu}
+                id={`${styles.hamburgerMenuImage}`}
+                className={`${styles.hamburgerMenuImage}`}
+                src="/assets/hamburger-menu.svg"
                 alt="Hamburger menu"
+                height={30}
+                width={30}
               />
             </div>
           </div>

@@ -1,0 +1,121 @@
+.featuredArtistsWrapper {
+  display: grid;
+  grid-template-columns: 300px 200px 200px;
+  /* grid-template-columns: repeat(auto-fit, 1fr); */
+  gap: 5px;
+  font-family: "Nunito Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  justify-content: center;
+  align-items: center;
+}
+
+.cardV1 {
+  background: linear-gradient(
+    90deg,
+    #f3a140 -1.53%,
+    #fb564c 101.86%,
+    #e06d70 101.87%
+  );
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+}
+
+.featuredArtistsA {
+  color: black;
+  font-weight: 400;
+  text-decoration: none;
+
+}
+
+.cardV1:nth-of-type(1) {
+  grid-row-start: span 2;
+}
+
+.cardV2 {
+  background: linear-gradient(90deg, #f45b49 -2.47%, #f3a140 100%);
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+}
+
+.cardV3 {
+  background: linear-gradient(90deg, #f3a13b 0%, #f45b49 100%);
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+}
+
+.cardHeadingV1 {
+  color: white;
+  font-size: 48px;
+  margin: 20px;
+  line-height: 48px;
+}
+.cardHeadingV2 {
+  color: white;
+  font-size: 30px;
+  margin: 20px;
+  line-height: 28px;
+}
+
+.cardHeadingV3 {
+  color: white;
+  font-size: 28px;
+  margin: 20px;
+  line-height: 30px;
+}
+
+.artistsGrid {
+  margin-left: 20px;
+  display: grid;
+  grid-template-columns: 60px 60px 60px;
+  gap: 35px;
+}
+
+.artistsItem {
+  text-align: center;
+  align-content: center;
+  justify-content: center;
+}
+
+.artistImage {
+  width: 65px;
+  height: 65px;
+  border-radius: 5px;
+}
+
+.artistName {
+  text-align: center;
+  letter-spacing: 1px;
+  margin-left: 5px;
+  align-content: center;
+  justify-content: center;
+  font-size: 13px;
+  color: white;
+  display: inline;
+}
+
+@media only screen and (max-width: 710px) {
+  .featuredArtistsWrapper {
+    grid-template-columns: 300px 200px;
+  }
+}
+
+@media only screen and (max-width: 505px) {
+  .featuredArtistsWrapper {
+    grid-template-columns: 300px;
+  }
+}
+
+@media only screen and (max-width: 300px) {
+  .featuredArtistsWrapper {
+    grid-template-columns: 270px;
+  }
+
+  .artistsGrid {
+    margin-left: 20px;
+    display: grid;
+    grid-template-columns: 60px 60px 60px;
+    gap: 25px;
+  }
+}

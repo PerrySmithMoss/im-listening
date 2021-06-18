@@ -2,7 +2,7 @@ import React from 'react';
 import { Story, Meta } from '@storybook/react';
 
 import { Home, HomeProps } from './Home';
-import * as HeaderStories from '../Header.stories';
+import * as HeaderStories from '../components/Old/Header.stories';
 
 export default {
   title: 'Pages/Home',
