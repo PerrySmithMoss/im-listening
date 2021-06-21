@@ -8,7 +8,7 @@ interface ListOfUserPostsProps {}
 export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
   return (
     <section className={`${styles.userPostsWrapper}`}>
-      <a href="#">
+      <a href="" className={`${styles.ListOfPostsA}`}>
         <div className={`${styles.userPostItem}`}>
           <div>
             <img
@@ -33,7 +33,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
                 >
                   David Henry{" "}
                 </p>
-                <a href="">
+                <a href="" className={`${styles.ListOfPostsA}`}>
                   <span style={{ color: "#0f8deb", fontSize: "0.8rem" }}>
                     @davidH
                   </span>
@@ -63,7 +63,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
           </div>
         </div>
       </a>
-      <a href="">
+      <a href="" className={`${styles.ListOfPostsA}`}>
         <div className={`${styles.userPostItem}`}>
           <div>
             <img
@@ -88,7 +88,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
                 >
                   David Henry{" "}
                 </p>
-                <a href="">
+                <a href="" className={`${styles.ListOfPostsA}`}>
                   <span style={{ color: "#0f8deb", fontSize: "0.8rem" }}>
                     @davidH
                   </span>
@@ -118,7 +118,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
           </div>
         </div>
       </a>
-      <a href="#">
+      <a href="#" className={`${styles.ListOfPostsA}`}>
         <div className={`${styles.userPostItem}`}>
           <div>
             <img
@@ -143,7 +143,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
                 >
                   David Henry{" "}
                 </p>
-                <a href="">
+                <a href="" className={`${styles.ListOfPostsA}`}>
                   <span style={{ color: "#0f8deb", fontSize: "0.8rem" }}>
                     @davidH
                   </span>
@@ -173,7 +173,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
           </div>
         </div>
       </a>
-      <a href="#">
+      <a href="#" className={`${styles.ListOfPostsA}`}>
         <div className={`${styles.userPostItem}`}>
           <div>
             <img
@@ -198,7 +198,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
                 >
                   David Henry{" "}
                 </p>
-                <a href="">
+                <a href="" className={`${styles.ListOfPostsA}`}>
                   <span style={{ color: "#0f8deb", fontSize: "0.8rem" }}>
                     @davidH
                   </span>
@@ -228,7 +228,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
           </div>
         </div>
       </a>
-      <a href="#">
+      <a href="#" className={`${styles.ListOfPostsA}`}>
         <div className={`${styles.userPostItem}`}>
           <div>
             <img
@@ -253,7 +253,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
                 >
                   David Henry{" "}
                 </p>
-                <a href="">
+                <a href="" className={`${styles.ListOfPostsA}`}>
                   <span style={{ color: "#0f8deb", fontSize: "0.8rem" }}>
                     @davidH
                   </span>
@@ -283,7 +283,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
           </div>
         </div>
       </a>
-      <a href="#">
+      <a href="#" className={`${styles.ListOfPostsA}`}>
         <div className={`${styles.userPostItem}`}>
           <div>
             <img
@@ -308,7 +308,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({}) => {
                 >
                   David Henry{" "}
                 </p>
-                <a href="">
+                <a href="" className={`${styles.ListOfPostsA}`}>
                   <span style={{ color: "#0f8deb", fontSize: "0.8rem" }}>
                     @davidH
                   </span>
