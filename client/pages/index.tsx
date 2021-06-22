@@ -3,35 +3,17 @@ import { Header } from "../stories/components/Home/Header";
 import { FeaturedArtists } from "../stories/components/Home/FeaturedArtists";
 import { Categories } from "../stories/components/Home/Categories";
 import { ListOfUserPosts } from "../stories/components/Home/ListOfUserPosts";
+import { GetServerSideProps } from "next";
+import { Meta } from "../stories/components/Home/Meta";
 
-export default function Home() {
+export default function Home({ data }: any) {
   return (
-    // <div>
-    //   <header>
-    //     <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-    //     <h3>I'm Listening</h3>
-    //     <ul>
-    //       <li>
-    //         <a href="#">Home</a>
-    //       </li>
-    //       <li>
-    //         <a href="#">Latest</a>
-    //       </li>
-    //       <li>
-    //         <a href="#">Popular</a>
-    //       </li>
-    //     </ul>
-    //     <ul>
-    //       <li>
-    //         <a href="#">Login</a>
-    //       </li>
-    //       <li>
-    //         <a href="#">Sign up</a>
-    //       </li>
-    //     </ul>
-    //   </header>
-    // </div>
     <div>
+      <Meta
+        title={"I'm Listening"}
+        keywords={"music, social media, social, share music, music"}
+        description={"Share what you're listening to."}
+      />
       <Navbar
         primary={true}
         onLogin={() => {}}
@@ -41,10 +23,22 @@ export default function Home() {
       <Header />
       <FeaturedArtists />
       <Categories />
-      <ListOfUserPosts />
+      <ListOfUserPosts data={data} />
     </div>
-    // <div>
-    //   <Image src="/assets/headphones.svg" height={60} width={60}/>
-    // </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  const res = await fetch(`http://localhost:5000/`);
+  const data = await res.json();
+
+  if (!data) {
+    return {
+      notFound: true,
+    };
+  }
+
+  return {
+    props: { data }, // will be passed to the page component as props
+  };
+};

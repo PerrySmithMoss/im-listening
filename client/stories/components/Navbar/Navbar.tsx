@@ -3,6 +3,7 @@ import { Button } from "../Old/Button";
 import { Logo } from "../Logo/Logo";
 import styles from "./navbar.module.css";
 import Image from "next/image";
+import Link from "next/link";
 
 // const UserAvatar = require("../../assets/user-avatar.jpeg") as string;
 // const HamburgerMenu = require("../../assets/hamburger-menu.svg") as string;
@@ -51,24 +52,24 @@ export const Navbar: React.FC<NavbarProps> = ({
         <hr className={`${styles.sidebarDivider}`} />
         <ul className={`${styles.sidebarMenuUl}`}>
           <li className={`${styles.sidebarMenuUlLi}`}>
-            <a className={`${styles.sidebarMenuUlLiA}`} href="">
-              Home
-            </a>
+            <Link href="/">
+              <a className={`${styles.sidebarMenuUlLiA}`}>Home</a>
+            </Link>
           </li>
           <li className={`${styles.sidebarMenuUlLi}`}>
-            <a className={`${styles.sidebarMenuUlLiA}`} href="">
-              Latest
-            </a>
+            <Link href="/latest">
+              <a className={`${styles.sidebarMenuUlLiA}`}>Latest</a>
+            </Link>
           </li>
           <li className={`${styles.sidebarMenuUlLi}`}>
-            <a className={`${styles.sidebarMenuUlLiA}`} href="">
-              Popular
-            </a>
+            <Link href="/popular">
+              <a className={`${styles.sidebarMenuUlLiA}`}>Popular</a>
+            </Link>
           </li>
           <li className={`${styles.sidebarMenuUlLi}`}>
-            <a className={`${styles.sidebarMenuUlLiA}`} href="">
-              Archive
-            </a>
+            <Link href="/archive">
+              <a className={`${styles.sidebarMenuUlLiA}`}>Archive</a>
+            </Link>
           </li>
         </ul>
       </div>
@@ -79,24 +80,24 @@ export const Navbar: React.FC<NavbarProps> = ({
             <h1 className={`${styles.navbarHeading}`}>I'm Listening</h1>
             <ul className={`${styles.navLinks}`}>
               <li className={`${styles.navLinksLi}`}>
-                <a className={`${styles.navLinksLiA}`} href="#">
-                  Home
-                </a>
+                <Link href="/">
+                  <a className={`${styles.navLinksLiA}`}>Home</a>
+                </Link>
               </li>
               <li className={`${styles.navLinksLi}`}>
-                <a className={`${styles.navLinksLiA}`} href="#">
-                  Latest
-                </a>
+                <Link href="/latest">
+                  <a className={`${styles.navLinksLiA}`}>Latest</a>
+                </Link>
               </li>
               <li className={`${styles.navLinksLi}`}>
-                <a className={`${styles.navLinksLiA}`} href="#">
-                  Popular
-                </a>
+                <Link href="/popular">
+                  <a className={`${styles.navLinksLiA}`}>Popular</a>
+                </Link>
               </li>
               <li className={`${styles.navLinksLi}`}>
-                <a className={`${styles.navLinksLiA}`} href="#">
-                  Archive
-                </a>
+                <Link href="/archive">
+                  <a className={`${styles.navLinksLiA}`}>Archive</a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -128,14 +129,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               </>
             ) : (
               <>
-                <Button size="small" onClick={onLogin} label="Log in" />
-                <Button
-                  color={primary}
-                  primary
-                  size="small"
-                  onClick={onCreateAccount}
-                  label="Sign up"
-                />
+                <Link href="/login">
+                  <Button size="small" onClick={onLogin} label="Log in" />
+                </Link>
+                <Link href="/sign-up">
+                  <Button
+                    color={primary}
+                    primary
+                    size="small"
+                    onClick={onCreateAccount}
+                    label="Sign up"
+                  />
+                </Link>
               </>
             )}
             <div className={`${styles.hamburgerMenu}`}>

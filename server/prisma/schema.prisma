@@ -11,20 +11,23 @@ generator client {
 }
 
 model Post {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  albumName String   @db.VarChar(255)
-  content   String?
-  published Boolean  @default(false)
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  albumName  String   @db.VarChar(255)
+  artistName String   @db.VarChar(255)
+  rating     Int
+  title      String
+  content    String
+  published  Boolean  @default(false)
+  author     User     @relation(fields: [authorId], references: [id])
+  authorId   Int
 }
 
 model Profile {
   id     Int     @id @default(autoincrement())
   bio    String?
-  avatar String?
+  avatar String? @default("http://localhost:5000/images/default-avatar.jpg")
   user   User    @relation(fields: [userId], references: [id])
   userId Int     @unique
 }
@@ -32,9 +35,9 @@ model Profile {
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
-  firstName String?
-  lastName  String?
-  username  String?
+  firstName String
+  lastName  String
+  username  String
   posts     Post[]
   profile   Profile?
 }
