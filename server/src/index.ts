@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
+import { UserResolver } from "./resolvers/user";
 
 const PORT = process.env.PORT || 5000;
 const prisma = new PrismaClient();
@@ -37,7 +38,7 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver, PostResolver],
+      resolvers: [HelloResolver, PostResolver, UserResolver],
     }),
     context: () => ({ prisma: prisma }),
     // subscriptions: {

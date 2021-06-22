@@ -8,8 +8,16 @@ export class User {
   @Field(() => ID)
   id: number
   
+  @Field(() => Date)
+  createdAt: Date
+
+  @Field(() => Date)
+  updatedAt: Date
+
   @Field(() => String)
   email: string
+
+  password: string
 
   @Field(() => String)
   firstName: string
