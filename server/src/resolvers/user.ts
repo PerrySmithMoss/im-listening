@@ -136,8 +136,25 @@ export class UserResolver {
       };
     }
 
+    ctx.req.session.userId = user.id;
+
     return {
       user: user,
     };
+  }
+
+  @Query(() => User, { nullable: true })
+  async getCurrentUser(@Ctx() ctx: PrismaContext) {
+    // You're not logged in
+    if (!ctx.req.session.userId) {
+      return null;
+    }
+
+    return await ctx.prisma.user.findUnique({
+      where: {
+        id: ctx.req.session.userId,
+      },
+      include: { posts: true, profile: true },
+    });
   }
 }

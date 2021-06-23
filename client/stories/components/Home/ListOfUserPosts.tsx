@@ -4,14 +4,14 @@ import styles from "./user-posts.module.css";
 // const UserAvatar = require("../../assets/user-avatar.jpeg") as string;
 
 interface ListOfUserPostsProps {
-  data: any;
+  recentPosts: any;
 }
 
-export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({ data }) => {
-  console.dir(data);
+export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({ recentPosts }) => {
+  // console.dir(recentPosts)
   return (
     <section className={`${styles.userPostsWrapper}`}>
-      {data.recentPosts.map((post: any) => (
+      {recentPosts.map((post: any) => (
         <a href="" className={`${styles.ListOfPostsA}`}>
           <div key={post.id} className={`${styles.userPostItem}`}>
             <div>

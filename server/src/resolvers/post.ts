@@ -50,7 +50,7 @@ export class PostResolver {
         rating,
         title,
         content,
-        authorId: 9,
+        authorId: 18,
       },
     });
   }

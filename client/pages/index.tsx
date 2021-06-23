@@ -6,7 +6,7 @@ import { ListOfUserPosts } from "../stories/components/Home/ListOfUserPosts";
 import { GetServerSideProps } from "next";
 import { Meta } from "../stories/components/Home/Meta";
 
-export default function Home({ data }: any) {
+export default function Home({ recentPosts }: any) {
   return (
     <div>
       <Meta
@@ -23,22 +23,23 @@ export default function Home({ data }: any) {
       <Header />
       <FeaturedArtists />
       <Categories />
-      <ListOfUserPosts data={data} />
+      <ListOfUserPosts recentPosts={recentPosts} />
     </div>
   );
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
   const res = await fetch(`http://localhost:5000/`);
-  const data = await res.json();
+  const recentPosts = await res.json();
+  // console.log(recentPosts)
 
-  if (!data) {
+  if (!recentPosts) {
     return {
       notFound: true,
     };
   }
 
   return {
-    props: { data }, // will be passed to the page component as props
+    props: { recentPosts }, // will be passed to the page component as props
   };
 };
