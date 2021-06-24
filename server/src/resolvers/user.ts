@@ -98,6 +98,8 @@ export class UserResolver {
     } catch (err) {
       console.log(err);
     }
+
+    ctx.req.session.userId = registeredUser?.id
     return {
       user: registeredUser,
     };
