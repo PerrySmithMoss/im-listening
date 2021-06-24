@@ -8,8 +8,9 @@ type Values = {
   password: string;
 };
 
-const Validation = ( values : Values) => {
+const Validation = (values: Values) => {
   let errors = {} as Values;
+  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
   if (!values.firstName) {
     errors.firstName = "First name is required.";
@@ -19,12 +20,12 @@ const Validation = ( values : Values) => {
   }
 
   if (!values.username) {
-    errors.username = "Last name is required.";
+    errors.username = "Username is required.";
   }
 
   if (!values.email) {
     errors.email = "Email is required";
-  } else if (!/\$+@\S+\.\S+/.test(values.email)) {
+  } else if (re.test(values.email) === false) {
     errors.email = "Email is invalid";
   }
 

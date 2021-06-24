@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "../Old/Button";
 import signupStyles from "./signup.module.css";
 import validation from "./Validation";
 import Image from "next/image";
+import Link from "next/link";
+import { useRegisterUserMutation } from "../../../graphql/generated/graphql";
+import { toErrorMap } from "../../../utils/toErrorMap";
+import { useRouter } from "next/dist/client/router";
 
 interface SignUpProps {}
 
@@ -15,6 +19,7 @@ type Errors = {
 };
 
 export const SignUp: React.FC<SignUpProps> = ({}) => {
+  const router = useRouter();
   const [formValues, setFormValues] = useState({
     firstName: "",
     lastName: "",
@@ -23,7 +28,12 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
     password: "",
   });
   const [errors, setErrors] = useState({} as Errors);
-
+  const [serverErrors, setServerErrors] = useState(
+    {} as Record<string, string>
+  );
+  const [dataIsCorrect, setDataIsCorrect] = useState(false);
+  const [serverDataIsCorrect, setServerDataIsCorrect] = useState(false);
+  const [registerUser] = useRegisterUserMutation();
   const onFormChange = (event: any) => {
     setFormValues({
       ...formValues,
@@ -31,10 +41,44 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
     });
   };
 
-  const handleRegisterUser = (event: any) => {
+  const handleRegisterUser = async (event: any) => {
+    console.log("Yo")
     event.preventDefault();
-    setErrors(validation(formValues));
+    // setErrors(validation(formValues));
+    // if (dataIsCorrect === true) {
+      const res = await registerUser({
+        variables: {
+          firstName: formValues.firstName,
+          lastName: formValues.lastName,
+          email: formValues.email,
+          password: formValues.password,
+          username: formValues.username,
+        },
+      });
+      console.log(res);
+      // if (res.data?.registerUser.errors) {
+      //   setServerErrors(toErrorMap(res.data.registerUser.errors));
+      // } else if (res.data?.registerUser.user) {
+      //   router.push("/");
+      // }
+    // }
   };
+
+  function checkIfErrors() {
+    if (Object.keys(errors).length === 0 && dataIsCorrect) {
+      setDataIsCorrect(true);
+    } else if (Object.keys(serverErrors).length === 0 && serverDataIsCorrect) {
+      setServerDataIsCorrect(true);
+    }
+  }
+
+  // useEffect(() => {
+  //   if (Object.keys(errors).length === 0 && dataIsCorrect) {
+  //     setDataIsCorrect(true);
+  //   } else if (Object.keys(serverErrors).length === 0 && serverDataIsCorrect) {
+  //     setServerDataIsCorrect(true);
+  //   }
+  // }, [errors, serverErrors]);
 
   return (
     <section className={`${signupStyles.signupContainer}`}>
@@ -61,9 +105,13 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
             <p className={`${signupStyles.headerP}`}>
               Already have an account?
             </p>
-            <p className={`${signupStyles.headerP} ${signupStyles.headerSpan}`}>
-              Log in
-            </p>
+            <Link href="/login">
+              <p
+                className={`${signupStyles.headerP} ${signupStyles.headerSpan}`}
+              >
+                Log in
+              </p>
+            </Link>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <button
@@ -111,6 +159,11 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
                       {errors.firstName}
                     </p>
                   )}
+                  {serverErrors.firstName && (
+                    <p className={`${signupStyles.sigupErrors}`}>
+                      {serverErrors.firstName}
+                    </p>
+                  )}
                 </small>
               </div>
               <div className="form__control">
@@ -129,6 +182,11 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
                   {errors.lastName && (
                     <p className={`${signupStyles.sigupErrors}`}>
                       {errors.lastName}
+                    </p>
+                  )}
+                  {serverErrors.lastName && (
+                    <p className={`${signupStyles.sigupErrors}`}>
+                      {serverErrors.lastName}
                     </p>
                   )}
                 </small>
@@ -152,6 +210,11 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
                     {errors.email}
                   </p>
                 )}
+                {serverErrors.email && (
+                  <p className={`${signupStyles.sigupErrors}`}>
+                    {serverErrors.email}
+                  </p>
+                )}
               </small>
             </div>
             <div className={`${signupStyles.formInputGrid}`}>
@@ -173,6 +236,11 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
                       {errors.username}
                     </p>
                   )}
+                  {serverErrors.username && (
+                    <p className={`${signupStyles.sigupErrors}`}>
+                      {serverErrors.username}
+                    </p>
+                  )}
                 </small>
               </div>
               <div className="form__control">
@@ -191,6 +259,11 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
                   {errors.password && (
                     <p className={`${signupStyles.sigupErrors}`}>
                       {errors.password}
+                    </p>
+                  )}
+                  {serverErrors.password && (
+                    <p className={`${signupStyles.sigupErrors}`}>
+                      {serverErrors.password}
                     </p>
                   )}
                 </small>
@@ -222,18 +295,26 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
 
             <button
               className={`${signupStyles.signupButton}`}
-              onClick={(e) => handleRegisterUser(e)}
+              // onClick={async (e) => await handleRegisterUser(e)}
+              onClick={async (e) => {
+                e.preventDefault()
+                const resp = await registerUser({
+                  variables: {
+                    firstName: formValues.firstName,
+                    lastName: formValues.lastName,
+                    email: formValues.email,
+                    password: formValues.password,
+                    username: formValues.username,
+                  },
+                });
+                console.log(resp)
+                // if(resp.data?.registerUser.errors) {
+                //   setServerErrors(toErrorMap(resp.data.registerUser.errors))
+                // }
+              }}
             >
-              Register
+              Sign up
             </button>
-            {/* <div style={{ display: "flex", alignContent: "center" }}>
-            <p className={`${signupStyles.headerP}`}>
-              Already have an account?
-            </p>
-            <p className={`${signupStyles.headerP} ${signupStyles.headerSpan}`}>
-              Log in
-            </p>
-          </div> */}
           </form>
         </div>
       </div>

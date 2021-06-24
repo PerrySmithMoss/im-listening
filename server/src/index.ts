@@ -10,12 +10,19 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import { __prod__ } from "../constants";
 import { PrismaContext } from "./types/PrismaContext";
+import cors from "cors";
 
 const PORT = process.env.PORT || 5000;
 const prisma = new PrismaClient();
 
 const main = async () => {
   const app: Application = express();
+  app.use(
+    cors({
+      origin: process.env.CORS_ORIGIN as string,
+      credentials: true,
+    })
+  );
   app.use(express.static("public"));
 
   const RedisStore = connectRedis(session);
@@ -30,7 +37,7 @@ const main = async () => {
 
   app.use(
     session({
-      name: "sid",
+      name: process.env.COOKIE_NAME as string,
       store: new RedisStore({ client: redisClient, disableTouch: true }),
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 1, // 1 year
@@ -38,6 +45,7 @@ const main = async () => {
         httpOnly: true,
         sameSite: "lax",
         secure: __prod__, // cookie only works in https
+        domain: __prod__ ? ".example.com" : undefined
       },
       saveUninitialized: false,
       secret: process.env.SESSION_SECRET as string,
@@ -45,18 +53,18 @@ const main = async () => {
     })
   );
 
-  app.get('/', async (req, res) => {
+  app.get("/", async (req, res) => {
     const recentPosts = await prisma.post.findMany({
       include: {
         author: {
           include: {
-            profile: true
-          }
-        }
+            profile: true,
+          },
+        },
       },
-    })
-    res.send(recentPosts)
-  })
+    });
+    res.send(recentPosts);
+  });
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
@@ -71,7 +79,7 @@ const main = async () => {
     // uploads: false,
   });
 
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({ app, cors: false });
 
   app.listen(PORT, () =>
     console.log(`🚀  Server running on http://localhost:${PORT}`)
