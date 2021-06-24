@@ -43,16 +43,24 @@ export const Button: React.FC<ButtonProps> = ({
     ? `${styles.storybookButtonPrimary}`
     : `${styles.storybookButtonSecondary}`;
 
-    const sizeClass = size === "small" ? `${styles.small}` : `${styles.large}`
+  const sizeClass =
+    size === "small"
+      ? `${styles.small}`
+      : size === "medium"
+      ? `${styles.medium}`
+      : `${styles.large}`;
 
   const theme = color ? `${styles.orange}` : `${styles.purple}`;
   return (
     <button
       color={theme}
       type="button"
-      className={[`${styles.storybookButton}`, `${styles.storybookButton} ${sizeClass}`, mode, theme].join(
-        " "
-      )}
+      className={[
+        `${styles.storybookButton}`,
+        `${styles.storybookButton} ${sizeClass}`,
+        mode,
+        theme,
+      ].join(" ")}
       style={{ backgroundColor }}
       {...props}
     >
