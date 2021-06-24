@@ -4,7 +4,11 @@ import signupStyles from "./signup.module.css";
 import validation from "../../../utils/Validation";
 import Image from "next/image";
 import Link from "next/link";
-import { useRegisterUserMutation } from "../../../graphql/generated/graphql";
+import {
+  GetCurrentUserDocument,
+  GetCurrentUserQuery,
+  useRegisterUserMutation,
+} from "../../../graphql/generated/graphql";
 import { toErrorMap } from "../../../utils/toErrorMap";
 import { useRouter } from "next/dist/client/router";
 
@@ -54,16 +58,24 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
           password: formValues.password,
           username: formValues.username,
         },
+        update: (cache, { data }) => {
+          cache.writeQuery<GetCurrentUserQuery>({
+            query: GetCurrentUserDocument,
+            data: {
+              __typename: "Query",
+              getCurrentUser: data?.registerUser.user as any,
+            },
+          });
+        },
       });
-      console.log(res);
       if (res.data?.registerUser.errors) {
         setServerDataIsCorrect(false);
         setServerErrors(toErrorMap(res.data.registerUser.errors));
         // } else if (res.data?.registerUser.user) {
         //   router.push("/");
-      } else if(res.data?.registerUser.user) {
+      } else if (res.data?.registerUser.user) {
         setServerDataIsCorrect(true);
-        router.push("/")
+        router.push("/");
       }
     }
   };
