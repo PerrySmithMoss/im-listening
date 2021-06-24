@@ -4,6 +4,7 @@ import { Logo } from "../Logo/Logo";
 import styles from "./navbar.module.css";
 import Image from "next/image";
 import Link from "next/link";
+import { useGetCurrentUserQuery } from "../../../graphql/generated/graphql";
 
 // const UserAvatar = require("../../assets/user-avatar.jpeg") as string;
 // const HamburgerMenu = require("../../assets/hamburger-menu.svg") as string;
@@ -25,6 +26,60 @@ export const Navbar: React.FC<NavbarProps> = ({
   onCreateAccount,
 }) => {
   const [sidebar, setSidebar] = useState<null | boolean>(null);
+  const { data, loading } = useGetCurrentUserQuery();
+  let body = null;
+
+  // data is loading
+  if (loading) {
+    body = (
+      <>
+        <h2>Loading...</h2>
+      </>
+    );
+    // user is not logged in
+  } else if (!data?.getCurrentUser) {
+    body = (
+      <>
+        <Link href="/login">
+          <Button size="small" onClick={onLogin} label="Log in" />
+        </Link>
+        <Link href="/sign-up">
+          <Button
+            color={primary}
+            primary
+            size="small"
+            onClick={onCreateAccount}
+            label="Sign up"
+          />
+        </Link>
+      </>
+    );
+    // user is logged in
+  } else {
+    body = (
+      <div className={`${styles.userProfile}`}>
+        <a href="#">
+          <img
+            className={`${styles.userProfileImage}`}
+            src={data.getCurrentUser.profile.avatar as string}
+            alt="User avatar"
+            // height={40}
+            // width={40}
+          />
+        </a>
+        <a href="#">
+          <Image
+            className="user-profile_expand"
+            src={"/assets/chevron-down.svg"}
+            alt="ChevronDown"
+            height={15}
+            width={10}
+          />
+        </a>
+        {/* <Button size="small" onClick={onLogout} label="Log out" /> */}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -103,46 +158,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className={`${styles.userState}`}>
-            {user ? (
-              <>
-                <div className={`${styles.userProfile}`}>
-                  <a href="#">
-                    <Image
-                      className={`${styles.userProfileImage}`}
-                      src="/assets/user-avatar.jpeg"
-                      alt="User avatar"
-                      height={40}
-                      width={40}
-                    />
-                  </a>
-                  <a href="#">
-                    {/* <Image
-                      className="user-profile_expand"
-                      src={ChevronDown}
-                      alt="ChevronDown"
-                      height={15}
-                      width={10}
-                    /> */}
-                  </a>
-                  {/* <Button size="small" onClick={onLogout} label="Log out" /> */}
-                </div>
-              </>
-            ) : (
-              <>
-                <Link href="/login">
-                  <Button size="small" onClick={onLogin} label="Log in" />
-                </Link>
-                <Link href="/sign-up">
-                  <Button
-                    color={primary}
-                    primary
-                    size="small"
-                    onClick={onCreateAccount}
-                    label="Sign up"
-                  />
-                </Link>
-              </>
-            )}
+            {body}
             <div className={`${styles.hamburgerMenu}`}>
               <Image
                 onClick={() => setSidebar(!sidebar)}

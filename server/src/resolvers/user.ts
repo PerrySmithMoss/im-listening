@@ -59,7 +59,7 @@ export class UserResolver {
         errors: [
           {
             field: "password",
-            message: "Password must be greater than 8.",
+            message: "Password must be 8 characters or greater.",
           },
         ],
       };

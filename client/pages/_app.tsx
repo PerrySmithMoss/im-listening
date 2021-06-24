@@ -14,6 +14,7 @@ const client = new ApolloClient({
   uri: process.env.GRAPHQL_API_URL,
   credentials: "include",
   cache: new InMemoryCache(),
+  connectToDevTools: true
 });
 
 function MyApp({ Component, pageProps }: AppProps) {

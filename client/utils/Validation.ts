@@ -32,7 +32,7 @@ const Validation = (values: Values) => {
   if (!values.password) {
     errors.password = "Password is required";
   } else if (values.password.length < 8) {
-    errors.password = "Password must be greater than 8 characters";
+    errors.password = "Password must be 8 characters or greater.";
   }
   return errors;
 };

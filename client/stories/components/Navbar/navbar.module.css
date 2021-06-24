@@ -87,6 +87,7 @@ button {
 
 .userProfileImage {
   border-radius: 50px;
+  margin-right: 5px;
   height: 40px;
   width: 40px;
 }
