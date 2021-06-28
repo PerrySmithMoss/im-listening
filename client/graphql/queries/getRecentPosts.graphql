@@ -1,0 +1,24 @@
+query GetRecentPosts{
+  getRecentPosts {
+    id
+    createdAt
+    updatedAt
+    title
+    content
+    artistName
+    albumName
+    rating
+    author {
+      id
+      email
+      firstName
+      lastName
+      username
+      profile {
+        id
+        bio
+        avatar
+      }
+    }
+  }
+}

@@ -1,11 +1,16 @@
 import React from "react";
-import { withApollo } from "../lib/withApollo";
 import { Meta } from "../stories/components/Home/Meta";
 import { Navbar } from "../stories/components/Navbar/Navbar";
-import { SignUp } from "../stories/components/SignUp/SignUp";
-interface SignUpProps {}
+import { Login } from "../stories/components/Login/Login";
+import { useGetCurrentUserQuery } from "../graphql/generated/graphql";
+import { gql } from "@apollo/client";
 
-const Sign_Up: React.FC<SignUpProps> = ({}) => {
+interface TestProps {
+
+}
+
+const Test: React.FC<TestProps> = ({ }) => {
+
   return (
     <>
       {/* <Navbar
@@ -14,14 +19,16 @@ const Sign_Up: React.FC<SignUpProps> = ({}) => {
         onLogout={() => {}}
         onCreateAccount={() => {}}
       /> */}
-         <Meta
+      <Meta
         title={"I'm Listening | Register"}
-        keywords={"music, social media, social, share music, music, register, signup"}
+        keywords={
+          "music, social media, social, share music, music, register, signup"
+        }
         description={"Share what you're listening to. Register now."}
       />
-      <SignUp />
     </>
   );
 };
 
-export default withApollo({ ssr: false })(Sign_Up);
+export default Test;
+

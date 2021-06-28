@@ -2,6 +2,7 @@ import React from "react";
 import { Meta } from "../stories/components/Home/Meta";
 import { Navbar } from "../stories/components/Navbar/Navbar";
 import { Login } from "../stories/components/Login/Login";
+import { withApollo } from "../lib/withApollo";
 interface SignUpProps {}
 
 const Log_In: React.FC<SignUpProps> = ({}) => {
@@ -25,4 +26,4 @@ const Log_In: React.FC<SignUpProps> = ({}) => {
   );
 };
 
-export default Log_In;
+export default withApollo({ ssr: false })(Log_In);

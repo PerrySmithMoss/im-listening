@@ -30,6 +30,7 @@ export type Mutation = {
   deletePost: Scalars['Boolean'];
   registerUser: UserResponse;
   loginUser: UserResponse;
+  logoutUser: Scalars['Boolean'];
 };
 
 
@@ -93,6 +94,7 @@ export type Query = {
   __typename?: 'Query';
   hello: Scalars['String'];
   getPosts: Array<Post>;
+  getRecentPosts: Array<Post>;
   getPost?: Maybe<Post>;
   getCurrentUser?: Maybe<User>;
 };
@@ -148,6 +150,14 @@ export type LoginUserMutation = (
   ) }
 );
 
+export type LogoutUserMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LogoutUserMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'logoutUser'>
+);
+
 export type RegisterUserMutationVariables = Exact<{
   firstName: Scalars['String'];
   lastName: Scalars['String'];
@@ -185,6 +195,25 @@ export type GetCurrentUserQuery = (
     )>, profile: (
       { __typename?: 'Profile' }
       & Pick<Profile, 'id' | 'avatar'>
+    ) }
+  )> }
+);
+
+export type GetRecentPostsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetRecentPostsQuery = (
+  { __typename?: 'Query' }
+  & { getRecentPosts: Array<(
+    { __typename?: 'Post' }
+    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'content' | 'artistName' | 'albumName' | 'rating'>
+    & { author: (
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'username'>
+      & { profile: (
+        { __typename?: 'Profile' }
+        & Pick<Profile, 'id' | 'bio' | 'avatar'>
+      ) }
     ) }
   )> }
 );
@@ -242,6 +271,36 @@ export function useLoginUserMutation(baseOptions?: Apollo.MutationHookOptions<Lo
 export type LoginUserMutationHookResult = ReturnType<typeof useLoginUserMutation>;
 export type LoginUserMutationResult = Apollo.MutationResult<LoginUserMutation>;
 export type LoginUserMutationOptions = Apollo.BaseMutationOptions<LoginUserMutation, LoginUserMutationVariables>;
+export const LogoutUserDocument = gql`
+    mutation LogoutUser {
+  logoutUser
+}
+    `;
+export type LogoutUserMutationFn = Apollo.MutationFunction<LogoutUserMutation, LogoutUserMutationVariables>;
+
+/**
+ * __useLogoutUserMutation__
+ *
+ * To run a mutation, you first call `useLogoutUserMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLogoutUserMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [logoutUserMutation, { data, loading, error }] = useLogoutUserMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useLogoutUserMutation(baseOptions?: Apollo.MutationHookOptions<LogoutUserMutation, LogoutUserMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LogoutUserMutation, LogoutUserMutationVariables>(LogoutUserDocument, options);
+      }
+export type LogoutUserMutationHookResult = ReturnType<typeof useLogoutUserMutation>;
+export type LogoutUserMutationResult = Apollo.MutationResult<LogoutUserMutation>;
+export type LogoutUserMutationOptions = Apollo.BaseMutationOptions<LogoutUserMutation, LogoutUserMutationVariables>;
 export const RegisterUserDocument = gql`
     mutation RegisterUser($firstName: String!, $lastName: String!, $email: String!, $password: String!, $username: String!) {
   registerUser(
@@ -341,3 +400,56 @@ export function useGetCurrentUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOpt
 export type GetCurrentUserQueryHookResult = ReturnType<typeof useGetCurrentUserQuery>;
 export type GetCurrentUserLazyQueryHookResult = ReturnType<typeof useGetCurrentUserLazyQuery>;
 export type GetCurrentUserQueryResult = Apollo.QueryResult<GetCurrentUserQuery, GetCurrentUserQueryVariables>;
+export const GetRecentPostsDocument = gql`
+    query GetRecentPosts {
+  getRecentPosts {
+    id
+    createdAt
+    updatedAt
+    title
+    content
+    artistName
+    albumName
+    rating
+    author {
+      id
+      email
+      firstName
+      lastName
+      username
+      profile {
+        id
+        bio
+        avatar
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetRecentPostsQuery__
+ *
+ * To run a query within a React component, call `useGetRecentPostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetRecentPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetRecentPostsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetRecentPostsQuery(baseOptions?: Apollo.QueryHookOptions<GetRecentPostsQuery, GetRecentPostsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetRecentPostsQuery, GetRecentPostsQueryVariables>(GetRecentPostsDocument, options);
+      }
+export function useGetRecentPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetRecentPostsQuery, GetRecentPostsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetRecentPostsQuery, GetRecentPostsQueryVariables>(GetRecentPostsDocument, options);
+        }
+export type GetRecentPostsQueryHookResult = ReturnType<typeof useGetRecentPostsQuery>;
+export type GetRecentPostsLazyQueryHookResult = ReturnType<typeof useGetRecentPostsLazyQuery>;
+export type GetRecentPostsQueryResult = Apollo.QueryResult<GetRecentPostsQuery, GetRecentPostsQueryVariables>;

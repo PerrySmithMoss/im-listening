@@ -10,18 +10,17 @@ import {
 } from "@apollo/client";
 import type { AppProps } from "next/app";
 
-const client = new ApolloClient({
-  uri: process.env.GRAPHQL_API_URL,
-  credentials: "include",
-  cache: new InMemoryCache(),
-  connectToDevTools: true
-});
+// const client = new ApolloClient({
+//   uri: process.env.GRAPHQL_API_URL,
+//   credentials: "include",
+//   cache: new InMemoryCache(),
+//   connectToDevTools: true,
+//   ssrMode: typeof window === "undefined"
+// });
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <ApolloProvider client={client}>
       <Component {...pageProps} />
-    </ApolloProvider>
   );
 }
 export default MyApp;

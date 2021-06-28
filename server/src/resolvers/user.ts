@@ -12,7 +12,6 @@ import { PrismaContext } from "../types/PrismaContext";
 import argon2 from "argon2";
 import { User } from "../entities/User";
 import { validateEmail } from "../../utils/validateEmail";
-import e from "express";
 
 @ObjectType()
 class FieldError {
@@ -158,5 +157,21 @@ export class UserResolver {
       },
       include: { posts: true, profile: true },
     });
+  }
+
+  @Mutation(() => Boolean)
+  logoutUser(@Ctx() ctx: PrismaContext) {
+    return new Promise((resolve) =>
+      ctx.req.session.destroy((err: any) => {
+        ctx.res.clearCookie(process.env.COOKIE_NAME as string);
+        if (err) {
+          console.log(err);
+          resolve(false);
+          return;
+        }
+
+        resolve(true);
+      })
+    );
   }
 }

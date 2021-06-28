@@ -3,10 +3,13 @@ import { Header } from "../stories/components/Home/Header";
 import { FeaturedArtists } from "../stories/components/Home/FeaturedArtists";
 import { Categories } from "../stories/components/Home/Categories";
 import { ListOfUserPosts } from "../stories/components/Home/ListOfUserPosts";
-import { GetServerSideProps } from "next";
 import { Meta } from "../stories/components/Home/Meta";
+import { withApollo } from "../lib/withApollo";
+import { useGetRecentPostsQuery } from "../graphql/generated/graphql";
 
-export default function Home({ recentPosts }: any) {
+const Home = () => {
+  const { data, loading } = useGetRecentPostsQuery();
+
   return (
     <div>
       <Meta
@@ -23,23 +26,9 @@ export default function Home({ recentPosts }: any) {
       <Header />
       <FeaturedArtists />
       <Categories />
-      <ListOfUserPosts recentPosts={recentPosts} />
+      {!data ? <div>Loading...</div> : <ListOfUserPosts recentPosts={data} />}
     </div>
   );
-}
-
-export const getServerSideProps: GetServerSideProps = async () => {
-  const res = await fetch(`http://localhost:5000/`);
-  const recentPosts = await res.json();
-  // console.log(recentPosts)
-
-  if (!recentPosts) {
-    return {
-      notFound: true,
-    };
-  }
-
-  return {
-    props: { recentPosts }, // will be passed to the page component as props
-  };
 };
+
+export default withApollo({ ssr: true })(Home);

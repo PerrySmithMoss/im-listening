@@ -1,17 +1,17 @@
 import React from "react";
+import { useGetRecentPostsQuery } from "../../../graphql/generated/graphql";
 import styles from "./user-posts.module.css";
 // const KOD = require("../../assets/KOD.jpg") as string;
 // const UserAvatar = require("../../assets/user-avatar.jpeg") as string;
 
 interface ListOfUserPostsProps {
-  recentPosts: any;
+recentPosts: any
 }
 
-export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({ recentPosts }) => {
-  // console.dir(recentPosts)
+export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({recentPosts}) => {
   return (
     <section className={`${styles.userPostsWrapper}`}>
-      {recentPosts.map((post: any) => (
+      {recentPosts.getRecentPosts.map((post: any) => (
         <a href="" className={`${styles.ListOfPostsA}`}>
           <div key={post.id} className={`${styles.userPostItem}`}>
             <div>

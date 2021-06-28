@@ -4,7 +4,12 @@ import { Logo } from "../Logo/Logo";
 import styles from "./navbar.module.css";
 import Image from "next/image";
 import Link from "next/link";
-import { useGetCurrentUserQuery } from "../../../graphql/generated/graphql";
+import {
+  useGetCurrentUserQuery,
+  useLogoutUserMutation,
+} from "../../../graphql/generated/graphql";
+import { useApolloClient } from "@apollo/client";
+import { isServer } from "../../../utils/isServer";
 
 // const UserAvatar = require("../../assets/user-avatar.jpeg") as string;
 // const HamburgerMenu = require("../../assets/hamburger-menu.svg") as string;
@@ -26,7 +31,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   onCreateAccount,
 }) => {
   const [sidebar, setSidebar] = useState<null | boolean>(null);
-  const { data, loading } = useGetCurrentUserQuery();
+  const apolloClient = useApolloClient();
+  const { data, loading } = useGetCurrentUserQuery({skip: isServer()});
+  const [logoutUser] = useLogoutUserMutation();
   let body = null;
 
   // data is loading
@@ -76,7 +83,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             width={10}
           />
         </a>
-        {/* <Button size="small" onClick={onLogout} label="Log out" /> */}
+        <button onClick={async () => {
+          await logoutUser()
+          await apolloClient.resetStore()
+        }}>Logout</button>
+        {/* <Button size="small" onClick={logoutUser} label="Log out" /> */}
       </div>
     );
   }

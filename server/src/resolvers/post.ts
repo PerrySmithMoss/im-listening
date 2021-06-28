@@ -18,6 +18,19 @@ export class PostResolver {
     });
   }
 
+  @Query(() => [Post])
+  getRecentPosts(@Ctx() ctx: PrismaContext) {
+    return ctx.prisma.post.findMany({
+      include: {
+        author: {
+          include: {
+            profile: true,
+          },
+        },
+      },
+    });
+  }
+
   @Query(() => Post, { nullable: true })
   getPost(@Arg("id", () => Int) id: number, @Ctx() ctx: PrismaContext) {
     return ctx.prisma.post.findUnique({
