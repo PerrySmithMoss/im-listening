@@ -16,11 +16,11 @@ import { useRouter } from "next/dist/client/router";
 interface LoginProps {}
 
 type Errors = {
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  password: string;
+  firstName?: string;
+  lastName?: string;
+  username?: string;
+  email?: string;
+  password?: string;
 };
 
 export const Login: React.FC<LoginProps> = ({}) => {
@@ -152,7 +152,7 @@ export const Login: React.FC<LoginProps> = ({}) => {
           </div>
         </div>
 
-        <div className="formContainer">
+        <div className={`${signupStyles.formContainer}`}>
           <form className="signUpForm" id="signUpForm">
             <div className="form__control">
               {/* <label>Email</label> */}
@@ -234,25 +234,16 @@ export const Login: React.FC<LoginProps> = ({}) => {
             <button
               className={`${signupStyles.signupButton}`}
               onClick={async (e) => await handleLoginUser(e)}
-              // onClick={async (e) => {
-              //   e.preventDefault()
-              //   const resp = await registerUser({
-              //     variables: {
-              //       firstName: formValues.firstName,
-              //       lastName: formValues.lastName,
-              //       email: formValues.email,
-              //       password: formValues.password,
-              //       username: formValues.username,
-              //     },
-              //   });
-              //   console.log(resp)
-              //   // if(resp.data?.registerUser.errors) {
-              //   //   setServerErrors(toErrorMap(resp.data.registerUser.errors))
-              //   // }
-              // }}
             >
               Login
             </button>
+            <div>
+              <p className={`${signupStyles.forgotPassword}`}>
+                <Link href="/forgot-password">
+                  <a className={`${signupStyles.forgotPassword}`}>  Forgot password?</a>
+                </Link>
+              </p>
+            </div>
           </form>
         </div>
       </div>

@@ -190,14 +190,23 @@
   color: white;
   background-color: #f3a13b;
   font-size: 14px;
-  padding: 10px 18px;
+  padding: 10px 100px;
+  margin-top: 10px;
 }
 
-@media only screen and (max-width: 430px) {
+.forgotPassword {
+  color: rgb(15, 141, 235);
+}
+
+.signupSuccess {
+  color: green;
+}
+
+/* @media only screen and (max-width: 430px) {
   .signupButton {
     display: none;
   }
-}
+} */
 /* 
 .checkboxContainer {
   display: block;

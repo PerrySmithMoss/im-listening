@@ -5,7 +5,7 @@ import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
-import redis from "redis";
+import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import { __prod__ } from "../constants";
@@ -26,7 +26,7 @@ const main = async () => {
   app.use(express.static("public"));
 
   const RedisStore = connectRedis(session);
-  const redisClient = redis.createClient({
+  const redisClient = new Redis({
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT as unknown as number,
   });
@@ -70,7 +70,7 @@ const main = async () => {
     schema: await buildSchema({
       resolvers: [HelloResolver, PostResolver, UserResolver],
     }),
-    context: ({ req, res }): PrismaContext => ({ prisma: prisma, req, res }),
+    context: ({ req, res }) => ({ prisma, req, res, redisClient }),
     // subscriptions: {
     //   path: "/subscriptions",
     //   onConnect: () => console.log("✅  Client connected for subscriptions"),

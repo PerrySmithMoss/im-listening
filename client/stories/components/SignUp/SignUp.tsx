@@ -15,11 +15,11 @@ import { useRouter } from "next/dist/client/router";
 interface SignUpProps {}
 
 type Errors = {
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  password: string;
+  firstName?: string;
+  lastName?: string;
+  username?: string;
+  email?: string;
+  password?: string;
 };
 
 export const SignUp: React.FC<SignUpProps> = ({}) => {
@@ -46,7 +46,6 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
   };
 
   const handleRegisterUser = async (event: any) => {
-    console.log("Yo");
     event.preventDefault();
     setErrors(validation(formValues));
     if (dataIsCorrect === true) {

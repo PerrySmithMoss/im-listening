@@ -1,11 +1,11 @@
 import React from "react";
 
 type Values = {
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  password: string;
+  firstName?: string;
+  lastName?: string;
+  username?: string;
+  email?: string;
+  password?: string;
 };
 
 const Validation = (values: Values) => {

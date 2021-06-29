@@ -12,6 +12,9 @@ import { PrismaContext } from "../types/PrismaContext";
 import argon2 from "argon2";
 import { User } from "../entities/User";
 import { validateEmail } from "../../utils/validateEmail";
+import { sendEmail } from "../../utils/sendEmail";
+import { v4 } from "uuid";
+import { FORGET_PASSWORD_PREFIX } from "../../constants";
 
 @ObjectType()
 class FieldError {
@@ -98,7 +101,7 @@ export class UserResolver {
       console.log(err);
     }
 
-    ctx.req.session.userId = registeredUser?.id
+    ctx.req.session.userId = registeredUser?.id;
     return {
       user: registeredUser,
     };
@@ -173,5 +176,93 @@ export class UserResolver {
         resolve(true);
       })
     );
+  }
+
+  @Mutation(() => Boolean)
+  async forgotPassword(@Arg("email") email: string, @Ctx() ctx: PrismaContext) {
+    const user = await ctx.prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) {
+      return true;
+    }
+
+    const token = v4();
+
+    await ctx.redisClient.set(
+      FORGET_PASSWORD_PREFIX + token,
+      user.id,
+      "ex",
+      3600000
+    ); // 1 hour
+
+    await sendEmail(
+      email,
+      `<a href="http://localhost:3000/change-password/${token}">Reset Password</a>`
+    );
+
+    return true;
+  }
+
+  @Mutation(() => UserResponse)
+  async changePassword(
+    @Arg("token") token: string,
+    @Arg("password") password: string,
+    @Ctx() ctx: PrismaContext
+  ) {
+    if (password.length < 8) {
+      return {
+        errors: [
+          {
+            field: "password",
+            message: "Password must be 8 characters or greater.",
+          },
+        ],
+      };
+    }
+
+    const key = FORGET_PASSWORD_PREFIX + token;
+    const userId = await ctx.redisClient.get(key);
+    if (!userId) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "Token expired.",
+          },
+        ],
+      };
+    }
+
+    const loggedInUser = await ctx.prisma.user.findUnique({
+      where: { id: parseInt(userId) },
+      include: { posts: true, profile: true },
+    });
+    if (!loggedInUser) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "User no longer exists.",
+          },
+        ],
+      };
+    }
+
+    const updatedUser = await ctx.prisma.user.update({
+      where: { id: parseInt(userId) },
+      data: { password: await argon2.hash(password), updatedAt: new Date() },
+      include: { posts: true, profile: true },
+    });
+
+    await ctx.redisClient.del(key);
+
+    // login user after change password
+    ctx.req.session.userId = updatedUser.id;
+
+    return { user: updatedUser };
   }
 }
