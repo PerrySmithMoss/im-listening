@@ -194,6 +194,22 @@
   margin-top: 10px;
 }
 
+.cancelButton {
+  font-family: "Nunito Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  border: 0;
+  border-radius: 3em;
+  cursor: pointer;
+  display: inline-block;
+  line-height: 1;
+  margin-left: 10px;
+  color: white;
+  background-color: #F45B49;
+  font-size: 14px;
+  padding: 10px 100px;
+  margin-top: 10px;
+}
+
 .forgotPassword {
   color: rgb(15, 141, 235);
 }

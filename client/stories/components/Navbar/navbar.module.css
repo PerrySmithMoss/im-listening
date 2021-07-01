@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: space-between;
   margin: 0 auto;
-  overflow: auto;
+  /* overflow: auto; */
   padding: 10px 5%;
 }
 
@@ -68,7 +68,7 @@ button {
   padding-bottom: 5px;
 }
 
-.navLinksLiA:hover  {
+.navLinksLiA:hover {
   /* color: #f45c4c; */
   /* color: #f4a43c; */
   margin-top: 15px;
@@ -78,6 +78,7 @@ button {
 .userProfile {
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 .userProfileExpand {
   height: 15px;
@@ -88,8 +89,118 @@ button {
 .userProfileImage {
   border-radius: 50px;
   margin-right: 5px;
-  height: 40px;
-  width: 40px;
+  height: 30px;
+  width: 30px;
+}
+
+.iconBadgeGroup .iconBadgeContainer {
+  display: inline-block;
+  margin-left: 15px;
+}
+
+.iconBadgeGroup .iconBadgeContainer:first-child {
+  margin-left: 0;
+}
+
+.iconBadgeContainer {
+  position: relative;
+}
+
+.iconBadgeIcon {
+  position: relative;
+}
+
+.iconBadgeIcon:hover {
+  color: #f3a140;
+  /* color: #F45B49; */
+}
+
+.iconBadge {
+  background-color: red;
+  font-size: 12px;
+  color: white;
+  text-align: center;
+  width: 20px;
+  height: 15px;
+  border-radius: 80%;
+  position: absolute; /* changed */
+  top: -10px; /* changed */
+  left: 12px; /* changed */
+}
+
+.menuContainer {
+  /* position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center; */
+  position: relative;
+  display: inline-block;
+}
+
+ .profileNavbar {
+  /* z-index: 1;
+  position: fixed;
+  display: flex; */
+  position: absolute;
+  background-color: #f9f9f9;
+  /* min-width: 160px; */
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.profileNavbarNav {
+  /* z-index: 1;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  background-color: rgb(218, 10, 10);
+  position: fixed;
+  top: 100;
+  width: 100%;
+  height: 47px; */
+  list-style-type: none;
+  margin: 10;
+  padding: 0;
+  width: 90px;
+}
+
+.profileNavItem {
+  /* float: left; */
+  text-decoration: none;
+}
+
+.profileNavLink {
+  /* display: block;
+  color: white !important;
+  text-align: center;
+  padding: 14px 16px; 
+  text-decoration: none !important;
+  cursor: pointer; */
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.profileNavLink:hover {
+  /* background-color: rgb(255, 23, 15) !important; */
+  background-color: #f1f1f1
+} 
+
+.shareBtn {
+  font-family: "Nunito Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  border: 0;
+  border-radius: 3em;
+  cursor: pointer;
+  display: inline-block;
+  line-height: 1;
+  margin-left: 10px;
+  color: white;
+  background-color: #f3a13b;
+  font-size: 10px 15px;
+  padding: 6px 15px;
+  margin-bottom: 4px;
 }
 
 .hamburgerMenu {

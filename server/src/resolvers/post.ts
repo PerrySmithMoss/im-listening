@@ -1,6 +1,7 @@
 import "reflect-metadata";
-import { Resolver, Query, Ctx, Arg, Int, Mutation } from "type-graphql";
+import { Resolver, Query, Ctx, Arg, Int, Mutation, UseMiddleware } from "type-graphql";
 import { Post } from "../entities/Post";
+import { isAuth } from "../middleware/isAuth";
 import { PrismaContext } from "../types/PrismaContext";
 
 @Resolver()
@@ -8,6 +9,12 @@ export class PostResolver {
   @Query(() => [Post])
   getPosts(@Ctx() ctx: PrismaContext) {
     return ctx.prisma.post.findMany({
+      take: 2,
+      orderBy: [
+        {
+          createdAt: "desc"
+        }
+      ],
       include: {
         author: {
           include: {
@@ -21,6 +28,12 @@ export class PostResolver {
   @Query(() => [Post])
   getRecentPosts(@Ctx() ctx: PrismaContext) {
     return ctx.prisma.post.findMany({
+      take: 6,
+      orderBy: [
+        {
+          createdAt: "desc"
+        }
+      ],
       include: {
         author: {
           include: {
@@ -48,6 +61,7 @@ export class PostResolver {
   }
 
   @Mutation(() => Post)
+  @UseMiddleware(isAuth)
   async createPost(
     @Ctx() ctx: PrismaContext,
     @Arg("albumName") albumName: string,

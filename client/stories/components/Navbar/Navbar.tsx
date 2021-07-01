@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import { Button } from "../Old/Button";
 import { Logo } from "../Logo/Logo";
 import styles from "./navbar.module.css";
@@ -10,7 +10,10 @@ import {
 } from "../../../graphql/generated/graphql";
 import { useApolloClient } from "@apollo/client";
 import { isServer } from "../../../utils/isServer";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBell } from "@fortawesome/free-solid-svg-icons";
+import { faComments } from "@fortawesome/free-solid-svg-icons";
+import { ShareMusicModal } from "./ShareMusicModal";
 // const UserAvatar = require("../../assets/user-avatar.jpeg") as string;
 // const HamburgerMenu = require("../../assets/hamburger-menu.svg") as string;
 // const CloseMenu = require("../../assets/close.svg") as string;
@@ -32,10 +35,15 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [sidebar, setSidebar] = useState<null | boolean>(null);
   const apolloClient = useApolloClient();
-  const { data, loading } = useGetCurrentUserQuery({skip: isServer()});
+  const { data, loading } = useGetCurrentUserQuery({ skip: isServer() });
   const [logoutUser] = useLogoutUserMutation();
   let body = null;
 
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isShareMusicModalOpen, setIsShareMusicModalOpen] = useState(false);
+  const handleOpenShareMusicModal = () => {
+    setIsShareMusicModalOpen(!isShareMusicModalOpen);
+  };
   // data is loading
   if (loading) {
     body = (
@@ -65,29 +73,115 @@ export const Navbar: React.FC<NavbarProps> = ({
   } else {
     body = (
       <div className={`${styles.userProfile}`}>
-        <a href="#">
-          <img
-            className={`${styles.userProfileImage}`}
-            src={data.getCurrentUser.profile.avatar as string}
-            alt="User avatar"
-            // height={40}
-            // width={40}
-          />
-        </a>
-        <a href="#">
-          <Image
-            className="user-profile_expand"
-            src={"/assets/chevron-down.svg"}
-            alt="ChevronDown"
-            height={15}
-            width={10}
-          />
-        </a>
-        <button onClick={async () => {
-          await logoutUser()
-          await apolloClient.resetStore()
-        }}>Logout</button>
-        {/* <Button size="small" onClick={logoutUser} label="Log out" /> */}
+        <div
+          style={{ paddingRight: "20px" }}
+          className={`${styles.iconBadgeGroup}`}
+        >
+          <div className={`${styles.iconBadgeContainer}`}>
+            <a href="#">
+              <FontAwesomeIcon
+                color="grey"
+                size="lg"
+                icon={faBell}
+                className={`${styles.iconBadgeIcon}`}
+              ></FontAwesomeIcon>
+              <div className={`${styles.iconBadge}`}>6</div>
+            </a>
+          </div>
+        </div>
+        <div
+          style={{ paddingRight: "20px" }}
+          className={`${styles.iconBadgeGroup}`}
+        >
+          <div className={`${styles.iconBadgeContainer}`}>
+            <a href="#">
+              <FontAwesomeIcon
+                color="grey"
+                size="lg"
+                icon={faComments}
+                className={`${styles.iconBadgeIcon}`}
+              ></FontAwesomeIcon>
+              <div className={`${styles.iconBadge}`}>2</div>
+            </a>
+          </div>
+        </div>
+
+        <div className={`${styles.menuContainer}`}>
+          <div style={{ cursor: "pointer" }}>
+            {/* <a href="/"> */}
+            <img
+              className={`${styles.userProfileImage}`}
+              src={data.getCurrentUser.profile.avatar as string}
+              alt="User avatar"
+              onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+              // height={40}
+              // width={40}
+            />
+            {/* </a> */}
+          </div>
+          {/* <div style={{ paddingRight: "10px" }}>
+            <Image
+              className="user-profile_expand"
+              src="/assets/chevron-down.svg"
+              alt="ChevronDown"
+              height={15}
+              width={10}
+              onClick={() => setProfileDropdownOpen(!isProfileDropdownOpen)}
+            />
+          </div> */}
+          {isProfileDropdownOpen ? (
+            <nav className={styles.profileNavbar}>
+              <ul className={styles.profileNavbarNav}>
+                <li className={styles.profileNavItem}>
+                  <a className={styles.profileNavLink} href="#">
+                    Profile
+                  </a>
+                </li>
+                <li className={styles.profileNavItem}>
+                  <a className={styles.profileNavLink} href="#">
+                    Library
+                  </a>
+                </li>
+                <li className={styles.profileNavItem}>
+                  <a className={styles.profileNavLink} href="#">
+                    Settings
+                  </a>
+                </li>
+                <li className={styles.profileNavItem}>
+                  <a
+                    onClick={async () => {
+                      await logoutUser();
+                      await apolloClient.resetStore();
+                    }}
+                    className={styles.profileNavLink}
+                    href="/"
+                  >
+                    Logout
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          ) : (
+            false
+          )}
+          {/* <div>
+            <button
+              onClick={async () => {
+                await logoutUser();
+                await apolloClient.resetStore();
+              }}
+            >
+              Logout
+            </button>
+          </div> */}
+          {/* <Button size="small" onClick={logoutUser} label="Log out" /> */}
+        </div>
+        <button
+          onClick={() => setIsShareMusicModalOpen(!isShareMusicModalOpen)}
+          className={styles.shareBtn}
+        >
+          Share
+        </button>
       </div>
     );
   }
@@ -183,6 +277,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
         </div>
+        <ShareMusicModal
+          isShareMusicModalOpen={isShareMusicModalOpen}
+          setIsShareMusicModalOpen={setIsShareMusicModalOpen}
+        />
       </header>
     </>
   );

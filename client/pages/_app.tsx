@@ -1,22 +1,10 @@
 import "../styles/globals.css";
 // import "../stories/components/Old/button.css";
 // import "../stories/components/Navbar/navbar.css";
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-  useQuery,
-  gql,
-} from "@apollo/client";
 import type { AppProps } from "next/app";
-
-// const client = new ApolloClient({
-//   uri: process.env.GRAPHQL_API_URL,
-//   credentials: "include",
-//   cache: new InMemoryCache(),
-//   connectToDevTools: true,
-//   ssrMode: typeof window === "undefined"
-// });
+import "@fortawesome/fontawesome-svg-core/styles.css"; // import Font Awesome CSS
+import { config } from "@fortawesome/fontawesome-svg-core";
+config.autoAddCss = false; // Tell Font Awesome to skip adding the CSS automatically since it's being imported above
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (

@@ -1,7 +1,7 @@
 .categoriesWrap {
   display: grid;
   justify-content: center;
-  margin-top: 50px;
+  margin-top: 0px;
   gap: 25px;
   grid-auto-flow: column;
 }
@@ -53,6 +53,17 @@
   border-color: #f0f0f0 transparent transparent transparent;
   padding: 15px;
   font-weight: bold;
+}
+
+.othersListeningTo {
+
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  font-weight: 900;
+  font-size: 20px;
+  vertical-align: top;
+  text-align: center;
 }
 
 @media only screen and (max-width: 620px) {

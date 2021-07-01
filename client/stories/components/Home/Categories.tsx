@@ -6,6 +6,9 @@ interface CategoriesProps {}
 export const Categories: React.FC<CategoriesProps> = ({}) => {
   return (
     <>
+    <section className={`${styles.othersListeningTo}`}>
+    <h2 >What others are listening to</h2>
+    </section>
       <section className={`${styles.categoriesWrap}`}>
         <div className={`${styles.categoriesButtonWrap}`}>
           <button

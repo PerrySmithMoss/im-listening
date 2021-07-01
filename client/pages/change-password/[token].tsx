@@ -14,15 +14,16 @@ import { withApollo } from "../../lib/withApollo";
 import Link from "next/link";
 
 type Errors = {
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  password: string;
+  firstName?: string;
+  lastName?: string;
+  username?: string;
+  email?: string;
+  password?: string;
 };
 
-const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
+const ChangePassword: NextPage = () => {
   const router = useRouter();
+  console.log(router.query)
   const [formValues, setFormValues] = useState({
     firstName: "",
     lastName: "",
@@ -51,7 +52,7 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
     if (dataIsCorrect === true) {
       const res = await changePassword({
         variables: {
-          token,
+          token: typeof router.query.token === "string" ? router.query.token : "",
           password: formValues.password,
         },
         update: (cache, { data }) => {
@@ -171,10 +172,10 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
   );
 };
 
-ChangePassword.getInitialProps = ({ query }) => {
-  return {
-    token: query.token as string,
-  };
-};
+// ChangePassword.getInitialProps = ({ query }) => {
+//   return {
+//     token: query.token as string,
+//   };
+// };
 
 export default withApollo({ ssr: false })(ChangePassword);
