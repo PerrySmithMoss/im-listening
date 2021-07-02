@@ -129,15 +129,9 @@ export const ShareMusicModal: React.FC<ShareMusicModalProps> = ({
           content: formValues.content,
           rating: parseInt(formValues.rating)
         },
-        // update: (cache, { data }) => {
-        //   cache.writeQuery<GetCurrentUserQuery>({
-        //     query: GetCurrentUserDocument,
-        //     data: {
-        //       __typename: "Query",
-        //       getCurrentUser: data?.registerUser.user as any,
-        //     },
-        //   });
-        // },
+        update: (cache) => {
+          cache.evict({ fieldName: "getRecentPosts:{}"})
+        },
       });
       if (res.errors) {
         console.log(res.errors)
