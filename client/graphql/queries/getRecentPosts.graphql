@@ -1,23 +1,26 @@
-query GetRecentPosts{
-  getRecentPosts {
-    id
-    createdAt
-    updatedAt
-    title
-    content
-    artistName
-    albumName
-    rating
-    author {
+query GetRecentPosts($limit: Int!, $cursor: DateTime) {
+  getRecentPosts(limit: $limit, cursor: $cursor) {
+    hasMore
+    posts {
       id
-      email
-      firstName
-      lastName
-      username
-      profile {
+      createdAt
+      updatedAt
+      title
+      content
+      artistName
+      albumName
+      rating
+      author {
         id
-        bio
-        avatar
+        email
+        firstName
+        lastName
+        username
+        profile {
+          id
+          bio
+          avatar
+        }
       }
     }
   }

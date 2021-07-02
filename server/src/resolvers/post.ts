@@ -1,47 +1,140 @@
 import "reflect-metadata";
-import { Resolver, Query, Ctx, Arg, Int, Mutation, UseMiddleware } from "type-graphql";
+import {
+  Resolver,
+  Query,
+  Ctx,
+  Arg,
+  Int,
+  Mutation,
+  UseMiddleware,
+  ObjectType,
+  Field,
+} from "type-graphql";
 import { Post } from "../entities/Post";
 import { isAuth } from "../middleware/isAuth";
 import { PrismaContext } from "../types/PrismaContext";
 
+@ObjectType()
+class PaginatedPosts {
+  @Field(() => [Post])
+  posts: Post[];
+  @Field()
+  hasMore: Boolean;
+}
+
 @Resolver()
 export class PostResolver {
-  @Query(() => [Post])
-  getPosts(@Ctx() ctx: PrismaContext) {
-    return ctx.prisma.post.findMany({
-      take: 2,
-      orderBy: [
-        {
-          createdAt: "desc"
-        }
-      ],
-      include: {
-        author: {
+  @Query(() => PaginatedPosts)
+  getPosts(
+    @Ctx() ctx: PrismaContext,
+    @Arg("limit", () => Int) limit: number,
+    @Arg("cursor", () => Date, { nullable: true }) cursor: Date | null
+  ) {
+    const maxLimit = Math.min(6, limit);
+
+    if (cursor) {
+      return {
+        posts: ctx.prisma.post.findMany({
+          where: {
+            createdAt: {
+              lt: cursor as Date,
+            },
+          },
+          orderBy: [
+            {
+              createdAt: "desc",
+            },
+          ],
+          take: maxLimit,
           include: {
-            profile: true,
+            author: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        }),
+        hasMore: true,
+      };
+    }
+
+    return {
+      posts: ctx.prisma.post.findMany({
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
+        take: maxLimit,
+        include: {
+          author: {
+            include: {
+              profile: true,
+            },
           },
         },
-      },
-    });
+      }),
+      hasMore: true,
+    };
   }
 
-  @Query(() => [Post])
-  getRecentPosts(@Ctx() ctx: PrismaContext) {
-    return ctx.prisma.post.findMany({
-      take: 6,
-      orderBy: [
-        {
-          createdAt: "desc"
-        }
-      ],
-      include: {
-        author: {
-          include: {
-            profile: true,
+  @Query(() => PaginatedPosts)
+  async getRecentPosts(
+    @Ctx() ctx: PrismaContext,
+    @Arg("limit", () => Int) limit: number,
+    @Arg("cursor", () => Date, { nullable: true }) cursor: Date | null
+  ) {
+    const maxLimit = Math.min(6, limit);
+    const maxLimitPlusOne = maxLimit + 1;
+
+    if (cursor) {
+      const posts = await ctx.prisma.post.findMany({
+        where: {
+          createdAt: {
+            lt: cursor as Date,
           },
         },
-      },
-    });
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
+        take: maxLimitPlusOne,
+        include: {
+          author: {
+            include: {
+              profile: true,
+            },
+          },
+        },
+      });
+      return {
+        posts: posts.slice(0, maxLimit),
+        hasMore: posts.length === maxLimitPlusOne,
+      };
+      
+    } else {
+      const posts = await ctx.prisma.post.findMany({
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
+        take: maxLimitPlusOne,
+        include: {
+          author: {
+            include: {
+              profile: true,
+            },
+          },
+        },
+      });
+
+      return {
+        posts: posts.slice(0, maxLimit),
+        hasMore: posts.length === maxLimitPlusOne,
+      };
+    }
   }
 
   @Query(() => Post, { nullable: true })

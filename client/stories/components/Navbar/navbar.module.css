@@ -203,6 +203,10 @@ button {
   margin-bottom: 4px;
 }
 
+.shareBtn:hover {
+  background-color: grey;
+}
+
 .hamburgerMenu {
   margin-left: 10px;
   align-items: center;

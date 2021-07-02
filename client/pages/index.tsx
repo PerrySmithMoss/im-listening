@@ -6,9 +6,38 @@ import { ListOfUserPosts } from "../stories/components/Home/ListOfUserPosts";
 import { Meta } from "../stories/components/Home/Meta";
 import { withApollo } from "../lib/withApollo";
 import { useGetRecentPostsQuery } from "../graphql/generated/graphql";
+import styles from "../stories/components/Home/user-posts.module.css";
 
 const Home = () => {
-  const { data, loading } = useGetRecentPostsQuery();
+  const { data, error, loading, fetchMore, variables } = useGetRecentPostsQuery(
+    {
+      variables: {
+        limit: 6,
+        cursor: null,
+      },
+      notifyOnNetworkStatusChange: true,
+    }
+  );
+
+  if (!loading && !data) {
+    return (
+      <div>
+        <div>Something went wrong while trying to fetch user posts...</div>
+        <div>{error?.message}</div>
+      </div>
+    );
+  }
+
+  const handleFetchMorePosts = async () => {
+    await fetchMore({
+      variables: {
+        limit: variables?.limit,
+        cursor:
+          data?.getRecentPosts.posts[data.getRecentPosts.posts.length - 1]
+            .createdAt,
+      },
+    });
+  };
 
   return (
     <div>
@@ -26,7 +55,21 @@ const Home = () => {
       <Header />
       <FeaturedArtists />
       <Categories />
-      {!data ? <div>Loading...</div> : <ListOfUserPosts recentPosts={data} />}
+      {!data && loading ? (
+        <div>Loading...</div>
+      ) : (
+        <ListOfUserPosts recentPosts={data} />
+      )}
+      {data && data.getRecentPosts.hasMore ? (
+        <div className={`${styles.seeMoreWrapper}`}>
+          <button
+            onClick={() => handleFetchMorePosts()}
+            className={`${styles.seeMoreBtn}`}
+          >
+            Load more
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 };

@@ -6,7 +6,7 @@
     justify-content: center;
     align-items: center;
     margin-top: 30px;
-    padding-bottom: 75px;
+    padding-bottom: 35px;
 }
 
 .userPostItem {
@@ -69,6 +69,34 @@ grid-row: 1/3;
     margin-top: 5px;
     margin-left: 2px;
     align-self: center;
+}
+
+.seeMoreWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 100px;
+}
+
+.seeMoreBtn {
+    font-family: "Nunito Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    border: 0;
+    border-radius: 3em;
+    font-size: 16px;
+    cursor: pointer;
+    display: inline-block;
+    line-height: 1;
+    color: white;
+    background-color: #f3a13b;
+    font-size: 10px 15px;
+    padding: 10px 20px;
+    margin-bottom: 4px;
+}
+
+.seeMoreBtn:hover {
+    color: white;
+    background-color: grey;
 }
 
 @media only screen and (max-width: 830px) {

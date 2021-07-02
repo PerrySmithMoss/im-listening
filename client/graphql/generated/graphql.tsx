@@ -81,6 +81,12 @@ export type MutationChangePasswordArgs = {
   token: Scalars['String'];
 };
 
+export type PaginatedPosts = {
+  __typename?: 'PaginatedPosts';
+  posts: Array<Post>;
+  hasMore: Scalars['Boolean'];
+};
+
 export type Post = {
   __typename?: 'Post';
   id: Scalars['ID'];
@@ -106,10 +112,22 @@ export type Profile = {
 export type Query = {
   __typename?: 'Query';
   hello: Scalars['String'];
-  getPosts: Array<Post>;
-  getRecentPosts: Array<Post>;
+  getPosts: PaginatedPosts;
+  getRecentPosts: PaginatedPosts;
   getPost?: Maybe<Post>;
   getCurrentUser?: Maybe<User>;
+};
+
+
+export type QueryGetPostsArgs = {
+  cursor?: Maybe<Scalars['DateTime']>;
+  limit: Scalars['Int'];
+};
+
+
+export type QueryGetRecentPostsArgs = {
+  cursor?: Maybe<Scalars['DateTime']>;
+  limit: Scalars['Int'];
 };
 
 
@@ -266,23 +284,30 @@ export type GetCurrentUserQuery = (
   )> }
 );
 
-export type GetRecentPostsQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetRecentPostsQueryVariables = Exact<{
+  limit: Scalars['Int'];
+  cursor?: Maybe<Scalars['DateTime']>;
+}>;
 
 
 export type GetRecentPostsQuery = (
   { __typename?: 'Query' }
-  & { getRecentPosts: Array<(
-    { __typename?: 'Post' }
-    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'content' | 'artistName' | 'albumName' | 'rating'>
-    & { author: (
-      { __typename?: 'User' }
-      & Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'username'>
-      & { profile: (
-        { __typename?: 'Profile' }
-        & Pick<Profile, 'id' | 'bio' | 'avatar'>
+  & { getRecentPosts: (
+    { __typename?: 'PaginatedPosts' }
+    & Pick<PaginatedPosts, 'hasMore'>
+    & { posts: Array<(
+      { __typename?: 'Post' }
+      & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'content' | 'artistName' | 'albumName' | 'rating'>
+      & { author: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'username'>
+        & { profile: (
+          { __typename?: 'Profile' }
+          & Pick<Profile, 'id' | 'bio' | 'avatar'>
+        ) }
       ) }
-    ) }
-  )> }
+    )> }
+  ) }
 );
 
 
@@ -601,26 +626,29 @@ export type GetCurrentUserQueryHookResult = ReturnType<typeof useGetCurrentUserQ
 export type GetCurrentUserLazyQueryHookResult = ReturnType<typeof useGetCurrentUserLazyQuery>;
 export type GetCurrentUserQueryResult = Apollo.QueryResult<GetCurrentUserQuery, GetCurrentUserQueryVariables>;
 export const GetRecentPostsDocument = gql`
-    query GetRecentPosts {
-  getRecentPosts {
-    id
-    createdAt
-    updatedAt
-    title
-    content
-    artistName
-    albumName
-    rating
-    author {
+    query GetRecentPosts($limit: Int!, $cursor: DateTime) {
+  getRecentPosts(limit: $limit, cursor: $cursor) {
+    hasMore
+    posts {
       id
-      email
-      firstName
-      lastName
-      username
-      profile {
+      createdAt
+      updatedAt
+      title
+      content
+      artistName
+      albumName
+      rating
+      author {
         id
-        bio
-        avatar
+        email
+        firstName
+        lastName
+        username
+        profile {
+          id
+          bio
+          avatar
+        }
       }
     }
   }
@@ -639,10 +667,12 @@ export const GetRecentPostsDocument = gql`
  * @example
  * const { data, loading, error } = useGetRecentPostsQuery({
  *   variables: {
+ *      limit: // value for 'limit'
+ *      cursor: // value for 'cursor'
  *   },
  * });
  */
-export function useGetRecentPostsQuery(baseOptions?: Apollo.QueryHookOptions<GetRecentPostsQuery, GetRecentPostsQueryVariables>) {
+export function useGetRecentPostsQuery(baseOptions: Apollo.QueryHookOptions<GetRecentPostsQuery, GetRecentPostsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<GetRecentPostsQuery, GetRecentPostsQueryVariables>(GetRecentPostsDocument, options);
       }
