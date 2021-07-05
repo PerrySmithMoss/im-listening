@@ -25,47 +25,27 @@ class PaginatedPosts {
 @Resolver()
 export class PostResolver {
   @Query(() => PaginatedPosts)
-  getPosts(
+  async getPosts(
     @Ctx() ctx: PrismaContext,
     @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => Date, { nullable: true }) cursor: Date | null
   ) {
     const maxLimit = Math.min(6, limit);
+    const maxLimitPlusOne = maxLimit + 1;
 
     if (cursor) {
-      return {
-        posts: ctx.prisma.post.findMany({
-          where: {
-            createdAt: {
-              lt: cursor as Date,
-            },
+      const posts = await ctx.prisma.post.findMany({
+        where: {
+          createdAt: {
+            lt: cursor as Date,
           },
-          orderBy: [
-            {
-              createdAt: "desc",
-            },
-          ],
-          take: maxLimit,
-          include: {
-            author: {
-              include: {
-                profile: true,
-              },
-            },
-          },
-        }),
-        hasMore: true,
-      };
-    }
-
-    return {
-      posts: ctx.prisma.post.findMany({
+        },
         orderBy: [
           {
             createdAt: "desc",
           },
         ],
-        take: maxLimit,
+        take: maxLimitPlusOne,
         include: {
           author: {
             include: {
@@ -73,9 +53,33 @@ export class PostResolver {
             },
           },
         },
-      }),
-      hasMore: true,
-    };
+      });
+      return {
+        posts: posts.slice(0, maxLimit),
+        hasMore: posts.length === maxLimitPlusOne,
+      };
+    } else {
+      const posts = await ctx.prisma.post.findMany({
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
+        take: maxLimitPlusOne,
+        include: {
+          author: {
+            include: {
+              profile: true,
+            },
+          },
+        },
+      });
+
+      return {
+        posts: posts.slice(0, maxLimit),
+        hasMore: posts.length === maxLimitPlusOne,
+      };
+    }
   }
 
   @Query(() => PaginatedPosts)
@@ -112,7 +116,6 @@ export class PostResolver {
         posts: posts.slice(0, maxLimit),
         hasMore: posts.length === maxLimitPlusOne,
       };
-      
     } else {
       const posts = await ctx.prisma.post.findMany({
         orderBy: [
@@ -176,6 +179,7 @@ export class PostResolver {
   }
 
   @Mutation(() => Post, { nullable: true })
+  @UseMiddleware(isAuth)
   async updatePost(
     @Ctx() ctx: PrismaContext,
     @Arg("id") id: number,
@@ -193,6 +197,7 @@ export class PostResolver {
   }
 
   @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
   async deletePost(@Ctx() ctx: PrismaContext, @Arg("id") id: number) {
     try {
       await ctx.prisma.post.delete({

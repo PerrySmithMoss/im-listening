@@ -64,6 +64,7 @@ export const Login: React.FC<LoginProps> = ({}) => {
               getCurrentUser: data?.loginUser.user,
             },
           });
+          cache.evict({ fieldName: "getRecentPosts:{}"})
         },
       });
       if (res.data?.loginUser.errors) {

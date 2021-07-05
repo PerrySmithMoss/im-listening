@@ -1,6 +1,7 @@
 import React from "react";
 import Navstyles from "../Navbar/navbar.module.css";
-import Image from "next/image"
+import Image from "next/image";
+import Link from "next/link";
 // const OrangeTheme = require("../../assets/headphones.svg") as string;
 // const PurpleTheme = require("../../assets/headphones2.svg") as string;
 
@@ -30,17 +31,19 @@ export const Logo: React.FC<LogoProps> = ({
   size = "medium",
   ...props
 }) => {
-  // const mode = primary 
+  // const mode = primary
   //   ? PurpleTheme
   //   : OrangeTheme;
   return (
-    <Image
-      className={`${Navstyles.headphonesLogo}`}
-      // src={mode}
-      src="/assets/headphones2.svg"
-      alt="I'm Listening logo"
-      height={40}
-      width={40}
-    />
+    <Link href="/">
+      <Image
+        className={`${Navstyles.headphonesLogo}`}
+        // src={mode}
+        src="/assets/headphones2.svg"
+        alt="I'm Listening logo"
+        height={40}
+        width={40}
+      />
+    </Link>
   );
 };

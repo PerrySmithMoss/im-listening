@@ -237,7 +237,9 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className={`${styles.heading}`}>
           <div className={`${styles.logoHeadingWrapper}`}>
             <Logo primary={primary} size="small" />
-            <h1 className={`${styles.navbarHeading}`}>I'm Listening</h1>
+            <Link href="/">
+              <h1 className={`${styles.navbarHeading}`}>I'm Listening</h1>
+            </Link>
             <ul className={`${styles.navLinks}`}>
               <li className={`${styles.navLinksLi}`}>
                 <Link href="/">
