@@ -12,7 +12,7 @@ const Home = () => {
   const { data, error, loading, fetchMore, variables } = useGetRecentPostsQuery(
     {
       variables: {
-        limit: 2,
+        limit: 6,
         cursor: null,
       },
       notifyOnNetworkStatusChange: true,

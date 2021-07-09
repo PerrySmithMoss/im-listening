@@ -37,6 +37,7 @@ export type Mutation = {
 
 
 export type MutationCreatePostArgs = {
+  albumImage: Scalars['String'];
   content: Scalars['String'];
   title: Scalars['String'];
   rating: Scalars['Float'];
@@ -52,7 +53,7 @@ export type MutationUpdatePostArgs = {
 
 
 export type MutationDeletePostArgs = {
-  id: Scalars['Float'];
+  id: Scalars['Int'];
 };
 
 
@@ -96,6 +97,7 @@ export type Post = {
   content: Scalars['String'];
   artistName: Scalars['String'];
   albumName: Scalars['String'];
+  albumImage: Scalars['String'];
   published?: Maybe<Scalars['Boolean']>;
   rating: Scalars['Int'];
   author: User;
@@ -187,6 +189,7 @@ export type CreatePostMutationVariables = Exact<{
   rating: Scalars['Float'];
   title: Scalars['String'];
   content: Scalars['String'];
+  albumImage: Scalars['String'];
 }>;
 
 
@@ -194,8 +197,18 @@ export type CreatePostMutation = (
   { __typename?: 'Mutation' }
   & { createPost: (
     { __typename?: 'Post' }
-    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'content' | 'artistName' | 'albumName' | 'rating'>
+    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'content' | 'artistName' | 'albumName' | 'rating' | 'albumImage'>
   ) }
+);
+
+export type DeletePostMutationVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type DeletePostMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'deletePost'>
 );
 
 export type ForgotPasswordMutationVariables = Exact<{
@@ -293,7 +306,7 @@ export type GetPostQuery = (
   { __typename?: 'Query' }
   & { getPost?: Maybe<(
     { __typename?: 'Post' }
-    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'content' | 'artistName' | 'albumName' | 'rating'>
+    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'content' | 'artistName' | 'albumName' | 'albumImage' | 'rating'>
     & { author: (
       { __typename?: 'User' }
       & Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'username'>
@@ -318,7 +331,7 @@ export type GetRecentPostsQuery = (
     & Pick<PaginatedPosts, 'hasMore'>
     & { posts: Array<(
       { __typename?: 'Post' }
-      & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'content' | 'artistName' | 'albumName' | 'rating'>
+      & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'content' | 'artistName' | 'albumName' | 'albumImage' | 'rating'>
       & { author: (
         { __typename?: 'User' }
         & Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'username'>
@@ -385,13 +398,14 @@ export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswo
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
 export const CreatePostDocument = gql`
-    mutation CreatePost($artistName: String!, $albumName: String!, $rating: Float!, $title: String!, $content: String!) {
+    mutation CreatePost($artistName: String!, $albumName: String!, $rating: Float!, $title: String!, $content: String!, $albumImage: String!) {
   createPost(
     artistName: $artistName
     albumName: $albumName
     rating: $rating
     title: $title
     content: $content
+    albumImage: $albumImage
   ) {
     id
     createdAt
@@ -401,6 +415,7 @@ export const CreatePostDocument = gql`
     artistName
     albumName
     rating
+    albumImage
   }
 }
     `;
@@ -424,6 +439,7 @@ export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, C
  *      rating: // value for 'rating'
  *      title: // value for 'title'
  *      content: // value for 'content'
+ *      albumImage: // value for 'albumImage'
  *   },
  * });
  */
@@ -434,6 +450,37 @@ export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
 export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
 export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
+export const DeletePostDocument = gql`
+    mutation DeletePost($id: Int!) {
+  deletePost(id: $id)
+}
+    `;
+export type DeletePostMutationFn = Apollo.MutationFunction<DeletePostMutation, DeletePostMutationVariables>;
+
+/**
+ * __useDeletePostMutation__
+ *
+ * To run a mutation, you first call `useDeletePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deletePostMutation, { data, loading, error }] = useDeletePostMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeletePostMutation(baseOptions?: Apollo.MutationHookOptions<DeletePostMutation, DeletePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeletePostMutation, DeletePostMutationVariables>(DeletePostDocument, options);
+      }
+export type DeletePostMutationHookResult = ReturnType<typeof useDeletePostMutation>;
+export type DeletePostMutationResult = Apollo.MutationResult<DeletePostMutation>;
+export type DeletePostMutationOptions = Apollo.BaseMutationOptions<DeletePostMutation, DeletePostMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($email: String!) {
   forgotPassword(email: $email)
@@ -656,6 +703,7 @@ export const GetPostDocument = gql`
     content
     artistName
     albumName
+    albumImage
     rating
     author {
       id
@@ -712,6 +760,7 @@ export const GetRecentPostsDocument = gql`
       content
       artistName
       albumName
+      albumImage
       rating
       author {
         id

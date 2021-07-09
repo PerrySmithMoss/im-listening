@@ -164,7 +164,8 @@ export class PostResolver {
     @Arg("artistName") artistName: string,
     @Arg("rating") rating: number,
     @Arg("title") title: string,
-    @Arg("content") content: string
+    @Arg("content") content: string,
+    @Arg("albumImage") albumImage: string
   ) {
     return ctx.prisma.post.create({
       data: {
@@ -173,7 +174,8 @@ export class PostResolver {
         rating,
         title,
         content,
-        authorId: 18,
+        albumImage: albumImage,
+        authorId: ctx.req.session.userId,
       },
     });
   }
@@ -198,10 +200,24 @@ export class PostResolver {
 
   @Mutation(() => Boolean)
   @UseMiddleware(isAuth)
-  async deletePost(@Ctx() ctx: PrismaContext, @Arg("id") id: number) {
+  async deletePost(
+    @Ctx() ctx: PrismaContext,
+    @Arg("id", () => Int) id: number
+  ) {
     try {
+      const post = await ctx.prisma.post.findUnique({ where: { id: id } });
+      if (!post) {
+        return false;
+      }
+
+      if (post.authorId !== ctx.req.session.userId) {
+        throw new Error("You can only delete posts which belong to you.");
+      }
+
       await ctx.prisma.post.delete({
-        where: { id: id },
+        where: {
+          id: id,
+        },
       });
     } catch {
       return false;

@@ -4,6 +4,9 @@ import signupStyles from "../SignUp/signup.module.css";
 import { useRouter } from "next/dist/client/router";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { useCreatePostMutation } from "../../../graphql/generated/graphql";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
 interface ShareMusicModalProps {
   setIsShareMusicModalOpen: (value: boolean) => void;
@@ -42,6 +45,9 @@ export const ShareMusicModal: React.FC<ShareMusicModalProps> = ({
   const [album, setAlbum] = useState({} as any);
   const [songName, setSongName] = useState("");
   const [artistName, setArtistName] = useState("");
+  const [isMusicCorrect, setIsMusicCorrect] = useState(false);
+  const [isMusicIncorrect, setIsMusicIncorrect] = useState(false);
+  const [apiSongImage, setApiSongImage] = useState("");
   const isEmpty = !album || Object.keys(album === 0);
   const [createPost] = useCreatePostMutation();
   const onFormChange = (event: any) => {
@@ -61,7 +67,7 @@ export const ShareMusicModal: React.FC<ShareMusicModalProps> = ({
   const onSongNameInputChange = (e: any) => {
     e.preventDefault();
     if (e.target.value.trim() === "") setIsSongNames(false);
-
+    setIsMusicCorrect(false);
     setSongName(e.target.value);
   };
 
@@ -117,6 +123,21 @@ export const ShareMusicModal: React.FC<ShareMusicModalProps> = ({
 
   useDebounce(songName, 1000, searchTvShow);
 
+  const handleCorrectSong = () => {
+    setIsMusicIncorrect(false);
+    setSongName(album.name);
+    setArtistName(album.album.artist);
+    setIsMusicCorrect(true);
+    setApiSongImage(album.album.image[2]["#text"]);
+  };
+
+  const handleIncorrectSong = () => {
+    setIsMusicCorrect(false);
+    setIsMusicIncorrect(true);
+    alert("Please enter a valid song and artist");
+    setApiSongImage("");
+  };
+
   const handleShareMusic = async (event: any) => {
     event.preventDefault();
     // setErrors(validation(formValues));
@@ -127,14 +148,15 @@ export const ShareMusicModal: React.FC<ShareMusicModalProps> = ({
           albumName: songName,
           title: formValues.title,
           content: formValues.content,
-          rating: parseInt(formValues.rating)
+          rating: parseInt(formValues.rating),
+          albumImage: apiSongImage,
         },
         update: (cache) => {
-          cache.evict({ fieldName: "getRecentPosts:{}"})
+          cache.evict({ fieldName: "getRecentPosts:{}" });
         },
       });
       if (res.errors) {
-        console.log(res.errors)
+        console.log(res.errors);
         setServerDataIsCorrect(false);
         // setServerErrors(toErrorMap(res.data.registerUser.errors));
         // } else if (res.data?.registerUser.user) {
@@ -145,6 +167,18 @@ export const ShareMusicModal: React.FC<ShareMusicModalProps> = ({
       }
     }
   };
+
+  const handleUploadImageClick = (e: any) => {
+    const file = e.target.files[0];
+    console.log(file);
+    setApiSongImage(file);
+    if (!file) return;
+    // uploadUserImage({
+    //   variables: { userId: data?.getCurrentUser?.id as number, file: file },
+    //   refetchQueries: [{ query: GetCurrentUserDocument }],
+    // });
+  };
+
   return (
     <>
       {isShareMusicModalOpen ? (
@@ -160,66 +194,120 @@ export const ShareMusicModal: React.FC<ShareMusicModalProps> = ({
             <hr />
             <div className="formContainer">
               <form className="signUpForm" id="signUpForm">
-                <div className="form__control">
-                  {/* <label>Email</label> */}
-                  <input
-                    className={`${signupStyles.formInput}`}
-                    type="text"
-                    placeholder="Enter artist name"
-                    id="artistName"
-                    name="artistName"
-                    value={artistName}
-                    onChange={onArtistNameInputChange}
-                  />
-                  <i className="fa fa-check-circle"></i>
-                  <i className="fa fa-exclamation-circle"></i>
-                  <small>
-                    {errors.email && (
-                      <p className={`${signupStyles.sigupErrors}`}>
-                        {errors.email}
-                      </p>
-                    )}
-                    {serverErrors.email && (
-                      <p className={`${signupStyles.sigupErrors}`}>
-                        {serverErrors.email}
-                      </p>
-                    )}
-                  </small>
-                </div>
-                <div className="form__control">
-                  {/* <label>First name</label> */}
-                  <input
-                    className={`${signupStyles.formInput}`}
-                    type="text"
-                    placeholder="Enter song name"
-                    id="songName"
-                    name="songName"
-                    value={songName}
-                    onChange={onSongNameInputChange}
-                  />
-                  <i className="fa fa-check-circle"></i>
-                  <i className="fa fa-exclamation-circle"></i>
-                  <small>
-                    {errors.firstName && (
-                      <p className={`${signupStyles.sigupErrors}`}>
-                        {errors.firstName}
-                      </p>
-                    )}
-                    {serverErrors.firstName && (
-                      <p className={`${signupStyles.sigupErrors}`}>
-                        {serverErrors.firstName}
-                      </p>
-                    )}
-                  </small>
+                <div className={`${shareMusicModalStyles.userMusicGrid}`}>
+                  <div className={`${shareMusicModalStyles.userMusicItem1}`}>
+                    {/* <img className={`${shareMusicModalStyles.apiSongImage}`} src="/assets/drake.jpg" alt="" /> */}
+                    <div>
+                      <input
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        id="icon-button-file"
+                        type="file"
+                        onChange={handleUploadImageClick}
+                      />
+                      <label htmlFor="icon-button-file">
+                        <img
+                          className={`${shareMusicModalStyles.apiSongImage}`}
+                          src={apiSongImage ? apiSongImage : undefined}
+                          alt=""
+                        />
+                      </label>
+                    </div>
+                  </div>
+                  <div className={`${shareMusicModalStyles.userMusicItem2}`}>
+                    {/* <label>Email</label> */}
+                    <input
+                      className={`${signupStyles.formInput}`}
+                      type="text"
+                      placeholder="Enter artist name"
+                      id="artistName"
+                      name="artistName"
+                      value={artistName}
+                      onChange={onArtistNameInputChange}
+                    />
+                    <i className="fa fa-check-circle"></i>
+                    <i className="fa fa-exclamation-circle"></i>
+                    <small>
+                      {errors.email && (
+                        <p className={`${signupStyles.sigupErrors}`}>
+                          {errors.email}
+                        </p>
+                      )}
+                      {serverErrors.email && (
+                        <p className={`${signupStyles.sigupErrors}`}>
+                          {serverErrors.email}
+                        </p>
+                      )}
+                    </small>
+                  </div>
+                  <div className={`${shareMusicModalStyles.userMusicItem3}`}>
+                    {/* <label>First name</label> */}
+                    <input
+                      className={`${signupStyles.formInput}`}
+                      type="text"
+                      placeholder="Enter song name"
+                      id="songName"
+                      name="songName"
+                      value={songName}
+                      onChange={onSongNameInputChange}
+                    />
+                    <i className="fa fa-check-circle"></i>
+                    <i className="fa fa-exclamation-circle"></i>
+                    <small>
+                      {errors.firstName && (
+                        <p className={`${signupStyles.sigupErrors}`}>
+                          {errors.firstName}
+                        </p>
+                      )}
+                      {serverErrors.firstName && (
+                        <p className={`${signupStyles.sigupErrors}`}>
+                          {serverErrors.firstName}
+                        </p>
+                      )}
+                    </small>
+                  </div>
                 </div>
                 {!isLoading && isSongNames && (
-                  <div>
-                    <img
-                      src={album.album.image[2]["#text"]}
-                      alt="Album cover image"
-                    />
-                    {album.album.artist} - {album.album.title}
-                  </div>
+                  <>
+                    <h4>Is this the song you're listening to?</h4>
+                    <div
+                      className={`${shareMusicModalStyles.apiSearchWrapper}`}
+                    >
+                      <div>
+                        <img
+                          src={album.album.image[2]["#text"]}
+                          alt="Album cover image"
+                        />
+                      </div>
+                      <div>
+                        <p>Artist - {album.album.artist}</p>
+                        <p>Album - {album.album.title}</p>
+                        <p>Song - {album.name}</p>
+                        <div
+                          className={`${shareMusicModalStyles.resultsActionsWrapper}`}
+                        >
+                          <div>
+                            <FontAwesomeIcon
+                              color={isMusicCorrect ? "green" : "grey"}
+                              size="lg"
+                              icon={faCheck}
+                              onClick={() => handleCorrectSong()}
+                              className={`${shareMusicModalStyles.tickIcon}`}
+                            ></FontAwesomeIcon>
+                          </div>
+                          <div>
+                            <FontAwesomeIcon
+                              color={isMusicIncorrect ? "red" : "grey"}
+                              size="lg"
+                              icon={faTimes}
+                              onClick={() => handleIncorrectSong()}
+                              className={`${shareMusicModalStyles.tickIcon}`}
+                            ></FontAwesomeIcon>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
                 )}
                 <hr />
                 <div className="form__control">
@@ -299,35 +387,36 @@ export const ShareMusicModal: React.FC<ShareMusicModalProps> = ({
                     )}
                   </small>
                 </div>
-
-                <button
-                  className={`${signupStyles.cancelButton} `}
-                  onClick={() => setIsShareMusicModalOpen(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className={`${signupStyles.signupButton}`}
-                  onClick={async (e) => await handleShareMusic(e)}
-                  // onClick={async (e) => {
-                  //   e.preventDefault()
-                  //   const resp = await registerUser({
-                  //     variables: {
-                  //       firstName: formValues.firstName,
-                  //       lastName: formValues.lastName,
-                  //       email: formValues.email,
-                  //       password: formValues.password,
-                  //       username: formValues.username,
-                  //     },
-                  //   });
-                  //   console.log(resp)
-                  //   // if(resp.data?.registerUser.errors) {
-                  //   //   setServerErrors(toErrorMap(resp.data.registerUser.errors))
-                  //   // }
-                  // }}
-                >
-                  Share
-                </button>
+                <div className={`${shareMusicModalStyles.finalActionButtons}`}>
+                  <button
+                    className={`${signupStyles.cancelButton} `}
+                    onClick={() => setIsShareMusicModalOpen(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className={`${signupStyles.signupButton}`}
+                    onClick={async (e) => await handleShareMusic(e)}
+                    // onClick={async (e) => {
+                    //   e.preventDefault()
+                    //   const resp = await registerUser({
+                    //     variables: {
+                    //       firstName: formValues.firstName,
+                    //       lastName: formValues.lastName,
+                    //       email: formValues.email,
+                    //       password: formValues.password,
+                    //       username: formValues.username,
+                    //     },
+                    //   });
+                    //   console.log(resp)
+                    //   // if(resp.data?.registerUser.errors) {
+                    //   //   setServerErrors(toErrorMap(resp.data.registerUser.errors))
+                    //   // }
+                    // }}
+                  >
+                    Share
+                  </button>
+                </div>
               </form>
             </div>
           </div>

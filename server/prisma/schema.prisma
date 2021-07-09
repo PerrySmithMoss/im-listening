@@ -16,6 +16,7 @@ model Post {
   updatedAt  DateTime @updatedAt
   albumName  String   @db.VarChar(255)
   artistName String   @db.VarChar(255)
+  albumImage String   @db.VarChar(255) @default("")
   rating     Int
   title      String
   content    String

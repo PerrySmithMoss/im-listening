@@ -22,7 +22,12 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({
                 <div>
                   <img
                     className={`${styles.albumImage}`}
-                    src="/assets/KOD.jpg"
+                    // src="/assets/KOD.jpg"
+                    src={
+                      post.albumImage === ""
+                        ? "/assets/KOD.jpg"
+                        : `${post.albumImage as string}`
+                    }
                     alt="Two people dancing to music"
                   />
                 </div>

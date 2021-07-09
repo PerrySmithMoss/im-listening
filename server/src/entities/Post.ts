@@ -25,6 +25,9 @@ export class Post {
   @Field(() => String)
   albumName: string
 
+  @Field(() => String)
+  albumImage: string
+
   @Field(() => Boolean, { nullable: true })
   published?: boolean | null
 

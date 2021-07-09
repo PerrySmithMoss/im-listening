@@ -9,6 +9,7 @@ query GetRecentPosts($limit: Int!, $cursor: DateTime) {
       content
       artistName
       albumName
+      albumImage
       rating
       author {
         id

@@ -33,3 +33,64 @@
   text-decoration: none;
   cursor: pointer;
 }
+
+.apiSearchWrapper {
+  display: grid;
+  grid-template-columns: 200px 200px;
+  font-family: "Nunito Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background-color: #f0f0f0;
+  border-radius: 15px;
+}
+
+.resultsActionsWrapper {
+  display: flex;
+}
+
+.tickIcon {
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+.finalActionButtons {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+
+.userMusicGrid {
+  /* font-family: "Nunito Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 24px;
+  padding: 100px 20px; */
+  margin: 0 auto;
+  /* max-width: 600px; */
+  color: black;
+  display: grid;
+  grid-template-columns: 175px auto;
+  grid-template-rows: auto;
+  gap: 5px;
+  grid-template-areas: 
+  "image artist"
+  "image song";
+  /* justify-content: center;
+  align-items: center; */
+}
+
+.userMusicItem1 {
+  grid-area: image;
+}
+
+.userMusicItem2 {
+  grid-area: artist;
+  /* align-self: end; */
+}
+
+.userMusicItem3 {
+  grid-area: song;
+  /* align-self: start; */
+}
+
+.apiSongImage {
+  height: 150px;
+  width: 175px;
+}
