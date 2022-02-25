@@ -59,7 +59,7 @@ const Post = ({}) => {
           <div>
             <img
               className={`${styles.albumImage}`}
-              src="/assets/KOD.jpg"
+              src={data?.getPost?.albumImage}
               alt="Two people dancing to music"
             />
           </div>
@@ -68,7 +68,7 @@ const Post = ({}) => {
               <div>
                 <img
                   className={`${styles.userAvatarImage}`}
-                  src="/assets/user-avatar.jpeg"
+                  src={"/assets/user-avatar.jpeg"}
                   alt="User Avatar"
                 />
               </div>

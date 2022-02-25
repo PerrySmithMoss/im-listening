@@ -23,7 +23,7 @@ type Errors = {
 
 const ChangePassword: NextPage = () => {
   const router = useRouter();
-  console.log(router.query)
+  // console.log(router.query)
   const [formValues, setFormValues] = useState({
     firstName: "",
     lastName: "",
@@ -171,11 +171,5 @@ const ChangePassword: NextPage = () => {
     </section>
   );
 };
-
-// ChangePassword.getInitialProps = ({ query }) => {
-//   return {
-//     token: query.token as string,
-//   };
-// };
 
 export default withApollo({ ssr: false })(ChangePassword);

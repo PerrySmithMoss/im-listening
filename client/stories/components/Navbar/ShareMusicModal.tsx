@@ -200,7 +200,7 @@ export const ShareMusicModal: React.FC<ShareMusicModalProps> = ({
                     <div>
                       <input
                         accept="image/*"
-                        style={{ display: "none" }}
+                        style={{ display: "none"}}
                         id="icon-button-file"
                         type="file"
                         onChange={handleUploadImageClick}
@@ -208,7 +208,7 @@ export const ShareMusicModal: React.FC<ShareMusicModalProps> = ({
                       <label htmlFor="icon-button-file">
                         <img
                           className={`${shareMusicModalStyles.apiSongImage}`}
-                          src={apiSongImage ? apiSongImage : undefined}
+                          src={apiSongImage ? apiSongImage : "/assets/Placeholder.jpg"}
                           alt=""
                         />
                       </label>
@@ -286,22 +286,22 @@ export const ShareMusicModal: React.FC<ShareMusicModalProps> = ({
                         <div
                           className={`${shareMusicModalStyles.resultsActionsWrapper}`}
                         >
-                          <div>
+                          <div className="faCheck">
                             <FontAwesomeIcon
                               color={isMusicCorrect ? "green" : "grey"}
                               size="lg"
                               icon={faCheck}
                               onClick={() => handleCorrectSong()}
-                              className={`${shareMusicModalStyles.tickIcon}`}
+                              className={`${shareMusicModalStyles.tickIcon} faCheck`}
                             ></FontAwesomeIcon>
                           </div>
-                          <div>
+                          <div className="faTimes">
                             <FontAwesomeIcon
                               color={isMusicIncorrect ? "red" : "grey"}
                               size="lg"
                               icon={faTimes}
                               onClick={() => handleIncorrectSong()}
-                              className={`${shareMusicModalStyles.tickIcon}`}
+                              className={`${shareMusicModalStyles.tickIcon} faTimes`}
                             ></FontAwesomeIcon>
                           </div>
                         </div>

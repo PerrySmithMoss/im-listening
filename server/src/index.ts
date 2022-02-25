@@ -9,7 +9,6 @@ import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import { __prod__ } from "../constants";
-import { PrismaContext } from "./types/PrismaContext";
 import cors from "cors";
 
 const PORT = process.env.PORT || 5000;

@@ -35,7 +35,6 @@ export const Logo: React.FC<LogoProps> = ({
   //   ? PurpleTheme
   //   : OrangeTheme;
   return (
-    <Link href="/">
       <Image
         className={`${Navstyles.headphonesLogo}`}
         // src={mode}
@@ -44,6 +43,5 @@ export const Logo: React.FC<LogoProps> = ({
         height={40}
         width={40}
       />
-    </Link>
   );
 };

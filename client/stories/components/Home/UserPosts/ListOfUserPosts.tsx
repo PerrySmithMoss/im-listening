@@ -1,7 +1,9 @@
+import { Button } from "@mantine/core";
 import Link from "next/link";
 import React from "react";
-import { useGetRecentPostsQuery } from "../../../graphql/generated/graphql";
+import { useGetRecentPostsQuery } from "../../../../graphql/generated/graphql";
 import styles from "./user-posts.module.css";
+import { UserPostsCard } from "./UserPostsCard";
 // const KOD = require("../../assets/KOD.jpg") as string;
 // const UserAvatar = require("../../assets/user-avatar.jpeg") as string;
 
@@ -12,12 +14,41 @@ interface ListOfUserPostsProps {
 export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({
   recentPosts,
 }) => {
+  const { data, error, loading, fetchMore, variables } = useGetRecentPostsQuery(
+    {
+      variables: {
+        limit: 6,
+        cursor: null,
+      },
+      notifyOnNetworkStatusChange: true,
+    }
+  );
+
+  const handleFetchMorePosts = async () => {
+    await fetchMore({
+      variables: {
+        limit: variables?.limit,
+        cursor:
+          data?.getRecentPosts.posts[data.getRecentPosts.posts.length - 1]
+            .createdAt,
+      },
+    });
+  };
+
   return (
-    <>
-      <section className={`${styles.userPostsWrapper}`}>
+    <section className="px-4 sm:px-8 lg:px-16 xl:px-20 mx-auto mt-2">
+      <div className="grid grid-cols-2 gap-4">
         {recentPosts.getRecentPosts.posts.map((post: any) => (
-          <Link href="/post/[id]" as={`/post/${post.id}`}>
-            <a href="" className={`${styles.ListOfPostsA}`}>
+          <UserPostsCard key={post.id} post={post} />
+        ))}
+      </div>
+
+      <section
+        className={`grid grid-cols-2 gap-4 px-4 sm:px-8 lg:px-16 xl:px-20 mx-auto mt-2`}
+      >
+        {recentPosts.getRecentPosts.posts.map((post: any) => (
+          <Link key={post.id} href="/post/[id]" as={`/post/${post.id}`}>
+            <div className={`${styles.ListOfPostsA}`}>
               <div key={post.id} className={`${styles.userPostItem}`}>
                 <div>
                   <img
@@ -81,10 +112,21 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({
                   </p>
                 </div>
               </div>
-            </a>
+            </div>
           </Link>
         ))}
       </section>
-    </>
+      {recentPosts && recentPosts.getRecentPosts.hasMore ? (
+        <div className={`${styles.seeMoreWrapper} mt-6`}>
+          <Button
+            size="md"
+            color="orange"
+            onClick={() => handleFetchMorePosts()}
+          >
+            Load More
+          </Button>
+        </div>
+      ) : null}
+    </section>
   );
 };

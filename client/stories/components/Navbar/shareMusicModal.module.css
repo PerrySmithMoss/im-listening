@@ -93,4 +93,14 @@
 .apiSongImage {
   height: 150px;
   width: 175px;
+  cursor: pointer
 }
+
+.faTimes:hover {
+  color: red;
+}
+
+.faCheck:hover {
+  color: green;
+}
+

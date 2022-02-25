@@ -1,0 +1,6 @@
+.headerExploreArrow svg {
+  transition: margin-left 0.4s;
+}
+.headerExploreArrow:hover svg {
+  margin-left: 12px;
+}

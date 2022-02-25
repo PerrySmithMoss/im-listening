@@ -1,15 +1,24 @@
 import { Navbar } from "../stories/components/Navbar/Navbar";
 import { Header } from "../stories/components/Home/Header";
-import { FeaturedArtists } from "../stories/components/Home/FeaturedArtists";
+import { WeeklyMostPopular } from "../stories/components/Home/WeeklyMostPopular/WeeklyMostPopular";
 import { Categories } from "../stories/components/Home/Categories";
-import { ListOfUserPosts } from "../stories/components/Home/ListOfUserPosts";
+import { ListOfUserPosts } from "../stories/components/Home/UserPosts/ListOfUserPosts";
 import { Meta } from "../stories/components/Home/Meta";
 import { withApollo } from "../lib/withApollo";
-import { useGetRecentPostsQuery } from "../graphql/generated/graphql";
+import {
+  useGetCurrentUserQuery,
+  useGetRecentPostsQuery,
+} from "../graphql/generated/graphql";
 import styles from "../stories/components/Home/user-posts.module.css";
+import { isServer } from "../utils/isServer";
+import { PromotedArtists } from "../stories/components/Home/PromotedArtists/PromotedArtists";
+import { DiscoverNewMusic } from "../stories/components/Home/DiscoverNewMusic/DiscoverNewMusic";
 
 const Home = () => {
-  const { data, error, loading, fetchMore, variables } = useGetRecentPostsQuery(
+  const { data: user, loading: userLoading } = useGetCurrentUserQuery({
+    skip: isServer(),
+  });
+  const { data, error, loading } = useGetRecentPostsQuery(
     {
       variables: {
         limit: 6,
@@ -27,18 +36,6 @@ const Home = () => {
       </div>
     );
   }
-
-  const handleFetchMorePosts = async () => {
-    await fetchMore({
-      variables: {
-        limit: variables?.limit,
-        cursor:
-          data?.getRecentPosts.posts[data.getRecentPosts.posts.length - 1]
-            .createdAt,
-      },
-    });
-  };
-
   return (
     <div>
       <Meta
@@ -53,23 +50,18 @@ const Home = () => {
         onCreateAccount={() => {}}
       />
       <Header />
-      <FeaturedArtists />
-      <Categories />
-      {!data && loading ? (
+      <DiscoverNewMusic />
+      <WeeklyMostPopular />
+      {!user?.getCurrentUser ? (
+        <PromotedArtists />
+      ) : !data && loading ? (
         <div>Loading...</div>
       ) : (
-        <ListOfUserPosts recentPosts={data} />
+        <>
+          <Categories />
+          <ListOfUserPosts recentPosts={data} />
+        </>
       )}
-      {data && data.getRecentPosts.hasMore ? (
-        <div className={`${styles.seeMoreWrapper}`}>
-          <button
-            onClick={() => handleFetchMorePosts()}
-            className={`${styles.seeMoreBtn}`}
-          >
-            Load more
-          </button>
-        </div>
-      ) : null}
     </div>
   );
 };

@@ -2,9 +2,9 @@ import React from "react";
 
 import { Navbar } from "../components/Navbar/Navbar";
 import { Header } from "../components/Home/Header";
-import { FeaturedArtists } from "../components/Home/FeaturedArtists";
+import { WeeklyMostPopular } from "../components/Home/WeeklyMostPopular/WeeklyMostPopular";
 import { Categories } from "../components/Home/Categories";
-import { ListOfUserPosts } from "../components/Home/ListOfUserPosts";
+import { ListOfUserPosts } from "../components/Home/UserPosts/ListOfUserPosts";
 
 export interface HomeProps {
   user?: {};
@@ -28,8 +28,8 @@ export const Home: React.FC<HomeProps> = ({
       onCreateAccount={onCreateAccount}
     />
     <Header />
-    <FeaturedArtists />
+    <WeeklyMostPopular />
     <Categories />
-    <ListOfUserPosts />
+    {/* <ListOfUserPosts /> */}
   </article>
 );

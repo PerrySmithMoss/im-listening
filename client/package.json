@@ -16,9 +16,13 @@
     "@fortawesome/free-regular-svg-icons": "^5.15.3",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.1.14",
+    "@mantine/core": "^3.6.9",
+    "@mantine/hooks": "^3.6.9",
+    "@mantine/next": "^3.6.9",
+    "@modulz/radix-icons": "^4.0.0",
     "@prisma/client": "^2.25.0",
     "graphql": "^15.5.1",
-    "next": "10.2.3",
+    "next": "12.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },
@@ -34,7 +38,10 @@
     "@storybook/addon-viewport": "^6.2.9",
     "@storybook/react": "^6.2.9",
     "@types/react": "17.0.10",
+    "autoprefixer": "^10.4.2",
     "babel-loader": "^8.2.2",
+    "postcss": "^8.4.6",
+    "tailwindcss": "^3.0.23",
     "typescript": "4.3.2"
   }
 }
