@@ -17,7 +17,7 @@ export const PromotedArtists: React.FC<PromotedArtistsProps> = ({}) => {
         </div>
       </div>
       <div className="">
-        <div className="grid grid-cols-1 xxs:grid-cols-2 lg:grid-cols-4 gap-x-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8">
           {promotedArtists.map((promotedArtist: IPromotedArtist) => (
             <article
               key={promotedArtist.id}
@@ -28,8 +28,8 @@ export const PromotedArtists: React.FC<PromotedArtistsProps> = ({}) => {
                   className="w-full h-64 object-cover object-center "
                   src={promotedArtist.artistImage}
                   alt="Artist Photo"
-                  height={278}
-                  width={278}
+                  // height={278}
+                  // width={278}
                 />
               </div>
               <div

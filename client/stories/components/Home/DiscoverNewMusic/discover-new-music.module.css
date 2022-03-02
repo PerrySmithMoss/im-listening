@@ -3,6 +3,21 @@
    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 20%);
 }
 
+.imageCard {
+    margin: auto;
+}
+.imageCard img{
+    max-width: 100%;
+    transition: all 0.5s;
+    display: block;
+    width: 100%;
+    height: auto;
+    transform: scale(1);
+}
+.imageCard:hover img {
+    transform: scale(1.1);
+}
+
 .imageCardBrightness {
     filter: brightness(50%);
 }

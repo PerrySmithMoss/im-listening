@@ -9,11 +9,11 @@ interface UserPostsCardProps {
 export const UserPostsCard: React.FC<UserPostsCardProps> = ({ post }) => {
   return (
     <Link key={post.id} href="/post/[id]" as={`/post/${post.id}`}>
-      <div className="flex lg:justify-center">
-        <div className="bg-whitemx-8 flex max-w-5xl shadow-md hover:shadow-lg rounded-sm">
-          <div className="lg:w-1/2">
+      <div className="">
+        <div className="  flex hover:shadow-lg rounded">
+          <div className="">
             <img
-              className={`h-full w-full`}
+              className={`h-full w-full rounded-l`}
               src={
                 post.albumImage === ""
                   ? "/assets/KOD.jpg"
@@ -26,16 +26,16 @@ export const UserPostsCard: React.FC<UserPostsCardProps> = ({ post }) => {
             <div>
               <Avatar
                 radius="xl"
-                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=250&q=80"
+                src={post.author.profile.avatar}
               />
             </div>
             <div className={`pl-3`}>
-              <p className={``} style={{ color: "black", fontWeight: "bold" }}>
-                {`${post.author.firstName} ${post.author.lastName}`}
+              <p className={``} style={{ fontWeight: "bold" }}>
+                {post.author.firstName} {post.author.lastName}
               </p>
               <a href="" className={``}>
                 <span style={{ color: "#0f8deb", fontSize: "0.8rem" }}>
-                  {`${post.author.username}`}
+                  {post.author.username}
                 </span>
               </a>
             </div>

@@ -121,7 +121,7 @@ export const ShareMusicModal: React.FC<ShareMusicModalProps> = ({
     setLoading(false);
   };
 
-  useDebounce(songName, 1000, searchTvShow);
+  // useDebounce(songName, 1000, searchTvShow);
 
   const handleCorrectSong = () => {
     setIsMusicIncorrect(false);

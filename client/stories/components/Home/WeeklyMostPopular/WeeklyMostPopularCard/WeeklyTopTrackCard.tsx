@@ -13,11 +13,11 @@ export const WeeklyTopTrackCard: React.FC<WeeklyTopTrackCardProps> = ({
 }) => {
   return (
     <article className="flex flex-col rounded-lg cursor-pointer pb-1">
-      <div className="flex justify-center overflow-hidden relative">
+      <div className="flexjustify-center overflow-hidden relative">
         <img
           src={card.image}
           alt="Product Image"
-          className="w-full h-64 object-cover object-center "
+          className="w-full  h-auto object-cover object-center "
           height={278}
           width={278}
         />

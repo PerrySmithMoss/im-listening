@@ -8,7 +8,7 @@ import {
 import { withApollo } from "../../lib/withApollo";
 import { Meta } from "../../stories/components/Home/Meta";
 import { Navbar } from "../../stories/components/Navbar/Navbar";
-import styles from "../../stories/components/Home/user-posts.module.css";
+import styles from "../../stories/components/Home/UserPosts/user-posts.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { isServer } from "../../utils/isServer";
@@ -47,12 +47,6 @@ const Post = ({}) => {
         title={"I'm Listening"}
         keywords={"music, social media, social, share music, music"}
         description={"Share what you're listening to."}
-      />
-      <Navbar
-        primary={true}
-        onLogin={() => {}}
-        onLogout={() => {}}
-        onCreateAccount={() => {}}
       />
       <section className={`${styles.individualPostWrapper}`}>
         <div key={data?.getPost?.id} className={`${styles.individualPostItem}`}>

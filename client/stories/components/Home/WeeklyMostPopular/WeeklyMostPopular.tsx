@@ -7,8 +7,8 @@ interface WeeklyMostPopularProps {}
 
 export const WeeklyMostPopular: React.FC<WeeklyMostPopularProps> = ({}) => {
   return (
-    <section className="px-4 sm:px-8 lg:px-16 xl:px-20 my-10 max-w-[90rem] mx-auto">
-      <div className="flex justify-between">
+    <section className="px-4 sm:px-8 lg:px-16 xl:px-20 my-16 max-w-[90rem] mx-auto">
+      <div className="flex justify-between content-center items-center">
         <div>
           <h2 className="pb-6 text-3xl font-bold">Weekly Most Popular</h2>
         </div>
@@ -16,7 +16,7 @@ export const WeeklyMostPopular: React.FC<WeeklyMostPopularProps> = ({}) => {
           <SeeAll buttonText="See all"/>
         </div>
       </div>
-      <div className="grid grid-cols-1 xxs:grid-cols-2 lg:grid-cols-4 gap-x-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-8">
         {weeklyTopTracks.map((track: IWeeklyTopTrack) => (
           <WeeklyTopTrackCard key={track.id} card={track} />
         ))}

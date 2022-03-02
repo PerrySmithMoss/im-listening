@@ -122,8 +122,9 @@ button {
   color: white;
   text-align: center;
   width: 20px;
-  height: 15px;
-  border-radius: 80%;
+  height: 18px;
+  border-radius: 100%;
+  position: relative;
   position: absolute; /* changed */
   top: -10px; /* changed */
   left: 12px; /* changed */

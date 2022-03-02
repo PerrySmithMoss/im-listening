@@ -13,15 +13,23 @@ import { isServer } from "../../../utils/isServer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell } from "@fortawesome/free-solid-svg-icons";
 import { faComments } from "@fortawesome/free-solid-svg-icons";
-import { ShareMusicModal } from "./ShareMusicModal";
 import {
   ActionIcon,
   Avatar,
-  Button,
+  Modal,
+  Popover,
   Text,
   useMantineColorScheme,
 } from "@mantine/core";
-import { SunIcon, MoonIcon } from "@modulz/radix-icons";
+import {
+  SunIcon,
+  MoonIcon,
+  BellIcon,
+  ChatBubbleIcon,
+} from "@modulz/radix-icons";
+import { ShareMusicModal } from "./ShareMusicModal";
+import { ShareMusic } from "../Modal/ShareMusic";
+import { useGlobalUIContext } from "../../../context/GlobalUI.context";
 // const UserAvatar = require("../../assets/user-avatar.jpeg") as string;
 // const HamburgerMenu = require("../../assets/hamburger-menu.svg") as string;
 // const CloseMenu = require("../../assets/close.svg") as string;
@@ -32,6 +40,7 @@ export interface NavbarProps {
   onLogout: () => void;
   onCreateAccount: () => void;
   primary: boolean;
+  songAudio: boolean
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -40,6 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogin,
   onLogout,
   onCreateAccount,
+  songAudio
 }) => {
   const [sidebar, setSidebar] = useState<null | boolean>(null);
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
@@ -48,10 +58,24 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { data, loading } = useGetCurrentUserQuery({ skip: isServer() });
   const [logoutUser] = useLogoutUserMutation();
   let body = null;
-
+  const {
+    isMusicPlaying,
+    setIsMusicPlaying,
+    playingTrackState,
+    setPlayingTrackState,
+    isShowMusicPlayerOpen,
+    setIsShowMusicPlayerOpen,
+    chosenSong,
+    setChosenSong,
+  } = useGlobalUIContext();
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isShareMusicModalOpen, setIsShareMusicModalOpen] = useState(false);
 
+  const handleCloseModal = () => {
+    setIsShareMusicModalOpen(false)
+    setIsShowMusicPlayerOpen(false)
+    setIsMusicPlaying(false)
+  }
   // data is loading
   // if (loading) {
   //   body = (
@@ -69,7 +93,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* <a className="text-[#fd7e14] text-[15px] hover:text-brand-orange_hover">
               Log in
             </a> */}
-            <Text className="">Log in</Text>
+            <Text className=" cursor-pointer hover:text-brand-orange">
+              Log in
+            </Text>
           </Link>
         </li>
         <li className="pr-5">
@@ -109,13 +135,14 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <div className={`${styles.iconBadgeContainer}`}>
             <a href="#">
-              <FontAwesomeIcon
-                color="grey"
-                size="lg"
-                icon={faBell}
-                className={`${styles.iconBadgeIcon}`}
-              ></FontAwesomeIcon>
-              <div className={`${styles.iconBadge}`}>6</div>
+              <ActionIcon variant="hover">
+                <BellIcon style={{ width: 24, height: 24 }} />
+                <div className={`${styles.iconBadge}`}>
+                  <div className="absoloute absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    6
+                  </div>
+                </div>
+              </ActionIcon>
             </a>
           </div>
         </div>
@@ -125,46 +152,54 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <div className={`${styles.iconBadgeContainer}`}>
             <a href="#">
-              <FontAwesomeIcon
-                color="grey"
-                size="lg"
-                icon={faComments}
-                className={`${styles.iconBadgeIcon}`}
-              ></FontAwesomeIcon>
-              <div className={`${styles.iconBadge}`}>2</div>
+              <ActionIcon variant="hover">
+                <ChatBubbleIcon style={{ width: 24, height: 24 }} />
+                <div className={`${styles.iconBadge}`}>
+                  <div className="absoloute absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    2
+                  </div>
+                </div>
+              </ActionIcon>
             </a>
           </div>
         </div>
-
-        <div className={`${styles.menuContainer}`}>
-          <div className={`${styles.menuItem}`}>
-            {/* <a href="/"> */}
+        <Popover
+          opened={isProfileDropdownOpen}
+          onClose={() => setIsProfileDropdownOpen(false)}
+          target={
             <Avatar
               onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
               size="md"
               radius="xl"
               src={data.getCurrentUser.profile.avatar as string}
             />
-            {/* <img
-              className={`${styles.userProfileImage}`}
-              src={data.getCurrentUser.profile.avatar as string}
-              alt="User avatar"
-              onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-            /> */}
-            {/* </a> */}
+          }
+          width={260}
+          position="bottom"
+          withArrow
+        >
+          <div>
+            <Text
+              onClick={async () => {
+                await logoutUser();
+                await apolloClient.resetStore();
+              }}
+              size="sm"
+            >
+              Logout
+            </Text>
           </div>
-          {/* <div style={{ paddingRight: "10px" }}>
-            <Image
-              className="user-profile_expand"
-              src="/assets/chevron-down.svg"
-              alt="ChevronDown"
-              height={15}
-              width={10}
-              onClick={() => setProfileDropdownOpen(!isProfileDropdownOpen)}
+        </Popover>
+        {/* <div className={`${styles.menuContainer}`}>
+          <div className={`${styles.menuItem}`}>
+            <Avatar
+              onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+              size="md"
+              radius="xl"
+              src={data.getCurrentUser.profile.avatar as string}
             />
-          </div> */}
+          </div>
           {isProfileDropdownOpen ? (
-            // <nav className={styles.profileNavbar}>
             <div className={`${styles.dropDownMenu}`}>
               <a className={styles.profileNavLink} href="#">
                 <p>Profile</p>
@@ -192,13 +227,28 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : (
             false
           )}
-        </div>
+        </div> */}
         <button
           onClick={() => setIsShareMusicModalOpen(!isShareMusicModalOpen)}
           className={styles.shareBtn}
         >
           Share
         </button>
+        <div className="ml-4">
+          <ActionIcon
+            variant="outline"
+            size="lg"
+            color={dark ? "orange" : "orange"}
+            onClick={() => toggleColorScheme()}
+            title="Toggle color scheme"
+          >
+            {dark ? (
+              <SunIcon style={{ width: 18, height: 18 }} />
+            ) : (
+              <MoonIcon style={{ width: 18, height: 18 }} />
+            )}
+          </ActionIcon>
+        </div>
       </div>
     );
   }
@@ -207,7 +257,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     <>
       <div
         className={
-          `${styles.navigation} max-w-[90rem]` + (sidebar ? `${styles.navigationOpen}` : "")
+          `${styles.navigation} max-w-[90rem]` +
+          (sidebar ? `${styles.navigationOpen}` : "")
         }
       >
         <br></br>
@@ -250,7 +301,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           </li>
         </ul>
       </div>
-      <header className={`${styles.navbarWrapper} py-4 header max-w-[90rem] mx-auto`}>
+      <header
+        className={`${styles.navbarWrapper} py-4 header max-w-[90rem] mx-auto`}
+      >
         <div className=" px-4 sm:px-8 lg:px-16 xl:px-20 mx-auto">
           <nav className="header-wrapper flex items-center justify-between">
             <div className="header-logo flex content-center items-center">
@@ -306,6 +359,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="navbar hidden md:block">{body}</div>
           </nav>
         </div>
+        <Modal
+        centered
+          opened={isShareMusicModalOpen}
+          onClose={handleCloseModal}
+          title="What are you listening to?"
+          size="xl"
+        >
+          <hr />
+          <ShareMusic songAudio={songAudio}/>
+        </Modal>
+        {/* <ShareMusicModal
+          isShareMusicModalOpen={isShareMusicModalOpen}
+          setIsShareMusicModalOpen={setIsShareMusicModalOpen}
+        /> */}
       </header>
       {/* <header>
         <div className={`${styles.heading}`}>

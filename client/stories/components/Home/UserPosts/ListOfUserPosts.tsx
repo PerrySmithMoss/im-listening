@@ -36,14 +36,14 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({
   };
 
   return (
-    <section className="px-4 sm:px-8 lg:px-16 xl:px-20 mx-auto mt-2">
-      <div className="grid grid-cols-2 gap-4">
+    <section className=" mx-auto mt-2">
+      <div className="grid grid-cols-2 gap-6 px-4 sm:px-8 lg:px-16 xl:px-20">
         {recentPosts.getRecentPosts.posts.map((post: any) => (
           <UserPostsCard key={post.id} post={post} />
         ))}
       </div>
 
-      <section
+      {/* <section
         className={`grid grid-cols-2 gap-4 px-4 sm:px-8 lg:px-16 xl:px-20 mx-auto mt-2`}
       >
         {recentPosts.getRecentPosts.posts.map((post: any) => (
@@ -115,16 +115,15 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({
             </div>
           </Link>
         ))}
-      </section>
+      </section> */}
       {recentPosts && recentPosts.getRecentPosts.hasMore ? (
         <div className={`${styles.seeMoreWrapper} mt-6`}>
-          <Button
-            size="md"
-            color="orange"
+          <a
+          className="px-8 cursor-pointer py-2.5 bg-brand-orange hover:bg-brand-orange_hover text-white rounded"
             onClick={() => handleFetchMorePosts()}
           >
             Load More
-          </Button>
+          </a>
         </div>
       ) : null}
     </section>

@@ -1,12 +1,20 @@
 import React from "react";
+import { SeeAll } from "../../Button/SeeAll/SeeAll";
 import discoverNewMusicStyles from "./discover-new-music.module.css";
 
 interface DiscoverNewMusicProps {}
 
 export const DiscoverNewMusic: React.FC<DiscoverNewMusicProps> = ({}) => {
   return (
-    <div className="px-4 sm:px-8 lg:px-16 xl:px-20  my-10 max-w-[90rem] mx-auto">
-      <h2 className="pb-6 text-3xl font-bold">Discover New Music</h2>
+    <section className="px-4 sm:px-8 lg:px-16 xl:px-20 mt-4 max-w-[90rem] mx-auto">
+          <div className="flex justify-between content-center items-center">
+        <div>
+          <h2 className="pb-6 text-3xl font-bold">Discover New Music</h2>
+        </div>
+        <div>
+          <SeeAll buttonText="See all"/>
+        </div>
+      </div>
       <div className="grid grid-cols-1  md:grid-cols-2 xl:grid-cols-4 gap-x-6 gap-y-6">
         <div className="relative overflow-hidden w-full h-60 rounded-xl">
           <img
@@ -89,7 +97,7 @@ export const DiscoverNewMusic: React.FC<DiscoverNewMusicProps> = ({}) => {
           </h3>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
