@@ -1,21 +1,8 @@
-export function debounce<A = unknown, R = void>(
-  fn: (args: A) => R,
-  ms: number
-): [(args: A) => Promise<R>, () => void] {
-  let timer: NodeJS.Timeout;
-
-  const debouncedFunc = (args: A): Promise<R> =>
-    new Promise((resolve) => {
-      if (timer) {
-        clearTimeout(timer);
-      }
-
-      timer = setTimeout(() => {
-        resolve(fn(args));
-      }, ms);
-    });
-
-  const teardown = () => clearTimeout(timer);
-
-  return [debouncedFunc, teardown];
-}
+export const debounce = (func: any, delay: number) => {
+  let setTimoutInstance: any;
+  return function () {
+    const args = arguments;
+    if (setTimoutInstance) clearTimeout(setTimoutInstance);
+    setTimoutInstance = setTimeout(() => func.apply("", args), delay);
+  };
+};

@@ -6,7 +6,7 @@ query GetRecentPosts($limit: Int!, $cursor: DateTime) {
       createdAt
       updatedAt
       title
-      content
+      previewSongUrl
       artistName
       albumName
       albumImage

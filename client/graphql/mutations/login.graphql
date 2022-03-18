@@ -12,7 +12,7 @@ mutation LoginUser($email: String!, $password: String!) {
       posts {
         id
         title
-        content
+        previewSongUrl
       }
       profile {
         id

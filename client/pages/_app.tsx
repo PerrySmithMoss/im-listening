@@ -13,6 +13,7 @@ import { useHotkeys, useLocalStorageValue } from "@mantine/hooks";
 import { Layout } from "../stories/components/Layout/Layout";
 import { withApollo } from "../lib/withApollo";
 import { GlobalUIProvider } from "../context/GlobalUI.context";
+import { NotificationsProvider } from "@mantine/notifications";
 config.autoAddCss = false; // Tell Font Awesome to skip adding the CSS automatically since it's being imported above
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -52,11 +53,13 @@ function MyApp({ Component, pageProps }: AppProps) {
         }}
         withGlobalStyles
       >
+         <NotificationsProvider>
         <GlobalUIProvider>
           {/* <Layout> */}
           <Component {...pageProps} />
           {/* </Layout> */}
         </GlobalUIProvider>
+        </NotificationsProvider>
       </MantineProvider>
     </ColorSchemeProvider>
   );

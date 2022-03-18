@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { ObjectType, Field, ID, Int } from 'type-graphql'
+import { ObjectType, Field, ID, Int, Float } from 'type-graphql'
 import { User } from './User'
 
 @ObjectType()
@@ -16,8 +16,8 @@ export class Post {
   @Field(() => String)
   title: string
 
-  @Field(() => String)
-  content: string
+  @Field(() => String, { nullable: true })
+  previewSongUrl: string | null
 
   @Field(() => String)
   artistName: string
@@ -31,7 +31,7 @@ export class Post {
   @Field(() => Boolean, { nullable: true })
   published?: boolean | null
 
-  @Field(() => Int)
+  @Field(() => Float)
   rating: number
 
   @Field(() => User)

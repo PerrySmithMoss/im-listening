@@ -10,8 +10,9 @@ import { Meta } from "../../stories/components/Home/Meta";
 import { Navbar } from "../../stories/components/Navbar/Navbar";
 import styles from "../../stories/components/Home/UserPosts/user-posts.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faStar } from "@fortawesome/free-solid-svg-icons";
 import { isServer } from "../../utils/isServer";
+import Rating from "react-rating";
 
 const Post = ({}) => {
   const router = useRouter();
@@ -96,15 +97,21 @@ const Post = ({}) => {
             >
               {`${data?.getPost?.title}`}
             </p>
-            <p
-              className={`${styles.userUsername}`}
-            >{`${data?.getPost?.content}`}</p>
-            <p
-              className={`${styles.userUsername}`}
-              style={{ paddingBottom: "5px" }}
-            >
-              ⭐️ ⭐️ ⭐️ ⭐️
-            </p>
+            <Rating
+              initialRating={data?.getPost?.rating}
+              readonly
+              fractions={2}
+              // placeholderRating={3.5}
+              emptySymbol={
+                <FontAwesomeIcon size="2x" color="gray" icon={faStar} />
+              }
+              placeholderSymbol={
+                <FontAwesomeIcon size="2x" color="gray" icon={faStar} />
+              }
+              fullSymbol={
+                <FontAwesomeIcon size="2x" color="yellow" icon={faStar} />
+              }
+            />
             {User?.getCurrentUser?.id === data?.getPost?.author.id ? (
               <div className={`${styles.iconBadgeWrapper}`}>
                 <FontAwesomeIcon

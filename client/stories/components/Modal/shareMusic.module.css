@@ -1,0 +1,117 @@
+.fullStarsExampleTwo {
+  /* use display:inline-flex to prevent whitespace issues. alternatively, you can put all the children of .ratingGroup on a single line */
+  /* make hover effect work properly in IE */
+  /* hide radio inputs */
+  /* hide 'none' input from screenreaders */
+  /* set icon padding and size */
+  /* set default star color */
+  /* if any input is checked, make its following siblings grey */
+  /* make all stars orange on rating group hover */
+  /* make hovered input's following siblings grey on hover */
+}
+.fullStarsExampleTwo .ratingGroup {
+  display: inline-flex;
+}
+.fullStarsExampleTwo .ratingIcon {
+  pointer-events: none;
+}
+.fullStarsExampleTwo .ratingInput {
+  position: absolute !important;
+  left: -9999px !important;
+}
+.fullStarsExampleTwo .ratingInputNone {
+  display: none;
+}
+.fullStarsExampleTwo .ratingLabel {
+  cursor: pointer;
+  padding: 0 0.1em;
+  font-size: 2rem;
+}
+.fullStarsExampleTwo .ratingIconStar {
+  color: orange;
+}
+.fullStarsExampleTwo .ratingInput:checked ~ .ratingLabel .ratingIconStar {
+  color: #ddd;
+}
+.fullStarsExampleTwo .ratingGroup:hover .ratingLabel .ratingIconStar {
+  color: orange;
+}
+.fullStarsExampleTwo .ratingInput:hover ~ .ratingLabel .ratingIconStar {
+  color: #ddd;
+}
+
+/* Half star example */
+.halfStarsExample {
+  /* use display:inline-flex to prevent whitespace issues. alternatively, you can put all the children of .ratingGroup on a single line */
+  /* make hover effect work properly in IE */
+  /* hide radio inputs */
+  /* set icon padding and size */
+  /* add padding and positioning to half star labels */
+  /* set default star color */
+  /* set color of none icon when unchecked */
+  /* if none icon is checked, make it red */
+  /* if any input is checked, make its following siblings grey */
+  /* make all stars orange on rating group hover */
+  /* make hovered input's following siblings grey on hover */
+  /* make none icon grey on rating group hover */
+  /* make none icon red on hover */
+}
+.halfStarsExample .ratingGroup {
+  display: inline-flex;
+}
+.halfStarsExample .ratingIcon {
+  pointer-events: none;
+}
+.halfStarsExample .ratingInput {
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+.ratingIconStarIcon {
+    display: inline-block;
+
+}
+.ratingIconStarIcon:before {
+    content: "\f005";
+}
+.halfStarsExample .ratingLabel {
+  cursor: pointer;
+  /* if you change the left/right padding, update the margin-right property of .ratingLabelHalf as well. */
+  padding: 0 0.1em;
+  font-size: 2rem;
+}
+.halfStarsExample .ratingLabelHalf {
+  padding-right: 0;
+  margin-right: -0.6em;
+  z-index: 2;
+}
+.halfStarsExample .ratingIconStar {
+  color: orange;
+}
+.halfStarsExample .ratingIconNone {
+  color: #eee;
+}
+.halfStarsExample .ratingInputNone:checked + .ratingLabel .ratingIconNone {
+  color: red;
+}
+.halfStarsExample .ratingInput:checked ~ .ratingLabel .ratingIconStar {
+  color: #ddd;
+}
+.halfStarsExample .ratingGroup:hover .ratingLabel .ratingIconStar,
+.halfStarsExample .ratingGroup:hover .ratingLabelHalf .ratingIconStar {
+  color: orange;
+}
+.halfStarsExample .ratingInput:hover ~ .ratingLabel .ratingIconStar,
+.halfStarsExample .ratingInput:hover ~ .ratingLabelHalf .ratingIconStar {
+  color: #ddd;
+}
+.halfStarsExample
+  .ratingGroup:hover
+  .ratingInputNone:not(:hover)
+  + .ratingLabel
+  .ratingIconNone {
+  color: #eee;
+}
+.halfStarsExample .ratingInputNone:hover + .ratingLabel .ratingIconNone {
+  color: red;
+}

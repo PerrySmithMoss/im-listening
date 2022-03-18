@@ -18,6 +18,7 @@ import {
   Avatar,
   Modal,
   Popover,
+  Switch,
   Text,
   useMantineColorScheme,
 } from "@mantine/core";
@@ -26,6 +27,7 @@ import {
   MoonIcon,
   BellIcon,
   ChatBubbleIcon,
+  ChevronDownIcon,
 } from "@modulz/radix-icons";
 import { ShareMusicModal } from "./ShareMusicModal";
 import { ShareMusic } from "../Modal/ShareMusic";
@@ -40,7 +42,7 @@ export interface NavbarProps {
   onLogout: () => void;
   onCreateAccount: () => void;
   primary: boolean;
-  songAudio: boolean
+  songAudio: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -49,7 +51,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogin,
   onLogout,
   onCreateAccount,
-  songAudio
+  songAudio,
 }) => {
   const [sidebar, setSidebar] = useState<null | boolean>(null);
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
@@ -72,10 +74,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [isShareMusicModalOpen, setIsShareMusicModalOpen] = useState(false);
 
   const handleCloseModal = () => {
-    setIsShareMusicModalOpen(false)
-    setIsShowMusicPlayerOpen(false)
-    setIsMusicPlaying(false)
-  }
+    setIsShareMusicModalOpen(false);
+    setIsShowMusicPlayerOpen(false);
+    setIsMusicPlaying(false);
+  };
   // data is loading
   // if (loading) {
   //   body = (
@@ -128,10 +130,10 @@ export const Navbar: React.FC<NavbarProps> = ({
     // user is logged in
   } else {
     body = (
-      <div className={`${styles.userProfile}`}>
+      <div className={`${styles.userProfile} flex items-center content-center`}>
         <div
-          style={{ paddingRight: "20px" }}
-          className={`${styles.iconBadgeGroup}`}
+          style={{ paddingRight: "12px" }}
+          className={`${styles.iconBadgeGroup} mt-1`}
         >
           <div className={`${styles.iconBadgeContainer}`}>
             <a href="#">
@@ -147,13 +149,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
         <div
-          style={{ paddingRight: "20px" }}
-          className={`${styles.iconBadgeGroup}`}
+          style={{ paddingRight: "15px" }}
+          className={`${styles.iconBadgeGroup} mt-1`}
         >
           <div className={`${styles.iconBadgeContainer}`}>
             <a href="#">
               <ActionIcon variant="hover">
-                <ChatBubbleIcon style={{ width: 24, height: 24 }} />
+                <ChatBubbleIcon style={{ width: 22, height: 24 }} />
                 <div className={`${styles.iconBadge}`}>
                   <div className="absoloute absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                     2
@@ -163,33 +165,68 @@ export const Navbar: React.FC<NavbarProps> = ({
             </a>
           </div>
         </div>
+
         <Popover
           opened={isProfileDropdownOpen}
           onClose={() => setIsProfileDropdownOpen(false)}
           target={
             <Avatar
               onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-              size="md"
+              size={32}
               radius="xl"
+              className="cursor-pointer"
               src={data.getCurrentUser.profile.avatar as string}
             />
           }
-          width={260}
+          width={255}
           position="bottom"
           withArrow
         >
           <div>
-            <Text
-              onClick={async () => {
-                await logoutUser();
-                await apolloClient.resetStore();
-              }}
-              size="sm"
-            >
-              Logout
-            </Text>
+            <div className="pb-2">
+              <Text
+                onClick={async () => {
+                  await logoutUser();
+                  await apolloClient.resetStore();
+                }}
+                className={`cursor-pointer hover:text-brand-orange`}
+                size="md"
+              >
+                Logout
+              </Text>
+            </div>
+            <div>
+              <Text
+                onClick={async () => {
+                  await logoutUser();
+                  await apolloClient.resetStore();
+                }}
+                className="cursor-pointer"
+                size="sm"
+              >
+                Logout
+              </Text>
+            </div>
+            <div>
+              <Text
+                onClick={async () => {
+                  await logoutUser();
+                  await apolloClient.resetStore();
+                }}
+                className="cursor-pointer"
+                size="sm"
+              >
+                Logout
+              </Text>
+            </div>
           </div>
         </Popover>
+        <div className="ml-2 flex content-center items-center">
+          <span className="font-medium text-sm">
+            {data.getCurrentUser.firstName}
+          </span>
+          {/* <ChevronDownIcon className="text-gray-500" style={{ width: 15, height: 15, marginLeft: 2 }} /> */}
+        </div>
         {/* <div className={`${styles.menuContainer}`}>
           <div className={`${styles.menuItem}`}>
             <Avatar
@@ -228,12 +265,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             false
           )}
         </div> */}
-        <button
-          onClick={() => setIsShareMusicModalOpen(!isShareMusicModalOpen)}
-          className={styles.shareBtn}
-        >
-          Share
-        </button>
+        <div className="">
+          <button
+            onClick={() => setIsShareMusicModalOpen(!isShareMusicModalOpen)}
+            className="ml-4 px-4 py-2 bg-brand-orange hover:bg-brand-orange_hover rounded text-white text-sm"
+          >
+            Share
+          </button>
+        </div>
         <div className="ml-4">
           <ActionIcon
             variant="outline"
@@ -360,71 +399,20 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
         </div>
         <Modal
-        centered
+          // centered
           opened={isShareMusicModalOpen}
           onClose={handleCloseModal}
           title="What are you listening to?"
-          size="xl"
+          size={525}
         >
           <hr />
-          <ShareMusic songAudio={songAudio}/>
+          <ShareMusic handleCloseModal={handleCloseModal} songAudio={songAudio} />
         </Modal>
         {/* <ShareMusicModal
           isShareMusicModalOpen={isShareMusicModalOpen}
           setIsShareMusicModalOpen={setIsShareMusicModalOpen}
         /> */}
       </header>
-      {/* <header>
-        <div className={`${styles.heading}`}>
-          <div className={`${styles.logoHeadingWrapper}`}>
-            <Logo primary={primary} size="small" />
-            <Link href="/">
-              <h1 className={`${styles.navbarHeading}`}>I'm Listening</h1>
-            </Link>
-            <ul className={`${styles.navLinks}`}>
-              <li className={`${styles.navLinksLi}`}>
-                <Link href="/">
-                  <a className={`${styles.navLinksLiA}`}>Home</a>
-                </Link>
-              </li>
-              <li className={`${styles.navLinksLi}`}>
-                <Link href="/latest">
-                  <a className={`${styles.navLinksLiA}`}>Latest</a>
-                </Link>
-              </li>
-              <li className={`${styles.navLinksLi}`}>
-                <Link href="/popular">
-                  <a className={`${styles.navLinksLiA}`}>Popular</a>
-                </Link>
-              </li>
-              <li className={`${styles.navLinksLi}`}>
-                <Link href="/archive">
-                  <a className={`${styles.navLinksLiA}`}>Archive</a>
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className={`${styles.userState}`}>
-            {body}
-            <div className={`${styles.hamburgerMenu}`}>
-              <Image
-                onClick={() => setSidebar(!sidebar)}
-                id={`${styles.hamburgerMenuImage}`}
-                className={`${styles.hamburgerMenuImage}`}
-                src="/assets/hamburger-menu.svg"
-                alt="Hamburger menu"
-                height={30}
-                width={30}
-              />
-            </div>
-          </div>
-        </div>
-        <ShareMusicModal
-          isShareMusicModalOpen={isShareMusicModalOpen}
-          setIsShareMusicModalOpen={setIsShareMusicModalOpen}
-        />
-      </header> */}
     </>
   );
 };

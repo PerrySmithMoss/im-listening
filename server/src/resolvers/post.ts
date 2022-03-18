@@ -22,6 +22,8 @@ class PaginatedPosts {
   hasMore: Boolean;
 }
 
+type previewSongUrl = string | null;
+
 @Resolver()
 export class PostResolver {
   @Query(() => PaginatedPosts)
@@ -164,7 +166,8 @@ export class PostResolver {
     @Arg("artistName") artistName: string,
     @Arg("rating") rating: number,
     @Arg("title") title: string,
-    @Arg("content") content: string,
+    @Arg("previewSongUrl", () => String || null, { nullable: true })
+    previewSongUrl: string | null,
     @Arg("albumImage") albumImage: string
   ) {
     return ctx.prisma.post.create({
@@ -173,7 +176,7 @@ export class PostResolver {
         artistName,
         rating,
         title,
-        content,
+        previewSongUrl,
         albumImage: albumImage,
         authorId: ctx.req.session.userId,
       },

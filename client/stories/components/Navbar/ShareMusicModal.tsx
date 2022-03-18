@@ -147,7 +147,7 @@ export const ShareMusicModal: React.FC<ShareMusicModalProps> = ({
           artistName: artistName,
           albumName: songName,
           title: formValues.title,
-          content: formValues.content,
+          previewSongUrl: formValues.content,
           rating: parseInt(formValues.rating),
           albumImage: apiSongImage,
         },
@@ -397,22 +397,6 @@ export const ShareMusicModal: React.FC<ShareMusicModalProps> = ({
                   <button
                     className={`${signupStyles.signupButton}`}
                     onClick={async (e) => await handleShareMusic(e)}
-                    // onClick={async (e) => {
-                    //   e.preventDefault()
-                    //   const resp = await registerUser({
-                    //     variables: {
-                    //       firstName: formValues.firstName,
-                    //       lastName: formValues.lastName,
-                    //       email: formValues.email,
-                    //       password: formValues.password,
-                    //       username: formValues.username,
-                    //     },
-                    //   });
-                    //   console.log(resp)
-                    //   // if(resp.data?.registerUser.errors) {
-                    //   //   setServerErrors(toErrorMap(resp.data.registerUser.errors))
-                    //   // }
-                    // }}
                   >
                     Share
                   </button>

@@ -38,7 +38,7 @@ export type Mutation = {
 
 export type MutationCreatePostArgs = {
   albumImage: Scalars['String'];
-  content: Scalars['String'];
+  previewSongUrl?: Maybe<Scalars['String']>;
   title: Scalars['String'];
   rating: Scalars['Float'];
   artistName: Scalars['String'];
@@ -94,12 +94,12 @@ export type Post = {
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
   title: Scalars['String'];
-  content: Scalars['String'];
+  previewSongUrl: Scalars['String'];
   artistName: Scalars['String'];
   albumName: Scalars['String'];
   albumImage: Scalars['String'];
   published?: Maybe<Scalars['Boolean']>;
-  rating: Scalars['Int'];
+  rating: Scalars['Float'];
   author: User;
 };
 
@@ -174,7 +174,7 @@ export type ChangePasswordMutation = (
       & Pick<User, 'id' | 'firstName' | 'lastName' | 'email'>
       & { posts: Array<(
         { __typename?: 'Post' }
-        & Pick<Post, 'id' | 'title' | 'content'>
+        & Pick<Post, 'id' | 'title' | 'previewSongUrl'>
       )>, profile: (
         { __typename?: 'Profile' }
         & Pick<Profile, 'id' | 'avatar'>
@@ -188,7 +188,7 @@ export type CreatePostMutationVariables = Exact<{
   albumName: Scalars['String'];
   rating: Scalars['Float'];
   title: Scalars['String'];
-  content: Scalars['String'];
+  previewSongUrl?: Maybe<Scalars['String']>;
   albumImage: Scalars['String'];
 }>;
 
@@ -197,7 +197,7 @@ export type CreatePostMutation = (
   { __typename?: 'Mutation' }
   & { createPost: (
     { __typename?: 'Post' }
-    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'content' | 'artistName' | 'albumName' | 'rating' | 'albumImage'>
+    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'previewSongUrl' | 'artistName' | 'albumName' | 'rating' | 'albumImage'>
   ) }
 );
 
@@ -239,7 +239,7 @@ export type LoginUserMutation = (
       & Pick<User, 'id' | 'firstName' | 'lastName' | 'email'>
       & { posts: Array<(
         { __typename?: 'Post' }
-        & Pick<Post, 'id' | 'title' | 'content'>
+        & Pick<Post, 'id' | 'title' | 'previewSongUrl'>
       )>, profile: (
         { __typename?: 'Profile' }
         & Pick<Profile, 'id' | 'avatar'>
@@ -289,7 +289,7 @@ export type GetCurrentUserQuery = (
     & Pick<User, 'id' | 'firstName' | 'lastName' | 'email'>
     & { posts: Array<(
       { __typename?: 'Post' }
-      & Pick<Post, 'id' | 'title' | 'content'>
+      & Pick<Post, 'id' | 'title' | 'previewSongUrl'>
     )>, profile: (
       { __typename?: 'Profile' }
       & Pick<Profile, 'id' | 'avatar'>
@@ -306,7 +306,7 @@ export type GetPostQuery = (
   { __typename?: 'Query' }
   & { getPost?: Maybe<(
     { __typename?: 'Post' }
-    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'content' | 'artistName' | 'albumName' | 'albumImage' | 'rating'>
+    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'previewSongUrl' | 'artistName' | 'albumName' | 'albumImage' | 'rating'>
     & { author: (
       { __typename?: 'User' }
       & Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'username'>
@@ -331,7 +331,7 @@ export type GetRecentPostsQuery = (
     & Pick<PaginatedPosts, 'hasMore'>
     & { posts: Array<(
       { __typename?: 'Post' }
-      & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'content' | 'artistName' | 'albumName' | 'albumImage' | 'rating'>
+      & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'previewSongUrl' | 'artistName' | 'albumName' | 'albumImage' | 'rating'>
       & { author: (
         { __typename?: 'User' }
         & Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'username'>
@@ -360,7 +360,7 @@ export const ChangePasswordDocument = gql`
       posts {
         id
         title
-        content
+        previewSongUrl
       }
       profile {
         id
@@ -398,20 +398,20 @@ export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswo
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
 export const CreatePostDocument = gql`
-    mutation CreatePost($artistName: String!, $albumName: String!, $rating: Float!, $title: String!, $content: String!, $albumImage: String!) {
+    mutation CreatePost($artistName: String!, $albumName: String!, $rating: Float!, $title: String!, $previewSongUrl: String, $albumImage: String!) {
   createPost(
     artistName: $artistName
     albumName: $albumName
     rating: $rating
     title: $title
-    content: $content
+    previewSongUrl: $previewSongUrl
     albumImage: $albumImage
   ) {
     id
     createdAt
     updatedAt
     title
-    content
+    previewSongUrl
     artistName
     albumName
     rating
@@ -438,7 +438,7 @@ export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, C
  *      albumName: // value for 'albumName'
  *      rating: // value for 'rating'
  *      title: // value for 'title'
- *      content: // value for 'content'
+ *      previewSongUrl: // value for 'previewSongUrl'
  *      albumImage: // value for 'albumImage'
  *   },
  * });
@@ -527,7 +527,7 @@ export const LoginUserDocument = gql`
       posts {
         id
         title
-        content
+        previewSongUrl
       }
       profile {
         id
@@ -657,7 +657,7 @@ export const GetCurrentUserDocument = gql`
     posts {
       id
       title
-      content
+      previewSongUrl
     }
     profile {
       id
@@ -700,7 +700,7 @@ export const GetPostDocument = gql`
     createdAt
     updatedAt
     title
-    content
+    previewSongUrl
     artistName
     albumName
     albumImage
@@ -757,7 +757,7 @@ export const GetRecentPostsDocument = gql`
       createdAt
       updatedAt
       title
-      content
+      previewSongUrl
       artistName
       albumName
       albumImage

@@ -3,7 +3,7 @@ mutation CreatePost(
   $albumName: String!
   $rating: Float!
   $title: String!
-  $content: String!
+  $previewSongUrl: String
   $albumImage: String!
 ) {
   createPost(
@@ -11,14 +11,14 @@ mutation CreatePost(
     albumName: $albumName
     rating: $rating
     title: $title
-    content: $content
+    previewSongUrl: $previewSongUrl
     albumImage: $albumImage
   ) {
     id
     createdAt
     updatedAt
     title
-    content
+    previewSongUrl
     artistName
     albumName
     rating

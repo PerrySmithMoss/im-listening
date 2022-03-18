@@ -7,7 +7,7 @@ query GetCurrentUser{
     posts {
       id
       title
-      content
+      previewSongUrl
     }
     profile {
       id

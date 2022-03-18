@@ -4,7 +4,7 @@ query GetPost($id: Int!) {
     createdAt
     updatedAt
     title
-    content
+    previewSongUrl
     artistName
     albumName
     albumImage

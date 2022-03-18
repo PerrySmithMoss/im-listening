@@ -37,8 +37,7 @@ export function useSpotify() {
         // return data.access_token;
       };
       fetchSpotifyToken();
-      setInterval(fetchSpotifyToken, 1000 * 59 * 59);
-      spotifyAPI.setAccessToken(token);
+      // setInterval(fetchSpotifyToken, 1000 * 59 * 59);
     }
 
     // const initFetchToken = async () => {

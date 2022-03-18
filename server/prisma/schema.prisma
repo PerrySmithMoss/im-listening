@@ -11,18 +11,18 @@ generator client {
 }
 
 model Post {
-  id         Int      @id @default(autoincrement())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  albumName  String   @db.VarChar(255)
-  artistName String   @db.VarChar(255)
-  albumImage String   @db.VarChar(255) @default("")
-  rating     Int
-  title      String
-  content    String
-  published  Boolean  @default(false)
-  author     User     @relation(fields: [authorId], references: [id])
-  authorId   Int
+  id             Int      @id @default(autoincrement())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  albumName      String   @db.VarChar(255)
+  artistName     String   @db.VarChar(255)
+  albumImage     String  @default("") @db.VarChar(255)
+  rating         Decimal @db.Decimal(10, 1)
+  title          String
+  previewSongUrl String?   @db.VarChar(255)
+  published      Boolean  @default(false)
+  author         User     @relation(fields: [authorId], references: [id])
+  authorId       Int
 }
 
 model Profile {

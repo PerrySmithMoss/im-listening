@@ -53,7 +53,6 @@ const Home = () => {
     []
   );
 
-  console.log(songAudio === true ? "Song is paused" : "Song is playing");
   if (!loading && !data) {
     return (
       <div>
@@ -96,7 +95,7 @@ const Home = () => {
           {/* <Player trackUri={playingTrackState} /> */}
           <div
             className={
-              colorScheme === "dark" ? `bg-[#1d1e30] py-3` : `bg-[#FFFFFF] py-2`
+              colorScheme === "dark" ? `bg-[#1d1e30] py-2` : `bg-[#FFFFFF] py-2`
             }
           >
             <div className="flex content-center items-center justify-center space-x-10">
@@ -104,14 +103,14 @@ const Home = () => {
                 <div className="flex content-center items-center space-x-3">
                   <div>
                     <img
-                      className="w-20 h-auto"
+                      className="w-14 h-auto"
                       src={chosenSong.albumUrl}
                       alt="Album cover art"
                     />
                   </div>
                   <div className="">
-                    <h3 className="font-medium">{chosenSong.artist.name}</h3>
-                    <h3 className=" text-sm">{chosenSong.title}</h3>
+                    <h3 className="font-medium text-sm">{chosenSong.artist.name}</h3>
+                    <h3 className=" text-[12px]">{chosenSong.title}</h3>
                   </div>
                 </div>
               </div>
