@@ -4,7 +4,7 @@
   margin: 50px auto 0px auto;
   display: grid;
   grid-template-columns: 500px 500px;
-  gap: 100px;
+  gap: 125px;
   justify-content: center;
   align-items: center;
 }

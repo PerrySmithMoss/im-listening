@@ -1,5 +1,9 @@
 import { Button } from "@mantine/core";
+import { useRouter } from "next/dist/client/router";
 import React from "react";
+import Link from "next/link";
+import { useGetCurrentUserQuery } from "../../../graphql/generated/graphql";
+import { isServer } from "../../../utils/isServer";
 import HeaderStyles from "./home.module.css";
 
 //  const HomeHeroBanner1 = require("../../assets/home-hero_image1.png") as string;
@@ -9,16 +13,26 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onCreateAccount }) => {
+  const { data: user, loading: userLoading } = useGetCurrentUserQuery({
+    skip: isServer(),
+  });
+  const router = useRouter();
+  const handleShareMusic = () => {
+    if (!user?.getCurrentUser) {
+      // User not logged in, ask them to sign up to share
+      router.push("/login");
+    }
+  };
   return (
     <div className="hero pt-16 pb-10 max-w-[90rem] mx-auto">
       <div className="container px-4 sm:px-8 lg:px-16 xl:px-20 mx-auto">
         <div className="hero-wrapper grid grid-cols-1 md:grid-cols-12 gap-8 justify-center items-center mx-20">
           <div className="hero-text col-span-6">
             <h1 className=" font-bold text-4xl md:text-6xl max-w-xl  leading-tight">
-              Listening is  everything
+              Listening is everything
               {/* <span className="text-brand-orange"> */}
-                 {/* everything */}
-                {/* </span> */}
+              {/* everything */}
+              {/* </span> */}
             </h1>
             <hr className="w-12 h-2 bg-brand-orange rounded-full mt-8" />
             <p className="text-base max-w-[400px] leading-relaxed mt-8 ">
@@ -29,12 +43,20 @@ export const Header: React.FC<HeaderProps> = ({ onCreateAccount }) => {
               {/* <Button className="px-7" radius="xl" size="lg" color="orange">
                 Share
               </Button> */}
-            <a className=" cursor-pointer text-lg bg-brand-orange px-8 py-2.5 text-white rounded hover:bg-brand-orange_hover">Share</a>
-            {/* <a className=" cursor-pointer text-lg border border-brand-orange hover:border-brand-orange_hover  px-7 py-2.5 text-brand-orange rounded hover:text-brand-orange_hover">Explore</a> */}
-
-              <a className={`flex text-lg cursor-pointer text-brand-orange hover:text-brand-orange_hover items-center content-center`}>
-                Explore
+              <a
+                onClick={handleShareMusic}
+                className=" cursor-pointer text-lg bg-brand-orange px-8 py-2.5 text-white rounded hover:bg-brand-orange_hover"
+              >
+                Share
               </a>
+              {/* <a className=" cursor-pointer text-lg border border-brand-orange hover:border-brand-orange_hover  px-7 py-2.5 text-brand-orange rounded hover:text-brand-orange_hover">Explore</a> */}
+              <Link href="explore">
+                <a
+                  className={`flex text-lg cursor-pointer text-brand-orange hover:text-brand-orange_hover items-center content-center`}
+                >
+                  Explore
+                </a>
+              </Link>
             </div>
           </div>
           <div className="hero-image col-span-6 justify-self-end">

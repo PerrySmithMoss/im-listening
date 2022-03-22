@@ -22,8 +22,6 @@ class PaginatedPosts {
   hasMore: Boolean;
 }
 
-type previewSongUrl = string | null;
-
 @Resolver()
 export class PostResolver {
   @Query(() => PaginatedPosts)
@@ -54,6 +52,7 @@ export class PostResolver {
               profile: true,
             },
           },
+          songGenres: true,
         },
       });
       return {
@@ -74,6 +73,7 @@ export class PostResolver {
               profile: true,
             },
           },
+          songGenres: true,
         },
       });
 
@@ -112,6 +112,7 @@ export class PostResolver {
               profile: true,
             },
           },
+          songGenres: true,
         },
       });
       return {
@@ -132,6 +133,7 @@ export class PostResolver {
               profile: true,
             },
           },
+          songGenres: true,
         },
       });
 
@@ -154,6 +156,7 @@ export class PostResolver {
             profile: true,
           },
         },
+        songGenres: true,
       },
     });
   }
@@ -166,21 +169,37 @@ export class PostResolver {
     @Arg("artistName") artistName: string,
     @Arg("rating") rating: number,
     @Arg("title") title: string,
+    @Arg("genre") genre: string,
+    @Arg("genres", () => [String]) genres: string[],
     @Arg("previewSongUrl", () => String || null, { nullable: true })
     previewSongUrl: string | null,
     @Arg("albumImage") albumImage: string
   ) {
-    return ctx.prisma.post.create({
+    const post = await ctx.prisma.post.create({
       data: {
         albumName,
         artistName,
         rating,
         title,
+        genre,
         previewSongUrl,
         albumImage: albumImage,
         authorId: ctx.req.session.userId,
       },
     });
+
+    await ctx.prisma.$transaction(
+      genres.map((genre: string) =>
+        ctx.prisma.songGenre.create({
+          data: {
+            genre: genre,
+            postId: post.id,
+          },
+        })
+      )
+    );
+
+    return post;
   }
 
   @Mutation(() => Post, { nullable: true })
@@ -226,5 +245,102 @@ export class PostResolver {
       return false;
     }
     return true;
+  }
+
+  @Query(() => PaginatedPosts)
+  async filterPosts(
+    @Ctx() ctx: PrismaContext,
+    @Arg("limit", () => Int) limit: number,
+    @Arg("cursor", () => Date, { nullable: true }) cursor: Date | null,
+    @Arg("genres", () => [String]) genres: string[]
+  ) {
+    const maxLimit = Math.min(6, limit);
+    const maxLimitPlusOne = maxLimit + 1;
+
+    if (cursor) {
+      const posts = await ctx.prisma.post.findMany({
+        where: {
+          createdAt: {
+            lt: cursor as Date,
+          },
+          // Find all posts which match the genres passed in as an argument
+          OR: [
+            {
+              genre: {
+                in: genres,
+              },
+            },
+            {
+              songGenres: {
+                some: {
+                  genre: {
+                    in: genres,
+                  },
+                },
+              },
+            },
+          ],
+        },
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
+        take: maxLimitPlusOne,
+        include: {
+          author: {
+            include: {
+              profile: true,
+            },
+          },
+          songGenres: true,
+        },
+      });
+      return {
+        posts: posts.slice(0, maxLimit),
+        hasMore: posts.length === maxLimitPlusOne,
+      };
+    } else {
+      const posts = await ctx.prisma.post.findMany({
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
+        where: {
+          // Find all genres which match the genres passed in as an argument
+          OR: [
+            {
+              genre: {
+                in: genres,
+              },
+            },
+            {
+              songGenres: {
+                some: {
+                  genre: {
+                    in: genres,
+                  },
+                },
+              },
+            },
+          ],
+        },
+        take: maxLimitPlusOne,
+        include: {
+          author: {
+            include: {
+              profile: true,
+            },
+          },
+          songGenres: true,
+        },
+      });
+
+      return {
+        posts: posts.slice(0, maxLimit),
+        hasMore: posts.length === maxLimitPlusOne,
+      };
+    }
   }
 }

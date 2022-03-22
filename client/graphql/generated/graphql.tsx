@@ -39,6 +39,8 @@ export type Mutation = {
 export type MutationCreatePostArgs = {
   albumImage: Scalars['String'];
   previewSongUrl?: Maybe<Scalars['String']>;
+  genres: Array<Scalars['String']>;
+  genre: Scalars['String'];
   title: Scalars['String'];
   rating: Scalars['Float'];
   artistName: Scalars['String'];
@@ -94,13 +96,15 @@ export type Post = {
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
   title: Scalars['String'];
-  previewSongUrl: Scalars['String'];
+  previewSongUrl?: Maybe<Scalars['String']>;
   artistName: Scalars['String'];
   albumName: Scalars['String'];
   albumImage: Scalars['String'];
+  genre: Scalars['String'];
   published?: Maybe<Scalars['Boolean']>;
   rating: Scalars['Float'];
   author: User;
+  songGenres: Array<SongGenre>;
 };
 
 export type Profile = {
@@ -117,6 +121,7 @@ export type Query = {
   getPosts: PaginatedPosts;
   getRecentPosts: PaginatedPosts;
   getPost?: Maybe<Post>;
+  filterPosts: PaginatedPosts;
   getCurrentUser?: Maybe<User>;
 };
 
@@ -135,6 +140,22 @@ export type QueryGetRecentPostsArgs = {
 
 export type QueryGetPostArgs = {
   id: Scalars['Int'];
+};
+
+
+export type QueryFilterPostsArgs = {
+  genres: Array<Scalars['String']>;
+  cursor?: Maybe<Scalars['DateTime']>;
+  limit: Scalars['Int'];
+};
+
+export type SongGenre = {
+  __typename?: 'SongGenre';
+  id: Scalars['ID'];
+  createdAt: Scalars['DateTime'];
+  updatedAt: Scalars['DateTime'];
+  genre: Scalars['String'];
+  post: Post;
 };
 
 export type User = {
@@ -189,6 +210,8 @@ export type CreatePostMutationVariables = Exact<{
   rating: Scalars['Float'];
   title: Scalars['String'];
   previewSongUrl?: Maybe<Scalars['String']>;
+  genre: Scalars['String'];
+  genres: Array<Scalars['String']> | Scalars['String'];
   albumImage: Scalars['String'];
 }>;
 
@@ -197,7 +220,7 @@ export type CreatePostMutation = (
   { __typename?: 'Mutation' }
   & { createPost: (
     { __typename?: 'Post' }
-    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'previewSongUrl' | 'artistName' | 'albumName' | 'rating' | 'albumImage'>
+    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'previewSongUrl' | 'genre' | 'artistName' | 'albumName' | 'rating' | 'albumImage'>
   ) }
 );
 
@@ -279,6 +302,36 @@ export type RegisterUserMutation = (
   ) }
 );
 
+export type FilterPostsQueryVariables = Exact<{
+  limit: Scalars['Int'];
+  cursor?: Maybe<Scalars['DateTime']>;
+  genres: Array<Scalars['String']> | Scalars['String'];
+}>;
+
+
+export type FilterPostsQuery = (
+  { __typename?: 'Query' }
+  & { filterPosts: (
+    { __typename?: 'PaginatedPosts' }
+    & Pick<PaginatedPosts, 'hasMore'>
+    & { posts: Array<(
+      { __typename?: 'Post' }
+      & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'artistName' | 'albumName' | 'genre' | 'albumImage' | 'rating'>
+      & { author: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'username'>
+        & { profile: (
+          { __typename?: 'Profile' }
+          & Pick<Profile, 'id' | 'bio' | 'avatar'>
+        ) }
+      ), songGenres: Array<(
+        { __typename?: 'SongGenre' }
+        & Pick<SongGenre, 'genre'>
+      )> }
+    )> }
+  ) }
+);
+
 export type GetCurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -306,7 +359,7 @@ export type GetPostQuery = (
   { __typename?: 'Query' }
   & { getPost?: Maybe<(
     { __typename?: 'Post' }
-    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'previewSongUrl' | 'artistName' | 'albumName' | 'albumImage' | 'rating'>
+    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'previewSongUrl' | 'artistName' | 'albumName' | 'genre' | 'albumImage' | 'rating'>
     & { author: (
       { __typename?: 'User' }
       & Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'username'>
@@ -331,7 +384,7 @@ export type GetRecentPostsQuery = (
     & Pick<PaginatedPosts, 'hasMore'>
     & { posts: Array<(
       { __typename?: 'Post' }
-      & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'previewSongUrl' | 'artistName' | 'albumName' | 'albumImage' | 'rating'>
+      & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'previewSongUrl' | 'artistName' | 'albumName' | 'genre' | 'albumImage' | 'rating'>
       & { author: (
         { __typename?: 'User' }
         & Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'username'>
@@ -398,13 +451,15 @@ export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswo
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
 export const CreatePostDocument = gql`
-    mutation CreatePost($artistName: String!, $albumName: String!, $rating: Float!, $title: String!, $previewSongUrl: String, $albumImage: String!) {
+    mutation CreatePost($artistName: String!, $albumName: String!, $rating: Float!, $title: String!, $previewSongUrl: String, $genre: String!, $genres: [String!]!, $albumImage: String!) {
   createPost(
     artistName: $artistName
     albumName: $albumName
     rating: $rating
     title: $title
     previewSongUrl: $previewSongUrl
+    genre: $genre
+    genres: $genres
     albumImage: $albumImage
   ) {
     id
@@ -412,6 +467,7 @@ export const CreatePostDocument = gql`
     updatedAt
     title
     previewSongUrl
+    genre
     artistName
     albumName
     rating
@@ -439,6 +495,8 @@ export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, C
  *      rating: // value for 'rating'
  *      title: // value for 'title'
  *      previewSongUrl: // value for 'previewSongUrl'
+ *      genre: // value for 'genre'
+ *      genres: // value for 'genres'
  *      albumImage: // value for 'albumImage'
  *   },
  * });
@@ -647,6 +705,69 @@ export function useRegisterUserMutation(baseOptions?: Apollo.MutationHookOptions
 export type RegisterUserMutationHookResult = ReturnType<typeof useRegisterUserMutation>;
 export type RegisterUserMutationResult = Apollo.MutationResult<RegisterUserMutation>;
 export type RegisterUserMutationOptions = Apollo.BaseMutationOptions<RegisterUserMutation, RegisterUserMutationVariables>;
+export const FilterPostsDocument = gql`
+    query FilterPosts($limit: Int!, $cursor: DateTime, $genres: [String!]!) {
+  filterPosts(limit: $limit, cursor: $cursor, genres: $genres) {
+    hasMore
+    posts {
+      id
+      createdAt
+      updatedAt
+      title
+      artistName
+      albumName
+      genre
+      albumImage
+      rating
+      author {
+        id
+        email
+        firstName
+        lastName
+        username
+        profile {
+          id
+          bio
+          avatar
+        }
+      }
+      songGenres {
+        genre
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useFilterPostsQuery__
+ *
+ * To run a query within a React component, call `useFilterPostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFilterPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFilterPostsQuery({
+ *   variables: {
+ *      limit: // value for 'limit'
+ *      cursor: // value for 'cursor'
+ *      genres: // value for 'genres'
+ *   },
+ * });
+ */
+export function useFilterPostsQuery(baseOptions: Apollo.QueryHookOptions<FilterPostsQuery, FilterPostsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FilterPostsQuery, FilterPostsQueryVariables>(FilterPostsDocument, options);
+      }
+export function useFilterPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FilterPostsQuery, FilterPostsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FilterPostsQuery, FilterPostsQueryVariables>(FilterPostsDocument, options);
+        }
+export type FilterPostsQueryHookResult = ReturnType<typeof useFilterPostsQuery>;
+export type FilterPostsLazyQueryHookResult = ReturnType<typeof useFilterPostsLazyQuery>;
+export type FilterPostsQueryResult = Apollo.QueryResult<FilterPostsQuery, FilterPostsQueryVariables>;
 export const GetCurrentUserDocument = gql`
     query GetCurrentUser {
   getCurrentUser {
@@ -703,6 +824,7 @@ export const GetPostDocument = gql`
     previewSongUrl
     artistName
     albumName
+    genre
     albumImage
     rating
     author {
@@ -760,6 +882,7 @@ export const GetRecentPostsDocument = gql`
       previewSongUrl
       artistName
       albumName
+      genre
       albumImage
       rating
       author {

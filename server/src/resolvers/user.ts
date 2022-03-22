@@ -158,7 +158,14 @@ export class UserResolver {
       where: {
         id: ctx.req.session.userId,
       },
-      include: { posts: true, profile: true },
+      include: {
+        posts: {
+          include: {
+            songGenres: true,
+          },
+        },
+        profile: true,
+      },
     });
   }
 

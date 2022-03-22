@@ -21,9 +21,9 @@ export const UserPostsCard: React.FC<UserPostsCardProps> = ({ post }) => {
               : `flex cursor-pointer hover:bg-gray-200 rounded`
           }
         >
-          <div className="">
+          <div className=" max-w-[220px]">
             <img
-              className={`h-auto w-48 rounded`}
+              className={`h-full w-full rounded`}
               src={
                 post.albumImage === ""
                   ? "/assets/KOD.jpg"

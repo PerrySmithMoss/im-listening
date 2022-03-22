@@ -15,9 +15,16 @@ const Sign_Up: React.FC<SignUpProps> = ({}) => {
         onCreateAccount={() => {}}
       /> */}
          <Meta
-        title={"I'm Listening | Register"}
+        title={"Sign up | I'm Listening"}
         keywords={"music, social media, social, share music, music, register, signup"}
-        description={"Share what you're listening to. Register now."}
+        description={"Share what you're listening to. Sign up now."}
+      />
+          <Navbar
+        primary={true}
+        onLogin={() => {}}
+        onLogout={() => {}}
+        onCreateAccount={() => {}}
+        songAudio={false}
       />
       <SignUp />
     </>

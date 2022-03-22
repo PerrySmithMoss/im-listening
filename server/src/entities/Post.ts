@@ -1,39 +1,46 @@
-import 'reflect-metadata'
-import { ObjectType, Field, ID, Int, Float } from 'type-graphql'
-import { User } from './User'
+import "reflect-metadata";
+import { ObjectType, Field, ID, Int, Float } from "type-graphql";
+import { SongGenre } from "./SongGenre";
+import { User } from "./User";
 
 @ObjectType()
 export class Post {
   @Field(() => ID)
-  id: number
+  id: number;
 
   @Field(() => Date)
-  createdAt: Date
+  createdAt: Date;
 
   @Field(() => Date)
-  updatedAt: Date
+  updatedAt: Date;
 
   @Field(() => String)
-  title: string
+  title: string;
 
   @Field(() => String, { nullable: true })
-  previewSongUrl: string | null
+  previewSongUrl: string | null;
 
   @Field(() => String)
-  artistName: string
+  artistName: string;
 
   @Field(() => String)
-  albumName: string
+  albumName: string;
 
   @Field(() => String)
-  albumImage: string
+  albumImage: string;
+
+  @Field(() => String)
+  genre: string;
 
   @Field(() => Boolean, { nullable: true })
-  published?: boolean | null
+  published?: boolean | null;
 
   @Field(() => Float)
-  rating: number
+  rating: number;
 
   @Field(() => User)
-  author?: User
+  author?: User;
+
+  @Field(() => [SongGenre])
+  songGenres: SongGenre[];
 }

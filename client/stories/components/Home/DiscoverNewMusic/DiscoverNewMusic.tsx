@@ -6,7 +6,7 @@ interface DiscoverNewMusicProps {}
 
 export const DiscoverNewMusic: React.FC<DiscoverNewMusicProps> = ({}) => {
   return (
-    <section className="px-4 sm:px-8 lg:px-16 xl:px-20 mt-4 max-w-[90rem] mx-auto">
+    <section className="px-4 sm:px-8 lg:px-16 xl:px-20 my-16 max-w-[90rem] mx-auto">
           <div className="flex justify-between content-center items-center">
         <div>
           <h2 className="pb-6 text-3xl font-bold">Discover New Music</h2>

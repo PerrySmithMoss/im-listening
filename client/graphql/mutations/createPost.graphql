@@ -4,6 +4,8 @@ mutation CreatePost(
   $rating: Float!
   $title: String!
   $previewSongUrl: String
+  $genre: String!
+  $genres: [String!]!
   $albumImage: String!
 ) {
   createPost(
@@ -12,6 +14,8 @@ mutation CreatePost(
     rating: $rating
     title: $title
     previewSongUrl: $previewSongUrl
+    genre: $genre
+    genres: $genres
     albumImage: $albumImage
   ) {
     id
@@ -19,6 +23,7 @@ mutation CreatePost(
     updatedAt
     title
     previewSongUrl
+    genre
     artistName
     albumName
     rating

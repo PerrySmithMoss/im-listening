@@ -1,12 +1,11 @@
-query GetRecentPosts($limit: Int!, $cursor: DateTime) {
-  getRecentPosts(limit: $limit, cursor: $cursor) {
+query FilterPosts($limit: Int!, $cursor: DateTime, $genres: [String!]!) {
+  filterPosts(limit: $limit, cursor: $cursor, genres: $genres) {
     hasMore
     posts {
       id
       createdAt
       updatedAt
       title
-      previewSongUrl
       artistName
       albumName
       genre
@@ -23,6 +22,9 @@ query GetRecentPosts($limit: Int!, $cursor: DateTime) {
           bio
           avatar
         }
+      }
+      songGenres {
+        genre
       }
     }
   }

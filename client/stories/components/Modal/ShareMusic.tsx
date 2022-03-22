@@ -32,6 +32,10 @@ import { RatingComp } from "../Rating/Rating";
 import ShareMusicStyles from "./shareMusic.module.css";
 import { useNotifications } from "@mantine/notifications";
 import { useLocalStorageValue } from "@mantine/hooks";
+import { getLastWordOfString as getLastWordOfString } from "../../../helpers/getLastWordOfString";
+import "emoji-mart/css/emoji-mart.css";
+import { Picker } from "emoji-mart";
+import { faSmile } from "@fortawesome/free-regular-svg-icons";
 
 interface ShareMusicProps {
   handleCloseModal: () => void;
@@ -46,6 +50,10 @@ export const ShareMusic: React.FC<ShareMusicProps> = ({
   const notifications = useNotifications();
   const [songInput, setSongInput] = useState("");
   const [chosenSongModalFinal, setChosenSongModalFinal] = useState<any>({});
+  const [
+    chosenSongArtistGenresModalFinal,
+    setChosenSongArtistGenresModalFinal,
+  ] = useState<string[]>([]);
   const [chosenSongRating, setChosenSongRating] = useState<number | undefined>(
     undefined
   );
@@ -61,6 +69,7 @@ export const ShareMusic: React.FC<ShareMusicProps> = ({
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const router = useRouter();
   const [active, setActive] = useState(0);
+  const [showEmojis, setShowEmojis] = useState(false);
   const nextStep = () =>
     setActive((current) => (current < 1 ? current + 1 : current));
   const prevStep = () =>
@@ -75,8 +84,7 @@ export const ShareMusic: React.FC<ShareMusicProps> = ({
     chosenSong,
     setChosenSong,
   } = useGlobalUIContext();
-
-  const func: any = useCallback(
+  const fetchSongs: any = useCallback(
     debounce(async (string: string) => {
       // try {
       // const res = await spotifyAPI.searchTracks(string, { limit: 5, market: "GB" })
@@ -157,15 +165,80 @@ export const ShareMusic: React.FC<ShareMusicProps> = ({
     []
   );
   useEffect(() => {
-    songInput && func(songInput);
+    songInput && fetchSongs(songInput);
   }, [songInput]);
 
+  const fetchArtistGenres: any = useCallback(
+    debounce(async (string: string) => {
+      spotifyAPI
+        .getArtist(string)
+        .then((res: any) => {
+          setChosenSongArtistGenresModalFinal(res.body.genres);
+        })
+        .catch((error: any) => {
+          console.error("Error: ", error.statusCode);
+          if (error.status === 401 || 403) {
+            console.log("You need to refresh your access token!!");
+            const fetchSpotifyToken = async (callback: any) => {
+              console.log("Fetching new token...");
+              // const token = spotifyAPI.getAccessToken()
+
+              const res = await fetch(
+                "https://accounts.spotify.com/api/token",
+                {
+                  headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    Authorization:
+                      "Basic " +
+                      btoa(
+                        process.env.NEXT_PUBLIC_CLIENT_ID +
+                          ":" +
+                          process.env.NEXT_PUBLIC_CLIENT_SECRET
+                      ),
+                  },
+                  method: "POST",
+                  body: "grant_type=client_credentials",
+                }
+              );
+              const data = await res.json();
+              setToken(data.access_token);
+              spotifyAPI.setAccessToken(data.access_token);
+              callback();
+            };
+            fetchSpotifyToken(async () => {
+              await spotifyAPI.getArtist(string).then((res: any) => {
+                console.log(res);
+                setChosenSongArtistGenresModalFinal(res.body.genres);
+              });
+            });
+          }
+        });
+    }, 1500),
+    []
+  );
+  useEffect(() => {
+    Object.keys(chosenSongModalFinal).length !== 0 &&
+      fetchArtistGenres(chosenSongModalFinal.artist.id);
+  }, [chosenSongModalFinal]);
+
   const handlePlaySongPreview = (song: any) => {
-    console.log("User selected to preview song");
     setIsMusicPlaying(!isMusicPlaying);
     setPlayingTrackState(song.Uri);
     setIsShowMusicPlayerOpen(!isShowMusicPlayerOpen);
     setChosenSong(song);
+  };
+
+  const takeFirstSongGenre = (string: string) => {
+    const regexp = /[a-zA-Z]+\s+[a-zA-Z]+/g;
+    if (regexp.test(string)) {
+      // at least 2 words consisting of letters
+      return getLastWordOfString(string);
+    } else if (string === "electro") {
+      return "electronic";
+    } else {
+      // one word
+      return string.trim();
+    }
   };
 
   const handleSelectedChosenSongFnal = (song: any) => {
@@ -182,6 +255,8 @@ export const ShareMusic: React.FC<ShareMusicProps> = ({
         albumName: chosenSongModalFinal.title,
         title: chosenSongTitle,
         previewSongUrl: chosenSongModalFinal.previewUrl,
+        genres: chosenSongArtistGenresModalFinal,
+        genre: takeFirstSongGenre(chosenSongArtistGenresModalFinal[0]),
         rating: chosenSongRating as number,
         albumImage: chosenSongModalFinal.albumUrl,
       },
@@ -207,6 +282,15 @@ export const ShareMusic: React.FC<ShareMusicProps> = ({
       router.push("/");
     }
   };
+
+  const addEmoji = (e: any) => {
+    let sym = e.unified.split("-");
+    let codesArray: any = [];
+    sym.forEach((el: any) => codesArray.push("0x" + el));
+    let emoji = String.fromCodePoint(...codesArray);
+    setChosenSongTitle(chosenSongTitle + emoji);
+  };
+
   return (
     <div className="mt-6">
       <>
@@ -385,16 +469,43 @@ export const ShareMusic: React.FC<ShareMusicProps> = ({
                   <div className="flex w-full justify-between content-center items-center">
                     {chosenSongModalFinal?.artist?.name && (
                       <div className="w-full">
-                        <TextInput
-                          value={chosenSongTitle}
-                          onChange={(e) =>
-                            setChosenSongTitle(e.currentTarget.value)
-                          }
-                          className="w-full"
-                          placeholder="This is my jam!"
-                          required
-                        />
-                        <div className="mt-2">
+                        <div className="flex content-center items-center space-x-1">
+                          <TextInput
+                            value={chosenSongTitle}
+                            onChange={(e) =>
+                              setChosenSongTitle(e.currentTarget.value)
+                            }
+                            className="w-full"
+                            placeholder="This is my jam!"
+                            required
+                          />
+                          <div>
+                            <FontAwesomeIcon
+                              onClick={() => setShowEmojis(!showEmojis)}
+                              size="2x"
+                              color="gray"
+                              icon={faSmile}
+                              className="cursor-pointer pl-1"
+                            />
+
+                            <>
+                              {showEmojis && (
+                                <Picker
+                                  onSelect={(e) => addEmoji(e)}
+                                  style={{
+                                    position: "absolute",
+                                    marginTop: "40px",
+                                    marginLeft: -30,
+                                    maxWidth: "320px",
+                                    borderRadius: "20px",
+                                  }}
+                                  theme={colorScheme}
+                                />
+                              )}
+                            </>
+                          </div>
+                        </div>
+                        <div className="mt-4">
                           <RatingComp
                             chosenSongRating={chosenSongRating}
                             setChosenSongRating={setChosenSongRating}

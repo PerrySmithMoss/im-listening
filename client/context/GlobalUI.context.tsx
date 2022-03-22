@@ -15,6 +15,8 @@ type GlobalUIProps = {
   setIsShowMusicPlayerOpen: React.Dispatch<React.SetStateAction<boolean>>;
   chosenSong: IChosenSong | any,
   setChosenSong: React.Dispatch<React.SetStateAction<IChosenSong | any>>;
+  filterCategories: string[]
+  setFilterCategories: React.Dispatch<React.SetStateAction<string[]>>
 };
 
 const globalUIcontext = createContext<GlobalUIProps>({
@@ -25,7 +27,9 @@ const globalUIcontext = createContext<GlobalUIProps>({
   isShowMusicPlayerOpen: false,
   setIsShowMusicPlayerOpen: () => {},
   chosenSong: {} as IChosenSong,
-  setChosenSong: () => {}
+  setChosenSong: () => {},
+  filterCategories: [],
+  setFilterCategories: () => {},
 });
 
 export const GlobalUIProvider = ({
@@ -37,6 +41,7 @@ export const GlobalUIProvider = ({
     false
   );
   const [chosenSong, setChosenSong] = useState({});
+  const [filterCategories, setFilterCategories] = useState<string[]>([]);
 
   return (
     <globalUIcontext.Provider
@@ -49,6 +54,8 @@ export const GlobalUIProvider = ({
         setIsShowMusicPlayerOpen,
         chosenSong,
         setChosenSong,
+        filterCategories,
+        setFilterCategories
       }}
     >
       {children}

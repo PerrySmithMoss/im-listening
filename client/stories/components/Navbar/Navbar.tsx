@@ -32,9 +32,7 @@ import {
 import { ShareMusicModal } from "./ShareMusicModal";
 import { ShareMusic } from "../Modal/ShareMusic";
 import { useGlobalUIContext } from "../../../context/GlobalUI.context";
-// const UserAvatar = require("../../assets/user-avatar.jpeg") as string;
-// const HamburgerMenu = require("../../assets/hamburger-menu.svg") as string;
-// const CloseMenu = require("../../assets/close.svg") as string;
+import { useRouter } from "next/dist/client/router";
 
 export interface NavbarProps {
   user?: {};
@@ -58,6 +56,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const dark = colorScheme === "dark";
   const apolloClient = useApolloClient();
   const { data, loading } = useGetCurrentUserQuery({ skip: isServer() });
+  const router = useRouter();
   const [logoutUser] = useLogoutUserMutation();
   let body = null;
   const {
@@ -78,33 +77,20 @@ export const Navbar: React.FC<NavbarProps> = ({
     setIsShowMusicPlayerOpen(false);
     setIsMusicPlaying(false);
   };
-  // data is loading
-  // if (loading) {
-  //   body = (
 
-  //       <div>Loading...</div>
-
-  //   );
-  //   // user is not logged in
-  // } else
-  if (!data?.getCurrentUser) {
+  if (loading) {
+    body = <div>Loading...</div>;
+    // user is not logged in
+  } else if (!data?.getCurrentUser) {
     body = (
       <ul className="flex content-center items-center text-base">
         <li>
           <Link href="/login">
-            {/* <a className="text-[#fd7e14] text-[15px] hover:text-brand-orange_hover">
-              Log in
-            </a> */}
-            <Text className=" cursor-pointer hover:text-brand-orange">
-              Log in
-            </Text>
+            <a className=" cursor-pointer hover:text-brand-orange">Log in</a>
           </Link>
         </li>
         <li className="pr-5">
           <Link href="/sign-up">
-            {/* <Button radius="xl" size="sm" color="orange">
-              Sign up
-            </Button> */}
             <a className="ml-5 rounded sr bg-brand-orange px-5 py-2.5 text-white hover:bg-brand-orange_hover">
               Sign up
             </a>
@@ -131,7 +117,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   } else {
     body = (
       <div className={`${styles.userProfile} flex items-center content-center`}>
-        <div
+        {/* <div
           style={{ paddingRight: "12px" }}
           className={`${styles.iconBadgeGroup} mt-1`}
         >
@@ -164,7 +150,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </ActionIcon>
             </a>
           </div>
-        </div>
+        </div> */}
 
         <Popover
           opened={isProfileDropdownOpen}
@@ -378,19 +364,43 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="navbar hidden md:block">
               <ul className="flex content-center items-center space-x-8 text-base ">
                 <li>
-                  <a href="#" className="hover:text-orange-500 pb-2">
-                    Explore
-                  </a>
+                  <Link href="/explore">
+                    <a
+                      className={
+                        router.pathname === "/explore"
+                          ? ` text-brand-orange`
+                          : `hover:text-brand-orange pb-2`
+                      }
+                    >
+                      Explore
+                    </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-orange-500">
-                    Popular
-                  </a>
+                  <Link href="/popular">
+                    <a
+                      className={
+                        router.pathname === "/popular"
+                          ? ` text-brand-orange`
+                          : `hover:text-brand-orange pb-2`
+                      }
+                    >
+                      Popular
+                    </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-orange-500">
-                    About
-                  </a>
+                  <Link href="/about">
+                    <a
+                      className={
+                        router.pathname === "/about"
+                          ? ` text-brand-orange`
+                          : `hover:text-brand-orange pb-2`
+                      }
+                    >
+                      About
+                    </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -406,7 +416,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           size={525}
         >
           <hr />
-          <ShareMusic handleCloseModal={handleCloseModal} songAudio={songAudio} />
+          <ShareMusic
+            handleCloseModal={handleCloseModal}
+            songAudio={songAudio}
+          />
         </Modal>
         {/* <ShareMusicModal
           isShareMusicModalOpen={isShareMusicModalOpen}

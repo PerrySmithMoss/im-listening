@@ -7,6 +7,7 @@ query GetPost($id: Int!) {
     previewSongUrl
     artistName
     albumName
+    genre
     albumImage
     rating
     author {

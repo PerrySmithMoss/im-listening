@@ -45,9 +45,16 @@ const Post = ({}) => {
   return (
     <div>
       <Meta
-        title={"I'm Listening"}
+        title={`${data?.getPost?.title} | I'm Listening`}
         keywords={"music, social media, social, share music, music"}
         description={"Share what you're listening to."}
+      />
+      <Navbar
+        primary={true}
+        onLogin={() => {}}
+        onLogout={() => {}}
+        onCreateAccount={() => {}}
+        songAudio={false}
       />
       <section className={`${styles.individualPostWrapper}`}>
         <div key={data?.getPost?.id} className={`${styles.individualPostItem}`}>

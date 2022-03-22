@@ -20,15 +20,14 @@ import { Player } from "../stories/components/MusicPlayer/Player";
 import { useGlobalUIContext } from "../context/GlobalUI.context";
 import { useMantineColorScheme } from "@mantine/core";
 
-const Home = () => {
-  const { data: user, loading: userLoading } = useGetCurrentUserQuery({
-    skip: isServer(),
-  });
+const Explore = () => {
+
   const { data, error, loading } = useGetRecentPostsQuery({
     variables: {
       limit: 6,
       cursor: null,
     },
+    notifyOnNetworkStatusChange: true,
   });
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
@@ -36,13 +35,7 @@ const Home = () => {
 
   const {
     isMusicPlaying,
-    setIsMusicPlaying,
-    playingTrackState,
-    setPlayingTrackState,
-    isShowMusicPlayerOpen,
-    setIsShowMusicPlayerOpen,
     chosenSong,
-    setChosenSong,
   } = useGlobalUIContext();
 
   const onAudioStateChange = useCallback(
@@ -63,9 +56,9 @@ const Home = () => {
   return (
     <div>
       <Meta
-        title={"I'm Listening"}
+        title={"Explore | I'm Listening"}
         keywords={"music, social media, social, share music, music"}
-        description={"Share what you're listening to."}
+        description={"See what music people are listening to."}
       />
       <Navbar
         primary={true}
@@ -74,23 +67,10 @@ const Home = () => {
         onCreateAccount={() => {}}
         songAudio={songAudio}
       />
-      {!user?.getCurrentUser ? (
-        <>
-          <Header />
-          <Categories />
-          <ListOfUserPosts />
-          <DiscoverNewMusic />
-          <WeeklyMostPopular />
-          <PromotedArtists />
-        </>
-      ) : !data && loading ? (
-        <div>Loading...</div>
-      ) : (
-        <>
-          <Categories />
-          <ListOfUserPosts />
-        </>
-      )}
+
+      <Categories />
+      <ListOfUserPosts />
+
       {isMusicPlaying && (
         <div className="fixed bottom-0 left-0 right-0 z-[300]">
           {/* <Player trackUri={playingTrackState} /> */}
@@ -137,4 +117,4 @@ const Home = () => {
   );
 };
 
-export default withApollo({ ssr: true })(Home);
+export default withApollo({ ssr: true })(Explore);
