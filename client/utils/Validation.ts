@@ -1,5 +1,3 @@
-import React from "react";
-
 type Values = {
   firstName?: string;
   lastName?: string;

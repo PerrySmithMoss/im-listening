@@ -6,9 +6,9 @@ import {
   useGetPostQuery,
 } from "../../graphql/generated/graphql";
 import { withApollo } from "../../lib/withApollo";
-import { Meta } from "../../stories/components/Home/Meta";
-import { Navbar } from "../../stories/components/Navbar/Navbar";
-import styles from "../../stories/components/Home/UserPosts/user-posts.module.css";
+import { Meta } from "../../components/Home/Meta";
+import { Navbar } from "../../components/Navbar/Navbar";
+import styles from "../../components/Home/UserPosts/user-posts.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faStar } from "@fortawesome/free-solid-svg-icons";
 import { isServer } from "../../utils/isServer";
@@ -70,14 +70,14 @@ const Post = ({}) => {
               <div>
                 <img
                   className={`${styles.userAvatarImage}`}
-                  src={"/assets/user-avatar.jpeg"}
+                  src={data?.getPost?.author.profile.avatar as string}
                   alt="User Avatar"
                 />
               </div>
               <div className={`${styles.userHandles}`}>
                 <p
                   className={`${styles.userUsername}`}
-                  style={{ color: "black", fontWeight: "bold" }}
+                  style={{ color: "slate", fontWeight: "bold" }}
                 >
                   {`${data?.getPost?.author.firstName} ${data?.getPost?.author.lastName}`}
                 </p>

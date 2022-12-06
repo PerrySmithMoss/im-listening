@@ -1,24 +1,21 @@
-import { Navbar } from "../stories/components/Navbar/Navbar";
-import { Header } from "../stories/components/Home/Header";
-import { WeeklyMostPopular } from "../stories/components/Home/WeeklyMostPopular/WeeklyMostPopular";
-import { Categories } from "../stories/components/Home/Categories";
-import { ListOfUserPosts } from "../stories/components/Home/UserPosts/ListOfUserPosts";
-import { Meta } from "../stories/components/Home/Meta";
+import { Navbar } from "../components/Navbar/Navbar";
+import { Header } from "../components/Home/Header";
+import { WeeklyMostPopular } from "../components/Home/WeeklyMostPopular/WeeklyMostPopular";
+import { Categories } from "../components/Home/Categories";
+import { ListOfUserPosts } from "../components/Home/UserPosts/ListOfUserPosts";
+import { Meta } from "../components/Home/Meta";
 import { withApollo } from "../lib/withApollo";
 import {
   useGetCurrentUserQuery,
   useGetRecentPostsQuery,
 } from "../graphql/generated/graphql";
-import styles from "../stories/components/Home/user-posts.module.css";
 import { isServer } from "../utils/isServer";
-import { PromotedArtists } from "../stories/components/Home/PromotedArtists/PromotedArtists";
-import { DiscoverNewMusic } from "../stories/components/Home/DiscoverNewMusic/DiscoverNewMusic";
-import { useSpotify } from "../hooks/useSpotify";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocalStorageValue } from "@mantine/hooks";
-import { Player } from "../stories/components/MusicPlayer/Player";
+import { PromotedArtists } from "../components/Home/PromotedArtists/PromotedArtists";
+import { DiscoverNewMusic } from "../components/Home/DiscoverNewMusic/DiscoverNewMusic";
+import { useCallback, useState } from "react";
 import { useGlobalUIContext } from "../context/GlobalUI.context";
 import { useMantineColorScheme } from "@mantine/core";
+import { Layout } from "../components/Layout/Layout";
 
 const Home = () => {
   const { data: user, loading: userLoading } = useGetCurrentUserQuery({
@@ -61,7 +58,8 @@ const Home = () => {
     );
   }
   return (
-    <div>
+    <Layout>
+    <div className="max-w-[90rem] mx-auto">
       <Meta
         title={"I'm Listening"}
         keywords={"music, social media, social, share music, music"}
@@ -134,6 +132,7 @@ const Home = () => {
         </div>
       )}
     </div>
+    </Layout>
   );
 };
 

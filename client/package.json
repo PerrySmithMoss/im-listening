@@ -6,8 +6,6 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "storybook": "start-storybook -p 6006 -s public",
-    "build-storybook": "build-storybook -s public",
     "gen": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
@@ -38,11 +36,6 @@
     "@graphql-codegen/typescript": "1.22.3",
     "@graphql-codegen/typescript-operations": "1.18.2",
     "@graphql-codegen/typescript-react-apollo": "2.2.7",
-    "@storybook/addon-actions": "^6.2.9",
-    "@storybook/addon-essentials": "^6.2.9",
-    "@storybook/addon-links": "^6.2.9",
-    "@storybook/addon-viewport": "^6.2.9",
-    "@storybook/react": "^6.2.9",
     "@types/emoji-mart": "^3.0.9",
     "@types/react": "17.0.10",
     "autoprefixer": "^10.4.2",

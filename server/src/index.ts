@@ -1,4 +1,4 @@
-import express, { Request, Response, Application } from "express";
+import express, { Application } from "express";
 import { ApolloServer } from "apollo-server-express";
 import { PrismaClient } from "@prisma/client";
 import { buildSchema } from "type-graphql";
@@ -44,7 +44,7 @@ const main = async () => {
         httpOnly: true,
         sameSite: "lax",
         secure: __prod__, // cookie only works in https
-        domain: __prod__ ? ".example.com" : undefined
+        domain: __prod__ ? "im-listening.com" : undefined
       },
       saveUninitialized: false,
       secret: process.env.SESSION_SECRET as string,

@@ -1,7 +1,7 @@
 import React from "react";
-import { Meta } from "../stories/components/Home/Meta";
-import { Navbar } from "../stories/components/Navbar/Navbar";
-import { Login } from "../stories/components/Login/Login";
+import { Meta } from "../components/Home/Meta";
+import { Navbar } from "../components/Navbar/Navbar";
+import { Login } from "../components/Login/Login";
 import { withApollo } from "../lib/withApollo";
 interface SignUpProps {}
 

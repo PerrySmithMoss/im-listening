@@ -1,8 +1,8 @@
 import React from "react";
 import { withApollo } from "../lib/withApollo";
-import { Meta } from "../stories/components/Home/Meta";
-import { Navbar } from "../stories/components/Navbar/Navbar";
-import { SignUp } from "../stories/components/SignUp/SignUp";
+import { Meta } from "../components/Home/Meta";
+import { Navbar } from "../components/Navbar/Navbar";
+import { SignUp } from "../components/SignUp/SignUp";
 interface SignUpProps {}
 
 const Sign_Up: React.FC<SignUpProps> = ({}) => {

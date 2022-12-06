@@ -7,19 +7,23 @@ import React, {
 import { IChosenSong } from "../interfaces/IChosenSong";
 
 type GlobalUIProps = {
+  isMobileDrawerOpen: boolean;
+  setIsMobileDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isMusicPlaying: boolean;
   setIsMusicPlaying: React.Dispatch<React.SetStateAction<boolean>>;
   playingTrackState: string;
   setPlayingTrackState: React.Dispatch<React.SetStateAction<string>>;
   isShowMusicPlayerOpen: boolean;
   setIsShowMusicPlayerOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  chosenSong: IChosenSong | any,
+  chosenSong: IChosenSong | any;
   setChosenSong: React.Dispatch<React.SetStateAction<IChosenSong | any>>;
-  filterCategories: string[]
-  setFilterCategories: React.Dispatch<React.SetStateAction<string[]>>
+  filterCategories: string[];
+  setFilterCategories: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
 const globalUIcontext = createContext<GlobalUIProps>({
+  isMobileDrawerOpen: false,
+  setIsMobileDrawerOpen: () => {},
   isMusicPlaying: false,
   setIsMusicPlaying: () => {},
   playingTrackState: "",
@@ -35,17 +39,19 @@ const globalUIcontext = createContext<GlobalUIProps>({
 export const GlobalUIProvider = ({
   children,
 }: React.PropsWithChildren<unknown>) => {
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<boolean>(false);
   const [isMusicPlaying, setIsMusicPlaying] = useState<boolean>(false);
   const [playingTrackState, setPlayingTrackState] = useState<string>("");
-  const [isShowMusicPlayerOpen, setIsShowMusicPlayerOpen] = useState<boolean>(
-    false
-  );
+  const [isShowMusicPlayerOpen, setIsShowMusicPlayerOpen] =
+    useState<boolean>(false);
   const [chosenSong, setChosenSong] = useState({});
   const [filterCategories, setFilterCategories] = useState<string[]>([]);
 
   return (
     <globalUIcontext.Provider
       value={{
+        isMobileDrawerOpen,
+        setIsMobileDrawerOpen,
         isMusicPlaying,
         setIsMusicPlaying,
         playingTrackState,
@@ -55,7 +61,7 @@ export const GlobalUIProvider = ({
         chosenSong,
         setChosenSong,
         filterCategories,
-        setFilterCategories
+        setFilterCategories,
       }}
     >
       {children}
