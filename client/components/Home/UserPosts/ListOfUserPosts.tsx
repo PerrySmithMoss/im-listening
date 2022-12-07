@@ -80,11 +80,7 @@ export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({
             ))}
           </>
         )}
-        {/* {recentPosts.getRecentPosts.posts.map((post: any) => (
-          <UserPostsCard key={post.id} post={post} />
-        ))} */}
       </div>
-
       {recentPosts && recentPosts.getRecentPosts.hasMore ? (
         <div className={`${styles.seeMoreWrapper} mt-6`}>
           <a

@@ -56,15 +56,13 @@ const Post = ({}) => {
         onCreateAccount={() => {}}
         songAudio={false}
       />
-      <section className={`${styles.individualPostWrapper}`}>
+      <section className={`${styles.individualPostWrapper} px-4 sm:px-8 `}>
         <div key={data?.getPost?.id} className={`${styles.individualPostItem}`}>
-          <div>
             <img
               className={`${styles.albumImage}`}
               src={data?.getPost?.albumImage}
               alt="Two people dancing to music"
             />
-          </div>
           <div className={`${styles.individualUserReview}`}>
             <div className={`${styles.userHeader}`}>
               <div>
@@ -81,7 +79,7 @@ const Post = ({}) => {
                 >
                   {`${data?.getPost?.author.firstName} ${data?.getPost?.author.lastName}`}
                 </p>
-                <a href="" className={`${styles.ListOfPostsA}`}>
+                <a className={`${styles.ListOfPostsA}`}>
                   <span style={{ color: "#0f8deb", fontSize: "0.8rem" }}>
                     {`${data?.getPost?.author.username}`}
                   </span>
@@ -99,7 +97,7 @@ const Post = ({}) => {
               {`${data?.getPost?.artistName} - ${data?.getPost?.albumName}`}
             </p>
             <p
-              style={{ color: "#383838", fontWeight: "bold" }}
+              // style={{ color: "#383838", fontWeight: "bold" }}
               className={`${styles.userUsername} ${styles.withPadding}`}
             >
               {`${data?.getPost?.title}`}

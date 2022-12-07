@@ -22,7 +22,7 @@ model Post {
   previewSongUrl String?     @db.VarChar(255)
   genre          String     @db.VarChar(255)
   published      Boolean     @default(false)
-  author         User        @relation(fields: [authorId], references: [id])
+  author         User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId       Int
   songGenres     SongGenre[]
 }
@@ -32,7 +32,7 @@ model SongGenre {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   genre     String   @db.VarChar(255)
-  post      Post     @relation(fields: [postId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    Int
 }
 
@@ -40,7 +40,7 @@ model Profile {
   id     Int     @id @default(autoincrement())
   bio    String?
   avatar String? @default("http://localhost:5000/images/default-avatar.jpg")
-  user   User    @relation(fields: [userId], references: [id])
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int     @unique
 }
 

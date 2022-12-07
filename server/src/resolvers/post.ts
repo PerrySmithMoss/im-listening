@@ -241,7 +241,8 @@ export class PostResolver {
           id: id,
         },
       });
-    } catch {
+    } catch(err) {
+      console.log(err)
       return false;
     }
     return true;
