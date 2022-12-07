@@ -70,12 +70,6 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
     }),
     context: ({ req, res }) => ({ prisma, req, res, redisClient }),
-    // subscriptions: {
-    //   path: "/subscriptions",
-    //   onConnect: () => console.log("✅  Client connected for subscriptions"),
-    //   onDisconnect: () => console.log("❌  Client disconnected from subscriptions")
-    // },
-    // uploads: false,
   });
 
   apolloServer.applyMiddleware({ app, cors: false });
