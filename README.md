@@ -41,7 +41,8 @@
 </div>
 
 <h2>Video Demo</h2>
-[![Watch the video](https://user-images.githubusercontent.com/59027997/206213869-9735509d-09b7-4778-aceb-5ded62af6453.png)](https://user-images.githubusercontent.com/59027997/206225150-09105ac7-2037-4e4d-997a-e7b167832e69.mp4)
+
+[![Watch the video](https://user-images.githubusercontent.com/59027997/206213869-9735509d-09b7-4778-aceb-5ded62af6453.png)](https://user-images.githubusercontent.com/59027997/206225604-5ca7b2a7-5048-4a1e-84e5-65ed4173eb3e.mp4)
 </div>
 
 <h2>Images</h2>
