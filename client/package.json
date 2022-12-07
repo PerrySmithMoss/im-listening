@@ -19,7 +19,7 @@
     "@mantine/next": "^3.6.9",
     "@mantine/notifications": "^4.0.5",
     "@modulz/radix-icons": "^4.0.0",
-    "@prisma/client": "^2.25.0",
+    "@prisma/client": "^4.2.1",
     "@types/spotify-web-api-node": "^5.0.7",
     "emoji-mart": "^3.0.1",
     "graphql": "^15.5.1",
