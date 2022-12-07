@@ -15,7 +15,7 @@ import { DiscoverNewMusic } from "../components/Home/DiscoverNewMusic/DiscoverNe
 import { useCallback, useState } from "react";
 import { useGlobalUIContext } from "../context/GlobalUI.context";
 import { useMantineColorScheme } from "@mantine/core";
-import { Layout } from "../components/Layout/Layout";
+// import { Layout } from "../components/Layout/Layout";
 
 const Home = () => {
   const { data: user, loading: userLoading } = useGetCurrentUserQuery({
@@ -58,7 +58,6 @@ const Home = () => {
     );
   }
   return (
-    <Layout>
     <div className="max-w-[90rem] mx-auto">
       <Meta
         title={"I'm Listening"}
@@ -132,7 +131,6 @@ const Home = () => {
         </div>
       )}
     </div>
-    </Layout>
   );
 };
 

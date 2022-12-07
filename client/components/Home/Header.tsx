@@ -43,13 +43,13 @@ export const Header: React.FC<HeaderProps> = ({ onCreateAccount }) => {
               >
                 Share
               </a>
-              <Link href="explore">
+              {/* <Link href="explore">
                 <a
                   className={`flex xss:text-lg cursor-pointer text-brand-orange hover:text-brand-orange_hover items-center content-center`}
                 >
                   Explore
                 </a>
-              </Link>
+              </Link> */}
             </div>
           </div>
           <div className="hidden md:block hero-image col-span-6 justify-self-end">

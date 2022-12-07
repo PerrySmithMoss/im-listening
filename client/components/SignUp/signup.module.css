@@ -210,6 +210,14 @@
   color: green;
 }
 
+ @media only screen and (max-width: 1049px) {
+.signupContainer {
+  margin: 25px auto 0px auto;
+  grid-template-columns: 100%;
+  gap: 125px;
+}
+}
+
 /* @media only screen and (max-width: 430px) {
   .signupButton {
     display: none;

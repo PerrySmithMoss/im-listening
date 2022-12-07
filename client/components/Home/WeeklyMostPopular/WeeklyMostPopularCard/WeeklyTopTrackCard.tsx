@@ -10,7 +10,7 @@ export const WeeklyTopTrackCard: React.FC<WeeklyTopTrackCardProps> = ({
   card,
 }) => {
   return (
-    <article className="flex flex-col rounded-lg cursor-pointer pb-1">
+    <article className="flex flex-col rounded-lg pb-1">
       <div className="flexjustify-center overflow-hidden relative">
         <img
           src={card.image}

@@ -187,31 +187,36 @@ export class UserResolver {
 
   @Mutation(() => Boolean)
   async forgotPassword(@Arg("email") email: string, @Ctx() ctx: PrismaContext) {
-    const user = await ctx.prisma.user.findUnique({
-      where: {
-        email: email,
-      },
-    });
+    try {
+      const user = await ctx.prisma.user.findUnique({
+        where: {
+          email: email,
+        },
+      });
 
-    if (!user) {
+      if (!user) {
+        return false;
+      }
+
+      const token = v4();
+
+      await ctx.redisClient.set(
+        FORGET_PASSWORD_PREFIX + token,
+        user.id,
+        "ex",
+        3600000
+      ); // 1 hour
+
+      await sendEmail(
+        email,
+        `<a href="http://localhost:3000/change-password/${token}">Reset Password</a>`
+      );
+
       return true;
+    } catch (err) {
+      console.log(err)
+      return err;
     }
-
-    const token = v4();
-
-    await ctx.redisClient.set(
-      FORGET_PASSWORD_PREFIX + token,
-      user.id,
-      "ex",
-      3600000
-    ); // 1 hour
-
-    await sendEmail(
-      email,
-      `<a href="http://localhost:3000/change-password/${token}">Reset Password</a>`
-    );
-
-    return true;
   }
 
   @Mutation(() => UserResponse)

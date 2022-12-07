@@ -12,16 +12,16 @@ export const PromotedArtists: React.FC<PromotedArtistsProps> = ({}) => {
         <div>
           <h2 className="text-3xl font-bold">Promoted Artists</h2>
         </div>
-        <div>
+        {/* <div>
           <SeeAll buttonText="See all"/>
-        </div>
+        </div> */}
       </div>
       <div className="">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8">
           {promotedArtists.map((promotedArtist: IPromotedArtist) => (
             <article
               key={promotedArtist.id}
-              className="flex flex-col rounded-lg cursor-pointer pb-1"
+              className="flex flex-col rounded-lg pb-1"
             >
               <div className="flex justify-center overflow-hidden relative">
                 <img

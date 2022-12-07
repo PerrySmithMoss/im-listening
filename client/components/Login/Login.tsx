@@ -82,7 +82,7 @@ export const Login: React.FC<LoginProps> = ({}) => {
 
   return (
     <section className={`${signupStyles.signupContainer} mt-60`}>
-      <div className={``}>
+      <div className="hidden largeMd:block">
         <svg
           width="600"
           height="818"
@@ -550,11 +550,11 @@ export const Login: React.FC<LoginProps> = ({}) => {
         </svg>
       </div>
 
-      <div className="">
-        <div className="">
-          <h2 className={`text-6xl font-bold`}>Login</h2>
+      <div className="px-4 sm:px-8 ">
+        <div>
+          <h2 className={`text-4xl xss:text-5xl md:text-6xl font-bold`}>Login</h2>
           <div className=" flex content-center items-center pt-3 pb-4">
-            <p className={`text-lg`}>Don't have an account?</p>
+            <p className={`text-base xss:text-lg`}>Don't have an account?</p>
             <Link href="/sign-up">
               <p
                 className={`${signupStyles.headerP} ${signupStyles.headerSpan} text-lg`}
@@ -563,7 +563,7 @@ export const Login: React.FC<LoginProps> = ({}) => {
               </p>
             </Link>
           </div>
-          <div className="flex justify-between space-x-4">
+          {/* <div className="flex justify-between space-x-4">
             <button
               className={`w-full py-2.5 rounded border bg-white text-white inline-flex justify-center items-center`}
             >
@@ -596,11 +596,6 @@ export const Login: React.FC<LoginProps> = ({}) => {
               </div>
               <div className="ml-2 text-black">Log in with Google</div>
             </button>
-            {/* <button
-            className={`${signupStyles.socialSignup} ${signupStyles.facebook}`}
-          >
-            Sign up with Facebook
-          </button> */}
 
             <button
               className={`w-full py-2.5 rounded bg-[#4267B2] text-white justify-center inline-flex items-center`}
@@ -616,15 +611,15 @@ export const Login: React.FC<LoginProps> = ({}) => {
               </svg>
               <div className="ml-2 text-white">Log in with Facebook</div>
             </button>
-          </div>
-          <div className="mt-7 pb-6">
+          </div> */}
+          {/* <div className="mt-7 pb-6">
             <p className={`${signupStyles.signUpOr}`}>
               <span className={`${signupStyles.signUpSpan} text-lg`}>or</span>
             </p>
-          </div>
+          </div> */}
         </div>
 
-        <div className={`${signupStyles.formContainer}`}>
+        <div className={`${signupStyles.formContainer} mt-5`}>
           <form className="signUpForm" id="signUpForm">
             <div className="form__control">
               {/* <label>Email</label> */}

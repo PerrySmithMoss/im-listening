@@ -8,12 +8,6 @@ interface SignUpProps {}
 const Log_In: React.FC<SignUpProps> = ({}) => {
   return (
     <>
-      {/* <Navbar
-        primary={true}
-        onLogin={() => {}}
-        onLogout={() => {}}
-        onCreateAccount={() => {}}
-      /> */}
       <Meta
         title={"Log in | I'm Listening"}
         keywords={
@@ -21,7 +15,7 @@ const Log_In: React.FC<SignUpProps> = ({}) => {
         }
         description={"Share what you're listening to. Log in now."}
       />
-          <Navbar
+      <Navbar
         primary={true}
         onLogin={() => {}}
         onLogout={() => {}}

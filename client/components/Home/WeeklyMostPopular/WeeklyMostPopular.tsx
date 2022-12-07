@@ -12,9 +12,9 @@ export const WeeklyMostPopular: React.FC<WeeklyMostPopularProps> = ({}) => {
         <div>
           <h2 className="text-3xl font-bold">Weekly Most Popular</h2>
         </div>
-        <div>
+        {/* <div>
           <SeeAll buttonText="See all"/>
-        </div>
+        </div> */}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-8">
         {weeklyTopTracks.map((track: IWeeklyTopTrack) => (

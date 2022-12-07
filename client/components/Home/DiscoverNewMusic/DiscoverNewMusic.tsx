@@ -11,9 +11,9 @@ export const DiscoverNewMusic: React.FC<DiscoverNewMusicProps> = ({}) => {
         <div>
           <h2 className="text-3xl font-bold">Discover New Music</h2>
         </div>
-        <div>
+        {/* <div className="hidden xss:block">
           <SeeAll buttonText="See all"/>
-        </div>
+        </div> */}
       </div>
       <div className="grid grid-cols-1  md:grid-cols-2 xl:grid-cols-4 gap-x-6 gap-y-6">
         <div className="relative overflow-hidden w-full h-60 rounded-xl">

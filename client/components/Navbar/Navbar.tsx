@@ -46,7 +46,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   const dark = colorScheme === "dark";
   const apolloClient = useApolloClient();
   const { data, loading } = useGetCurrentUserQuery({ skip: isServer() });
-  const router = useRouter();
   const [logoutUser] = useLogoutUserMutation();
   let body = null;
   const {
@@ -75,14 +74,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             <a className=" cursor-pointer hover:text-brand-orange">Log in</a>
           </Link>
         </li>
-        <li className="pr-5">
+        <li className="pr-0 sms:pr-5">
           <Link href="/sign-up">
             <a className="ml-5 rounded sr bg-brand-orange px-5 py-2.5 text-white hover:bg-brand-orange_hover">
               Sign up
             </a>
           </Link>
         </li>
-        <li>
+        <li className="hidden sms:block">
           <ActionIcon
             variant="outline"
             size="lg"
@@ -143,6 +142,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
         </Popover>
+        <div className="hidden xxs:flex content-center items-center">
         <div className="ml-2 flex content-center items-center">
           <span className="font-medium text-sm">
             {data.getCurrentUser.firstName}
@@ -170,6 +170,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <MoonIcon style={{ width: 18, height: 18 }} />
             )}
           </ActionIcon>
+        </div>
         </div>
       </div>
     );
@@ -224,7 +225,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </ul>
       </div>
       <header
-        className={`${styles.navbarWrapper} py-4 header max-w-[90rem] mx-auto`}
+        className={`${styles.navbarWrapper} py-4 header`}
       >
         <div className=" px-4 sm:px-8 lg:px-16 xl:px-20 mx-auto">
           <nav className="header-wrapper flex items-center justify-between">
@@ -233,7 +234,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <a className="cursor-pointer flex content-center items-center">
                   <Logo primary={primary} size="small" />
 
-                  <div className="ml-3 cursor-pointer">
+                  <div className="ml-3 hidden xsm:flex cursor-pointer">
                     <h1 className="font-semibold text-lg leading-relaxed">
                       I'm Listening
                     </h1>
@@ -242,7 +243,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </Link>
             </div>
 
-            <div className="toggle md:hidden flex items-center">
+            {/* <div className="toggle md:hidden flex items-center">
               <button
                 onClick={() => setIsMobileDrawerOpen(!isMobileDrawerOpen)}
                 className={styles.hamburger}
@@ -261,7 +262,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <path d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
               </button>
-            </div>
+            </div> */}
             {/* 
             <div className="navbar hidden md:block">
               <ul className="flex content-center items-center space-x-8 text-base ">
@@ -307,7 +308,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </ul>
             </div> */}
 
-            <div className="navbar hidden md:block">{body}</div>
+            <div className="navbar">{body}</div>
           </nav>
         </div>
         <Modal

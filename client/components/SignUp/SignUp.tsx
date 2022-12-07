@@ -97,7 +97,7 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
 
   return (
     <section className={`${signupStyles.signupContainer}`}>
-      <div className={``}>
+    <div className="hidden largeMd:block">
         <svg
           width="600"
           height="818"
@@ -565,11 +565,11 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
         </svg>
       </div>
 
-      <div className="">
-        <div className="">
-          <h2 className={`text-6xl font-bold`}>Sign up</h2>
+      <div className="px-4 sm:px-8 ">
+        <div>
+          <h2 className={`text-4xl xss:text-5xl md:text-6xl font-bold`}>Sign up</h2>
           <div className=" flex content-center items-center pt-3 pb-4">
-            <p className={`text-lg`}>Already have an account</p>
+            <p className={`text-base xss:text-lg`}>Already have an account</p>
             <Link href="/login">
               <p
                 className={`${signupStyles.headerP} ${signupStyles.headerSpan} text-lg`}
@@ -578,7 +578,7 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
               </p>
             </Link>
           </div>
-          <div className="flex justify-between space-x-4">
+          {/* <div className="flex justify-between space-x-4">
             <button
               className={`w-full py-2.5 rounded border bg-white text-white inline-flex justify-center items-center`}
             >
@@ -611,11 +611,6 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
               </div>
               <div className="ml-2 text-black">Log in with Google</div>
             </button>
-            {/* <button
-            className={`${signupStyles.socialSignup} ${signupStyles.facebook}`}
-          >
-            Sign up with Facebook
-          </button> */}
 
             <button
               className={`w-full py-2.5 rounded bg-[#4267B2] text-white justify-center inline-flex items-center`}
@@ -631,17 +626,17 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
               </svg>
               <div className="ml-2 text-white">Log in with Facebook</div>
             </button>
-          </div>
-          <div className="mt-7 pb-6">
+          </div> */}
+          {/* <div className="mt-7 pb-6">
             <p className={`${signupStyles.signUpOr}`}>
               <span className={`${signupStyles.signUpSpan} text-lg`}>or</span>
             </p>
-          </div>
+          </div> */}
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
           <div>
             <input
-              className={`${signupStyles.formInput}`}
+              className={`${signupStyles.formInput} text-black`}
               type="text"
               placeholder="First name"
               id="firstName"
@@ -663,7 +658,7 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
           </div>
           <div>
             <input
-              className={`${signupStyles.formInput}`}
+              className={`${signupStyles.formInput} text-black`}
               type="text"
               placeholder="Last name"
               id="lastName"
@@ -687,7 +682,7 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
         <div className="">
           {/* <label>Email</label> */}
           <input
-            className={`${signupStyles.formInput}`}
+            className={`${signupStyles.formInput} text-black`}
             type="email"
             placeholder="Email"
             id="email"
@@ -707,11 +702,11 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
             )}
           </small>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid-cols-1 md:grid-cols-2 md:gap-4">
           <div>
             {/* <label>Username</label> */}
             <input
-              className={`${signupStyles.formInput}`}
+              className={`${signupStyles.formInput} text-black`}
               type="text"
               placeholder="Username"
               id="username"
@@ -735,7 +730,7 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
           </div>
           <div>
             <input
-              className={`${signupStyles.formInput}`}
+              className={`${signupStyles.formInput} text-black`}
               type="password"
               placeholder="Password"
               id="password"
