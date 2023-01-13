@@ -24,11 +24,11 @@ const main = async () => {
   app.use(express.static("public"));
 
   const RedisStore = connectRedis(session);
-  const redisClient = new Redis({
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT as unknown as number,
-    password: process.env.REDIS_PASSWORD, // needed for cloud Redis
-  });
+  const redisClient = new Redis(process.env.REDIS_URL); // prod
+  // const redisClient = new Redis({
+  //   host: process.env.REDIS_HOST,
+  //   port: process.env.REDIS_PORT as unknown as number
+  // });
 
   redisClient.on("error", (err) => {
     console.log("Error " + err);
@@ -39,12 +39,12 @@ const main = async () => {
       name: process.env.COOKIE_NAME as string,
       store: new RedisStore({ client: redisClient, disableTouch: true }),
       cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 365 * 1, // 1 year
-        // maxAge: 7000, // 1 day
+        maxAge: 6.048e8, // 7 days
         httpOnly: true,
-        sameSite: "lax",
+        path: "/",
+        sameSite: __prod__ ? "none" : "lax",
         secure: __prod__, // cookie only works in https
-        domain: __prod__ ? "im-listening.com" : undefined,
+        domain: __prod__ ? process.env.SERVER_DOMAIN : undefined,
       },
       saveUninitialized: false,
       secret: process.env.SESSION_SECRET as string,
@@ -76,7 +76,7 @@ const main = async () => {
 
   app.listen(process.env.PORT, () =>
     console.log(
-      `🚀  Server running on ${process.env.SERVER_DOMAIN}:${process.env.PORT}`
+      `🚀  Server running on ${process.env.SERVER_URL}:${process.env.PORT}`
     )
   );
 };
