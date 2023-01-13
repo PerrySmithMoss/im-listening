@@ -27,6 +27,7 @@ const main = async () => {
   const redisClient = new Redis({
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT as unknown as number,
+    password: process.env.REDIS_PASSWORD, // needed for cloud Redis
   });
 
   redisClient.on("error", (err) => {
@@ -43,7 +44,7 @@ const main = async () => {
         httpOnly: true,
         sameSite: "lax",
         secure: __prod__, // cookie only works in https
-        domain: __prod__ ? "im-listening.com" : undefined
+        domain: __prod__ ? "im-listening.com" : undefined,
       },
       saveUninitialized: false,
       secret: process.env.SESSION_SECRET as string,
@@ -74,7 +75,9 @@ const main = async () => {
   apolloServer.applyMiddleware({ app, cors: false });
 
   app.listen(process.env.PORT, () =>
-    console.log(`🚀  Server running on ${process.env.SERVER_DOMAIN}:${process.env.PORT}`)
+    console.log(
+      `🚀  Server running on ${process.env.SERVER_DOMAIN}:${process.env.PORT}`
+    )
   );
 };
 
