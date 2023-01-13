@@ -10,11 +10,13 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import { __prod__ } from "../constants";
 import cors from "cors";
+import dotenv from "dotenv";
+dotenv.config();
 
 const prisma = new PrismaClient();
+const app: Application = express();
 
 const main = async () => {
-  const app: Application = express();
   app.use(
     cors({
       origin: process.env.CORS_ORIGIN as string,
