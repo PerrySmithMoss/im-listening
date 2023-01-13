@@ -10,13 +10,8 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import { __prod__ } from "../constants";
 import cors from "cors";
-import dotenv from "dotenv";
 
 const prisma = new PrismaClient();
-
-if (__prod__) {
-  dotenv.config();
-}
 
 const main = async () => {
   const app: Application = express();
@@ -28,11 +23,10 @@ const main = async () => {
   );
   app.use(express.static("public"));
 
-  console.log("REDIS_URL: ", process.env.REDIS_URL)
-  console.log("REDIS_HOST: ", process.env.REDIS_HOST)
-  console.log("REDIS_PORT: ", process.env.REDIS_PORT)
-  console.log("REDIS_PASSWORD: ", process.env.REDIS_PASSWORD)
-  const RedisStore = connectRedis(session);
+  console.log("REDIS_URL: ", process.env.REDIS_URL);
+  console.log("REDIS_HOST: ", process.env.REDIS_HOST);
+  console.log("REDIS_PORT: ", process.env.REDIS_PORT);
+  console.log("REDIS_PASSWORD: ", process.env.REDIS_PASSWORD);
   // const redisClient = new Redis(process.env.REDIS_URL); // prod
   const redisClient = new Redis({
     host: process.env.REDIS_HOST as string,
@@ -51,6 +45,8 @@ const main = async () => {
   redisClient.on("error", (err) => {
     console.log("Error " + err);
   });
+
+  const RedisStore = connectRedis(session);
 
   app.use(
     session({
@@ -93,9 +89,7 @@ const main = async () => {
   apolloServer.applyMiddleware({ app, cors: false });
 
   app.listen(process.env.PORT, () =>
-    console.log(
-      `🚀  Server running on ${process.env.SERVER_URL}`
-    )
+    console.log(`🚀  Server running on ${process.env.SERVER_URL}`)
   );
 };
 
