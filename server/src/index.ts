@@ -10,8 +10,13 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import { __prod__ } from "../constants";
 import cors from "cors";
+import dotenv from "dotenv";
 
 const prisma = new PrismaClient();
+
+if (__prod__) {
+  dotenv.config();
+}
 
 const main = async () => {
   const app: Application = express();
@@ -29,6 +34,10 @@ const main = async () => {
   //   host: process.env.REDIS_HOST,
   //   port: process.env.REDIS_PORT as unknown as number
   // });
+
+  redisClient.connect(() => {
+    console.log("Connected to Redis cloud");
+  });
 
   redisClient.on("error", (err) => {
     console.log("Error " + err);
@@ -76,7 +85,7 @@ const main = async () => {
 
   app.listen(process.env.PORT, () =>
     console.log(
-      `🚀  Server running on ${process.env.SERVER_URL}:${process.env.PORT}`
+      `🚀  Server running on ${process.env.SERVER_URL}`
     )
   );
 };
