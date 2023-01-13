@@ -11,7 +11,6 @@ import connectRedis from "connect-redis";
 import { __prod__ } from "../constants";
 import cors from "cors";
 
-const PORT = process.env.PORT || 5000;
 const prisma = new PrismaClient();
 
 const main = async () => {
@@ -74,8 +73,8 @@ const main = async () => {
 
   apolloServer.applyMiddleware({ app, cors: false });
 
-  app.listen(PORT, () =>
-    console.log(`🚀  Server running on http://localhost:${PORT}`)
+  app.listen(process.env.PORT, () =>
+    console.log(`🚀  Server running on ${process.env.SERVER_DOMAIN}:${process.env.PORT}`)
   );
 };
 
