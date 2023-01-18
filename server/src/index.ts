@@ -24,7 +24,7 @@ const main = async () => {
     })
   );
   app.use(express.static("public"));
-  
+
   // const redisClient = new Redis(process.env.REDIS_URL); // prod
   const redisClient = new Redis(process.env.REDIS_URL as string); // prod
   // const redisClient = new Redis({
@@ -78,6 +78,7 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
     }),
     context: ({ req, res }) => ({ prisma, req, res, redisClient }),
+    introspection: true
   });
 
   apolloServer.applyMiddleware({ app, cors: false });
