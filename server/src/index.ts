@@ -85,7 +85,7 @@ const main = async () => {
     introspection: !__prod__,
   });
 
-  apolloServer.applyMiddleware({ app, cors: corsOptions });
+  apolloServer.applyMiddleware({ app, cors: false });
 
   app.listen(process.env.PORT, () =>
     console.log(`🚀  Server running on ${process.env.SERVER_URL}`)
