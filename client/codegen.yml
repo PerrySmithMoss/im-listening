@@ -1,5 +1,5 @@
 overwrite: true
-schema: "https://im-listening.up.railway.app/graphql"
+schema: "https://im-listening.onrender.com/graphql"
 documents: "graphql/**/*/*.graphql"
 generates:
   graphql/generated/graphql.tsx:

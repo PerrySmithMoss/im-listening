@@ -3,10 +3,10 @@ module.exports = {
     reactStrictMode: true,
     swcMinify: true,
     images: {
-      domains: ["localhost", "im-listening.up.railway.app"],
+      domains: ["localhost", "im-listening.onrender.com"],
     },
   },
   env: {
-    GRAPHQL_API_URL: "http://localhost:5000/graphql",
+    GRAPHQL_API_URL: "https://im-listening.onrender.com/graphql",
   },
 };

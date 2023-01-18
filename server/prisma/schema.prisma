@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -39,7 +39,7 @@ model SongGenre {
 model Profile {
   id     Int     @id @default(autoincrement())
   bio    String?
-  avatar String? @default("https://im-listening.up.railway.app/images/default-avatar.jpg")
+  avatar String? @default("https://im-listening.onrender.com/images/default-avatar.jpg")
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int     @unique
 }

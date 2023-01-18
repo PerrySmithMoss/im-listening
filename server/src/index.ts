@@ -24,17 +24,9 @@ const main = async () => {
     })
   );
   app.use(express.static("public"));
-
-  console.log("REDIS_URL: ", process.env.REDIS_URL);
-  console.log("REDIS_HOST: ", process.env.REDIS_HOST);
-  console.log("REDIS_PORT: ", process.env.REDIS_PORT);
-  console.log("REDIS_PASSWORD: ", process.env.REDIS_PASSWORD);
+  
   // const redisClient = new Redis(process.env.REDIS_URL); // prod
-  const redisClient = new Redis({
-    host: process.env.REDIS_HOST as string,
-    port: process.env.REDIS_PORT as unknown as number,
-    password: process.env.REDIS_PASSWORD as string,
-  }); // prod
+  const redisClient = new Redis(process.env.REDIS_URL as string); // prod
   // const redisClient = new Redis({
   //   host: process.env.REDIS_HOST,
   //   port: process.env.REDIS_PORT as unknown as number
