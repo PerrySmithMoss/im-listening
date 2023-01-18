@@ -198,7 +198,7 @@ let UserResolver = class UserResolver {
                 }
                 const token = uuid_1.v4();
                 yield ctx.redisClient.set(constants_1.FORGET_PASSWORD_PREFIX + token, user.id, "ex", 3600000); // 1 hour
-                yield sendEmail_1.sendEmail(email, `<a href="http://localhost:3000/change-password/${token}">Reset Password</a>`);
+                yield sendEmail_1.sendEmail(email, `<a href="${process.env.SERVER_URL}/change-password/${token}">Reset Password</a>`);
                 return true;
             }
             catch (err) {

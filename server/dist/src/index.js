@@ -24,33 +24,42 @@ const express_session_1 = __importDefault(require("express-session"));
 const connect_redis_1 = __importDefault(require("connect-redis"));
 const constants_1 = require("../constants");
 const cors_1 = __importDefault(require("cors"));
-const PORT = process.env.PORT || 5000;
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const prisma = new client_1.PrismaClient();
+const app = express_1.default();
+const corsOptions = {
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+};
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
-    const app = express_1.default();
-    app.use(cors_1.default({
-        origin: process.env.CORS_ORIGIN,
-        credentials: true,
-    }));
+    app.use(cors_1.default(corsOptions));
     app.use(express_1.default.static("public"));
-    const RedisStore = connect_redis_1.default(express_session_1.default);
-    const redisClient = new ioredis_1.default({
-        host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT,
+    // const redisClient = new Redis(process.env.REDIS_URL); // prod
+    const redisClient = new ioredis_1.default(process.env.REDIS_URL); // prod
+    // const redisClient = new Redis({
+    //   host: process.env.REDIS_HOST,
+    //   port: process.env.REDIS_PORT as unknown as number
+    // });
+    redisClient.connect(() => {
+        console.log("Connected to Redis cloud");
     });
     redisClient.on("error", (err) => {
         console.log("Error " + err);
     });
+    const RedisStore = connect_redis_1.default(express_session_1.default);
     app.use(express_session_1.default({
         name: process.env.COOKIE_NAME,
         store: new RedisStore({ client: redisClient, disableTouch: true }),
         cookie: {
-            maxAge: 1000 * 60 * 60 * 24 * 365 * 1,
-            // maxAge: 7000, // 1 day
+            maxAge: 6.048e8,
             httpOnly: true,
-            sameSite: "lax",
+            path: "/",
+            sameSite: constants_1.__prod__ ? "none" : "lax",
             secure: constants_1.__prod__,
-            domain: constants_1.__prod__ ? "im-listening.com" : undefined
+            domain: constants_1.__prod__ ? process.env.SERVER_DOMAIN : undefined,
         },
         saveUninitialized: false,
         secret: process.env.SESSION_SECRET,
@@ -73,9 +82,11 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             resolvers: [hello_1.HelloResolver, post_1.PostResolver, user_1.UserResolver],
         }),
         context: ({ req, res }) => ({ prisma, req, res, redisClient }),
+        playground: !constants_1.__prod__,
+        introspection: !constants_1.__prod__,
     });
     apolloServer.applyMiddleware({ app, cors: false });
-    app.listen(PORT, () => console.log(`🚀  Server running on http://localhost:${PORT}`));
+    app.listen(process.env.PORT, () => console.log(`🚀  Server running on ${process.env.SERVER_URL}`));
 });
 main()
     .catch((err) => {
