@@ -15,13 +15,16 @@ dotenv.config();
 
 const prisma = new PrismaClient();
 const app: Application = express();
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN as string,
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+}
 
 const main = async () => {
   app.use(
-    cors({
-      origin: process.env.CORS_ORIGIN as string,
-      credentials: true,
-    })
+    cors(corsOptions)
   );
   app.use(express.static("public"));
 
@@ -78,10 +81,11 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
     }),
     context: ({ req, res }) => ({ prisma, req, res, redisClient }),
-    introspection: true
+    playground: !__prod__,
+    introspection: !__prod__,
   });
 
-  apolloServer.applyMiddleware({ app, cors: false });
+  apolloServer.applyMiddleware({ app, cors: corsOptions });
 
   app.listen(process.env.PORT, () =>
     console.log(`🚀  Server running on ${process.env.SERVER_URL}`)
