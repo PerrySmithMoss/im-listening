@@ -80,7 +80,7 @@ const Home = () => {
           <WeeklyMostPopular />
           <PromotedArtists />
         </>
-      ) : !data && loading ? (
+      ) : loading ? (
         <div>Loading...</div>
       ) : (
         <>
