@@ -85,7 +85,7 @@ const main = async () => {
     context: ({ req, res }) => ({ prisma, req, res, redisClient }),
     csrfPrevention: true,
     introspection: !__prod__,
-    
+    cache: "bounded"
   });
 
   await apolloServer.start();
