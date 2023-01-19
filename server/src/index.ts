@@ -1,4 +1,5 @@
 import express, { Application } from "express";
+import { createServer } from "http";
 import { ApolloServer } from "apollo-server-express";
 import { PrismaClient } from "@prisma/client";
 import { buildSchema } from "type-graphql";
@@ -7,6 +8,7 @@ import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 import Redis from "ioredis";
 import session from "express-session";
+import cookieParser from "cookie-parser";
 import connectRedis from "connect-redis";
 import { __prod__ } from "../constants";
 import cors from "cors";
@@ -14,17 +16,20 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const prisma = new PrismaClient();
+
 const app: Application = express();
+const httpServer = createServer(app);
+
 const corsOptions = {
   origin: process.env.CORS_ORIGIN as string,
+  optionsSuccessStatus: 200,
   credentials: true,
-  preflightContinue: false,
-  optionsSuccessStatus: 204,
 };
 
 const main = async () => {
   app.use(cors(corsOptions));
   app.use(express.static("public"));
+  app.use(cookieParser());
 
   const redisClient = new Redis(process.env.REDIS_URL as string); // prod
   // const redisClient = new Redis({
@@ -78,13 +83,16 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
     }),
     context: ({ req, res }) => ({ prisma, req, res, redisClient }),
-    playground: !__prod__,
+    csrfPrevention: true,
     introspection: !__prod__,
+    
   });
 
-  apolloServer.applyMiddleware({ app, cors: false });
+  await apolloServer.start();
 
-  app.listen(process.env.PORT, () =>
+  apolloServer.applyMiddleware({ app, cors: corsOptions });
+
+  httpServer.listen(process.env.PORT, () =>
     console.log(`🚀  Server running on ${process.env.SERVER_URL}`)
   );
 };
