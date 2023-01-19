@@ -26,15 +26,12 @@ const main = async () => {
   app.use(cors(corsOptions));
   app.use(express.static("public"));
 
-  // const redisClient = new Redis(process.env.REDIS_URL); // prod
   const redisClient = new Redis(process.env.REDIS_URL as string); // prod
   // const redisClient = new Redis({
   //   host: process.env.REDIS_HOST,
   //   port: process.env.REDIS_PORT as unknown as number
   // });
 
-  console.log("Server Domain: ", process.env.SERVER_DOMAIN);
-  console.log("Prod: ", __prod__);
   redisClient.connect(() => {
     console.log("Connected to Redis cloud");
   });
@@ -52,10 +49,8 @@ const main = async () => {
       cookie: {
         maxAge: 6.048e8, // 7 days
         httpOnly: true,
-        path: "/",
         sameSite: __prod__ ? "none" : "lax",
         secure: __prod__, // cookie only works in https
-        domain: process.env.SERVER_DOMAIN,
       },
       saveUninitialized: false,
       secret: process.env.SESSION_SECRET as string,
@@ -83,8 +78,8 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
     }),
     context: ({ req, res }) => ({ prisma, req, res, redisClient }),
-    playground: !__prod__ ? false : true,
-    introspection: !__prod__ ? false : true,
+    playground: !__prod__,
+    introspection: !__prod__,
   });
 
   apolloServer.applyMiddleware({ app, cors: false });
