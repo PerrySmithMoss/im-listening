@@ -20,12 +20,10 @@ const corsOptions = {
   credentials: true,
   preflightContinue: false,
   optionsSuccessStatus: 204,
-}
+};
 
 const main = async () => {
-  app.use(
-    cors(corsOptions)
-  );
+  app.use(cors(corsOptions));
   app.use(express.static("public"));
 
   // const redisClient = new Redis(process.env.REDIS_URL); // prod
@@ -35,6 +33,8 @@ const main = async () => {
   //   port: process.env.REDIS_PORT as unknown as number
   // });
 
+  console.log("Server Domain: ", process.env.SERVER_DOMAIN);
+  console.log("Prod: ", __prod__);
   redisClient.connect(() => {
     console.log("Connected to Redis cloud");
   });
@@ -55,7 +55,7 @@ const main = async () => {
         path: "/",
         sameSite: __prod__ ? "none" : "lax",
         secure: __prod__, // cookie only works in https
-        domain: __prod__ ? process.env.SERVER_DOMAIN : undefined,
+        domain: process.env.SERVER_DOMAIN,
       },
       saveUninitialized: false,
       secret: process.env.SESSION_SECRET as string,
@@ -63,17 +63,19 @@ const main = async () => {
     })
   );
 
-  app.get("/", async (req, res) => {
-    const recentPosts = await prisma.post.findMany({
-      include: {
-        author: {
-          include: {
-            profile: true,
-          },
-        },
-      },
-    });
-    res.send(recentPosts);
+  app.get("/", async (_, res) => {
+    const healthcheck = {
+      uptime: process.uptime(),
+      response_time: process.hrtime(),
+      message: "OK",
+      timestamp: Date.now(),
+    };
+    try {
+      res.send(healthcheck);
+    } catch (error: any) {
+      healthcheck.message = error;
+      res.status(503).send(healthcheck);
+    }
   });
 
   const apolloServer = new ApolloServer({
@@ -81,8 +83,8 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
     }),
     context: ({ req, res }) => ({ prisma, req, res, redisClient }),
-    playground: !__prod__,
-    introspection: !__prod__,
+    playground: !__prod__ ? false : true,
+    introspection: !__prod__ ? false : true,
   });
 
   apolloServer.applyMiddleware({ app, cors: false });
