@@ -141,6 +141,7 @@ export class UserResolver {
     }
 
     ctx.req.session.userId = user.id;
+    ctx.req.session.save((err: any) => console.log(err));
 
     return {
       user: user,

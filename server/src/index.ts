@@ -27,7 +27,23 @@ const corsOptions = {
 };
 
 const main = async () => {
+  app.set("trust proxy", 1);
   app.use(cors(corsOptions));
+
+  app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Origin", process.env.SERVER_DOMAIN);
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-HTTP-Method-Override, Set-Cookie, Cookie"
+    );
+    res.header(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS"
+    );
+    next();
+  });
+
   app.use(express.static("public"));
   app.use(cookieParser());
 
@@ -54,8 +70,10 @@ const main = async () => {
       cookie: {
         maxAge: 6.048e8, // 7 days
         httpOnly: true,
+        path: "/",
         sameSite: __prod__ ? "none" : "lax",
         secure: __prod__, // cookie only works in https
+        domain: process.env.SERVER_DOMAIN,
       },
       saveUninitialized: false,
       secret: process.env.SESSION_SECRET as string,
@@ -85,7 +103,7 @@ const main = async () => {
     context: ({ req, res }) => ({ prisma, req, res, redisClient }),
     csrfPrevention: true,
     introspection: !__prod__,
-    cache: "bounded"
+    cache: "bounded",
   });
 
   await apolloServer.start();
