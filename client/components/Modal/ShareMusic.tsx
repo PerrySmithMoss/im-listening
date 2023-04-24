@@ -201,7 +201,6 @@ export const ShareMusic: React.FC<ShareMusicProps> = ({
             };
             fetchSpotifyToken(async () => {
               await spotifyAPI.getArtist(string).then((res: any) => {
-                console.log(res);
                 setChosenSongArtistGenresModalFinal(res.body.genres);
               });
             });

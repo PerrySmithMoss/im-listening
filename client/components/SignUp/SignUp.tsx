@@ -87,10 +87,8 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
 
   useEffect(() => {
     if (Object.keys(errors).length === 0) {
-      console.log("Client errors :", errors);
       setDataIsCorrect(true);
     } else if (Object.keys(serverErrors).length === 0) {
-      console.log("Server errors: ", serverErrors);
       setServerDataIsCorrect(true);
     }
   }, [errors, serverErrors]);
