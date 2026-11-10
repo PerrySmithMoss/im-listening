@@ -25,6 +25,14 @@ case "$1" in
         if [ -n "${GOOGLE_PROXY_SECRET_FILE:-}" ]; then
             export GOOGLE_PROXY_SECRET="$(cat "$GOOGLE_PROXY_SECRET_FILE")"
         fi
+        if [ -n "${SPOTIFY_CLIENT_ID_FILE:-}" ]; then
+            SPOTIFY_CLIENT_ID="$(cat "$SPOTIFY_CLIENT_ID_FILE")"
+            export SPOTIFY_CLIENT_ID
+        fi
+        if [ -n "${SPOTIFY_CLIENT_SECRET_FILE:-}" ]; then
+            SPOTIFY_CLIENT_SECRET="$(cat "$SPOTIFY_CLIENT_SECRET_FILE")"
+            export SPOTIFY_CLIENT_SECRET
+        fi
         ./node_modules/.bin/prisma migrate deploy
         exec node dist/src/index.js
         ;;

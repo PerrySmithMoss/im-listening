@@ -32,6 +32,7 @@ before running the migration. Compose creates a fresh PostgreSQL data volume.
 See [client/.env.example](client/.env.example) for frontend configuration. Set `SPOTIFY_CLIENT_ID` and
 `SPOTIFY_CLIENT_SECRET` in **server/.env** to enable Spotify search. You can still share
 songs by entering their details manually. Audio previews appear when Spotify supplies one.
+For production, see [Enable Spotify search](docs/deploy-vps.md#enable-spotify-search).
 
 ## Password reset email
 
