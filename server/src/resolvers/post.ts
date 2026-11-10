@@ -131,9 +131,13 @@ export class PostResolver {
     @Arg("genres", () => [String]) genres: string[],
     @Arg("previewSongUrl", () => String, { nullable: true }) previewSongUrl: string | null,
     @Arg("albumImage") albumImage: string,
+    @Arg("spotifyTrackId", () => String, { nullable: true }) spotifyTrackId: string | null,
   ) {
     checkRating(rating);
     checkGenres(genres);
+    if (spotifyTrackId != null && !/^[A-Za-z0-9]{22}$/.test(spotifyTrackId)) {
+      badInput("Invalid Spotify track ID.");
+    }
     checkMediaUrl(albumImage, true);
     if (previewSongUrl !== null && previewSongUrl !== undefined) checkMediaUrl(previewSongUrl, false);
     for (const text of [albumName, artistName, title, genre]) {
@@ -141,7 +145,7 @@ export class PostResolver {
     }
     return ctx.prisma.post.create({
       data: {
-        albumName, artistName, rating, title: title.trim(), genre, previewSongUrl, albumImage,
+        albumName, artistName, rating, title: title.trim(), genre, previewSongUrl, albumImage, spotifyTrackId,
         authorId: authenticatedUserId(ctx),
         songGenres: { create: [...new Set(genres)].map((genre) => ({ genre })) },
       },

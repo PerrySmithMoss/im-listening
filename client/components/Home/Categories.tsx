@@ -1,36 +1,22 @@
-import { Chip, Group, MultiSelect } from "@mantine/core";
-import { useGlobalUIContext } from "../../context/GlobalUI.context";
+import { MultiSelect, Pill } from "@mantine/core";
+import { genres } from "../../lib/genres";
 
-const genres = [
-  ["rock", "Rock"], ["pop", "Pop"], ["hip hop", "Hip-hop"], ["dance", "Dance"],
-  ["electronic", "Electronic"], ["classical", "Classical"], ["indie", "Indie"],
-  ["metal", "Metal"], ["r&b", "R&B"], ["country", "Country"],
-].map(([value, label]) => ({ value, label }));
+export const genreInputId = "feed-genres";
 
-export function Categories() {
-  const { filterCategories, setFilterCategories } = useGlobalUIContext();
-
+export function Categories({ selected, onChange }: { selected: string[]; onChange: (values: string[]) => void }) {
   return (
-    <section className="px-4 sm:px-8 lg:px-16 xl:px-20 mx-auto mt-5 md:mt-10">
-      <h2 className="text-2xl xss:text-3xl font-bold">Currently Playing</h2>
-      <div className="sm:hidden py-6">
-        <MultiSelect
-          data={genres}
-          value={filterCategories}
-          onChange={setFilterCategories}
-          aria-label="Filter by genre"
-          placeholder="Filter by genre"
-          searchable
-          nothingFoundMessage="Nothing found"
-        />
-      </div>
-      <div className="hidden sm:block py-6">
-        <Chip.Group value={filterCategories} onChange={setFilterCategories} multiple>
-          <Group gap="md">
-            {genres.map(({ value, label }) => <Chip key={value} value={value} color="orange" variant="filled">{label}</Chip>)}
-          </Group>
-        </Chip.Group>
-      </div>
-    </section>
+    <div className="feed-filters">
+      <MultiSelect id={genreInputId} label="Filter by genre" className="genre-picker" data={genres} value={selected}
+        onChange={onChange} placeholder={selected.length ? "Add a genre" : "All genres"}
+        searchable nothingFoundMessage="No matching genres" hidePickedOptions
+        withCheckIcon={false} size="md" radius="md"
+        renderPill={({ option, value, onRemove }) => {
+          const label = option?.label ?? value;
+          return <Pill withRemoveButton={Boolean(onRemove)} onRemove={() => {
+            onRemove?.();
+            document.getElementById(genreInputId)?.focus();
+          }} removeButtonProps={{ "aria-hidden": false, "aria-label": `Remove ${label} filter`, tabIndex: 0 }}>{label}</Pill>;
+        }} />
+    </div>
   );
 }

@@ -17,9 +17,6 @@
   "dependencies": {
     "@apollo/client": "4.3.8",
     "@emoji-mart/data": "1.2.1",
-    "@fortawesome/fontawesome-svg-core": "7.3.1",
-    "@fortawesome/free-solid-svg-icons": "7.3.1",
-    "@fortawesome/react-fontawesome": "3.5.0",
     "@mantine/core": "9.8.0",
     "@mantine/hooks": "9.8.0",
     "@mantine/notifications": "9.8.0",

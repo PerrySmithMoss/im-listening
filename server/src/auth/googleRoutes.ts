@@ -44,7 +44,10 @@ const uniqueConflict = (error: unknown) =>
   error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
 
 function localReturnPath(value: unknown) {
-  return typeof value === "string" && /^\/post\/[1-9][0-9]{0,9}$/.test(value) ? value : "/";
+  if (value === "/?share=1" || value === "/account/sign-in") return value;
+  if (typeof value === "string" && /^\/post\/[1-9][0-9]{0,9}$/.test(value) &&
+      Number(value.slice(6)) <= 2147483647) return value;
+  return "/";
 }
 
 function signInEntry(entry: Entry, returnTo: string) {

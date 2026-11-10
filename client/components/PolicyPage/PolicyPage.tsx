@@ -9,9 +9,9 @@ export function PolicyPage({ title, children }: { title: string; children: React
     <>
       <Head><title>{title} | I&apos;m Listening</title></Head>
       <Navbar />
-      <main className="mx-auto max-w-3xl space-y-6 px-4 py-12 sm:px-8">
+      <main id="main-content" tabIndex={-1} className="page-width prose max-w-3xl space-y-6 py-10 wrap-anywhere">
         <header>
-          <h1 className="text-4xl font-bold">{title}</h1>
+          <h1 className="page-title">{title}</h1>
           <p className="mt-2 text-sm">Updated 10 November 2026</p>
         </header>
         {children}

@@ -3,12 +3,6 @@ query GetCurrentUser{
     id
     firstName
     lastName
-    email
-    posts {
-      id
-      title
-      previewSongUrl
-    }
     profile {
       id
       avatar

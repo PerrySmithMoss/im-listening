@@ -32,6 +32,7 @@ const authLimits = {
   googleEmail: { account: 3, ip: 15, windowMs: 15 * 60_000 },
   googleCode: { account: 12, ip: 30, windowMs: 15 * 60_000 },
   googleManage: { account: 10, ip: 30, windowMs: 15 * 60_000 },
+  checkReset: { account: 20, ip: 60, windowMs: 60 * 60_000 },
   change: { account: 10, ip: 30, windowMs: 60 * 60_000 },
 };
 

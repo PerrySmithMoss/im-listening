@@ -411,6 +411,13 @@ test("Google OIDC integration with real PostgreSQL, Redis and an isolated provid
     assert.equal(await b.user(), null);
   });
 
+  await t.test("Google sign-in resumes the composer without accepting other query destinations", async () => {
+    const b = browser();
+    assert.equal((await authorize(b, {}, { returnTo: "/?share=1" })).headers.get("location"), "/?share=1");
+    const second = browser();
+    assert.equal((await authorize(second, {}, { returnTo: "/?share=1&next=//unrelated.test" })).headers.get("location"), "/");
+  });
+
   await t.test("concurrent starts and cancellation preserve other transactions", async () => {
     const b = browser();
     const cancelled = await b.start({ entry: "/sign-up", returnTo: "/post/42" });

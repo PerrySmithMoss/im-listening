@@ -62,9 +62,9 @@ const register = `mutation($name: String!, $email: String!, $password: String!) 
 const login = `mutation($email: String!, $password: String!) {
   loginUser(email: $email, password: $password) { user { id } errors { field } }
 }`;
-const create = `mutation($title: String!, $genre: String!) {
+const create = `mutation($title: String!, $genre: String!, $spotifyTrackId: String) {
   createPost(albumName: "Test song", artistName: "Test artist", rating: 3.5, title: $title,
-    genre: $genre, genres: [$genre], albumImage: "") { id createdAt rating author { username } }
+    genre: $genre, genres: [$genre], albumImage: "", spotifyTrackId: $spotifyTrackId) { id createdAt rating author { username } }
 }`;
 const filter = `query($genre: String!, $cursor: DateTimeISO, $cursorId: Int) {
   filterPosts(limit: 1, genres: [$genre], cursor: $cursor, cursorId: $cursorId) { posts { id createdAt } hasMore }
@@ -72,6 +72,7 @@ const filter = `query($genre: String!, $cursor: DateTimeISO, $cursorId: Int) {
 const update = `mutation($id: Int!) { updatePost(id: $id, rating: 4.5) { id rating } }`;
 const remove = `mutation($id: Int!) { deletePost(id: $id) }`;
 const resetRequest = `mutation($email: String!) { forgotPassword(email: $email) }`;
+const checkReset = `mutation($token: String!) { checkPasswordResetLink(token: $token) }`;
 const reset = `mutation($token: String!, $password: String!) {
   changePassword(token: $token, password: $password) { user { id } errors { field } }
 }`;
@@ -178,10 +179,17 @@ test("registration, login, posts, password reset and logout work with PostgreSQL
   assert.equal((await alice.query(login, { email: mixedCaseEmail, password })).loginUser.user.id, registered.user.id);
   assert.notEqual(alice.cookie, oldCookie, "Login issues a new session ID");
 
-  const first = (await alice.query(create, { title: "First review", genre })).createPost;
+  assert.equal((await alice.query("{ getCurrentUser { hasPassword } }")).getCurrentUser.hasPassword, true);
+  const spotifyTrackId = "4uLU6hMCjMI75M1A2tKUQC";
+  const first = (await alice.query(create, { title: "First review", genre, spotifyTrackId })).createPost;
   const second = (await alice.query(create, { title: "Second review", genre })).createPost;
   assert.equal(first.rating, 3.5);
   assert.equal(first.author.username, name);
+  const getTrackId = async (id) => (await visitor.query(
+    "query($id: Int!) { getPost(id: $id) { spotifyTrackId } }", { id: Number(id) },
+  )).getPost.spotifyTrackId;
+  assert.equal(await getTrackId(first.id), spotifyTrackId);
+  assert.equal(await getTrackId(second.id), null);
   // Simulate two reviews landing at the same database timestamp.
   await prisma.post.update({ where: { id: Number(first.id) }, data: { createdAt: second.createdAt } });
   const page = (await visitor.query(filter, { genre: genre.toUpperCase() })).filterPosts;
@@ -205,9 +213,13 @@ test("registration, login, posts, password reset and logout work with PostgreSQL
   const link = mail.match(/http:\/\/localhost:3100\/change-password\/([\w-]{43})/);
   assert.ok(link, "Password reset email links to the web app");
   const token = link[1];
+  assert.equal((await visitor.query(checkReset, { token: "invalid" })).checkPasswordResetLink, false);
+  assert.equal((await visitor.query(checkReset, { token })).checkPasswordResetLink, true);
+  assert.equal((await visitor.query(checkReset, { token })).checkPasswordResetLink, true, "Checking does not consume the link");
 
   assert.equal((await visitor.query(reset, { token, password: resetPassword })).changePassword.user.id, registered.user.id);
   assert.equal((await alice.query("{ getCurrentUser { id } }")).getCurrentUser, null, "Password changes invalidate existing sessions");
+  assert.equal((await visitor.query(checkReset, { token })).checkPasswordResetLink, false);
   assert.equal((await visitor.query(reset, { token, password: resetPassword })).changePassword.errors[0].field, "token");
   assert.equal((await visitor.query("mutation { logoutUser }")).logoutUser, true);
   assert.equal((await visitor.query("{ getCurrentUser { id } }")).getCurrentUser, null);
