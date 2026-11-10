@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 
 export const idleSessionMs = 24 * 60 * 60_000;
 export const absoluteSessionMs = 7 * idleSessionMs;
+export const sessionPrefix = "im-listening:sess:";
 
 export async function saveSession(req: Request) {
   try {

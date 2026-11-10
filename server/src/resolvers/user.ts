@@ -3,7 +3,8 @@ import argon2 from "argon2";
 import {
   Resolver, Query, Mutation, Arg, Ctx, ObjectType, Field, FieldResolver, Root,
 } from "type-graphql";
-import { destroySession, establishSession } from "../auth/session";
+import { logoutSession } from "../auth/googleCompletion";
+import { establishSession } from "../auth/session";
 import { Prisma } from "../generated/prisma/client";
 import { Post } from "../entities/Post";
 import { User } from "../entities/User";
@@ -126,7 +127,7 @@ export class UserResolver {
 
   @Mutation(() => Boolean)
   async logoutUser(@Ctx() ctx: PrismaContext) {
-    await destroySession(ctx.req);
+    await logoutSession(ctx.req, ctx.redis);
     ctx.res.clearCookie(ctx.cookieName, ctx.cookie);
     return true;
   }

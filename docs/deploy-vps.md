@@ -36,6 +36,7 @@ values out of command history, process arguments, files in the repo and CI.
 | `im_listening_session_secret_v1` | Random hex from `openssl rand -hex 32` | API |
 | `im_listening_resend_key_v1` | Resend key with sending access for `imlistening-mail.perrysmithmoss.com` | API |
 | `im_listening_google_oauth_v1` | Production OAuth client secret from [Google Cloud setup](#google-cloud) | API |
+| `im_listening_google_proxy_v1` | Separate random hex from `openssl rand -hex 32`, also set as `GOOGLE_PROXY_SECRET` in Vercel | API |
 | `im_listening_redis_url_v1` | `redis://:<password>@redis:6379` | API |
 | `im_listening_redis_config_v1` | `requirepass <password>` with a final newline | Redis |
 
@@ -110,8 +111,11 @@ NEXT_PUBLIC_GRAPHQL_API_URL=/api/graphql
 GRAPHQL_INTERNAL_URL=https://im-listening-api.perrysmithmoss.com/graphql
 ```
 
-Build and promote the frontend. The Next.js rewrites send `/api/graphql`,
-`/api/spotify/*` and `/api/auth/google/*` to the VPS. GraphQL server rendering uses the absolute URL.
+Build and promote the frontend. The Next.js rewrites send `/api/graphql` and
+`/api/spotify/*` to the VPS. A server-side API route forwards `/api/auth/google/*`
+and authenticates to the VPS using the production `GOOGLE_PROXY_SECRET`. The
+VPS uses the Vercel-provided client address for Google route limits and rejects
+direct Google requests. GraphQL server rendering uses the absolute URL.
 The browser sees a same-origin API and can send the secure, host-only
 `__Host-im-listening` cookie. Keep `CLIENT_ORIGIN` in the stack aligned with
 `https://im-listening.vercel.app` so the API accepts requests from the live site
@@ -166,9 +170,13 @@ Google cannot verify the current hosted domain. [Google OAuth setup](https://dev
 
 ### VPS enablement and rotation
 
-Production requires the Google OAuth client ID and secret at startup. Before
-the first restricted release containing Google sign-in, provision the secret
-and apply the updated stack manifest with the currently verified API digest.
+Production requires the Google OAuth client ID, client secret and proxy secret
+at startup. Provision the proxy secret as a Swarm secret and as a sensitive,
+server-only Vercel environment variable. Use a different value in each environment.
+Apply the updated stack manifest with the currently verified API digest, then
+promote the frontend with the Google proxy route before releasing the API that
+requires it. The previous Google-capable API accepts the new frontend route
+during the transition.
 Check service health and record the spec with
 `sudo /usr/local/libexec/portfolio-release record im-listening`. Restricted
 releases update the image and preserve the configured credentials.
@@ -182,13 +190,15 @@ spec, and verify a live sign-in before revoking the previous secret.
 
 ### Live verification and rollback
 
-- Confirm the Vercel rewrite forwards Google form POSTs and the redirect to
+- Confirm the Vercel API route forwards Google form POSTs and the redirect to
   the callback GET on the frontend host. Test with a disposable flow before
   public rollout. The Traefik auth router disables access logs and traces for
   this path. Verify that Vercel, WAF, error monitoring, analytics and log drains
-  exclude callback bodies, query strings and sensitive headers. Vercel rewrite
-  logs can include query strings, so the POST carries the code in the body and
+  exclude callback bodies, query strings and sensitive headers, including the
+  proxy authorization header. The POST carries the code in the body and
   the GET URL carries only a short-lived receipt. [Vercel log drains](https://vercel.com/docs/drains/reference/logs) · [Traefik router logs](https://doc.traefik.io/traefik/observe/logs-and-access-logs/)
+- Check that two independent client addresses get separate Google start limits
+  through the frontend, and that direct VPS requests to the Google API are rejected.
 - On a desktop and a mobile browser, check cancellation, new registration,
   returning sign-in, post return, reload, explicit linking and logout. Confirm
   the HTTPS cookie is Secure, HttpOnly, host-only, Path=/ and SameSite=Lax.
@@ -197,8 +207,15 @@ spec, and verify a live sign-in before revoking the previous secret.
   Check Google discovery, Redis and SMTP when retries or verification failures
   rise. Record the verified API digest, frontend deployment, browsers, date,
   results and rollback test in [the task log](tasks.md).
-- To roll back, redeploy a verified API digest through the release workflow.
-  Once a Google-capable release has been verified, use that digest so both
-  sign-in methods work. On the initial rollout, the preceding image supports
-  password sign-in and reset. Google-only users need a Google-capable image to
-  sign in again. Retain the database migration and identity links.
+- Before accepting Google registrations, verify a fallback image against the
+  migrated database. Check password sign-in and reset for password accounts,
+  Google sign-in, and that password reset sends no email and cannot add a
+  password for a Google-only account.
+  In the `VPS Production` GitHub environment, set `API_ROLLBACK_ALLOWLIST` to
+  the verified pairs, one `<sha256:digest> <40-character commit SHA>` per line.
+  Keep a verified fallback in the running service before an update so Swarm's
+  automatic rollback is safe as well.
+- Redeploy a verified pair through the release workflow. A pre-Google image
+  can grant password access to a Google-only account through email reset. Keep
+  that image out of both manual and automatic rollback once Google registration
+  is available. Retain the database migration and identity links.
