@@ -1,0 +1,11 @@
+*
+!package.json
+!package-lock.json
+!prisma7.config.ts
+!prisma/
+!tsconfig.json
+!src/
+src/generated/
+!utils/
+!public/
+!docker-entrypoint.sh

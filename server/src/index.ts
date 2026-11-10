@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { resolve } from "node:path";
 import { ApolloServer } from "@apollo/server";
@@ -21,7 +22,13 @@ import { createMailer } from "../utils/sendEmail";
 
 async function main() {
   const config = loadConfig();
-  const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: config.databaseUrl.href }) });
+  const databaseCa = process.env.DATABASE_CA_FILE;
+  const prisma = new PrismaClient({ adapter: new PrismaPg({
+    connectionString: config.databaseUrl.href,
+    connectionTimeoutMillis: 3000,
+    query_timeout: 5000,
+    ...(databaseCa && { ssl: { ca: readFileSync(databaseCa) } }),
+  }) });
   const redis = createClient<RedisModules, RedisFunctions, RedisScripts, RespVersions, TypeMapping>({
     url: config.redisUrl,
     disableOfflineQueue: true,
@@ -45,7 +52,19 @@ async function main() {
       crossOriginResourcePolicy: { policy: "cross-origin" },
       strictTransportSecurity: config.production,
     }));
-    app.get(["/", "/healthz"], (_req, res) => res.json({ status: "ok" }));
+    app.get("/", (_req, res) => res.json({ status: "ok" }));
+    app.get("/healthz", async (_req, res) => {
+      res.set("Cache-Control", "no-store");
+      try {
+        await Promise.all([
+          prisma.$queryRaw`SELECT 1`,
+          redis.withAbortSignal(AbortSignal.timeout(3000)).ping(),
+        ]);
+        res.json({ status: "ok" });
+      } catch {
+        res.status(503).json({ status: "unavailable" });
+      }
+    });
     app.use("/images", express.static(resolve(__dirname, "../../public/images"), { index: false }));
 
     app.use(["/graphql", "/spotify"], cors({ origin: config.clientOrigin, credentials: true }));

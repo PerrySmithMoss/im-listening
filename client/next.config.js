@@ -2,6 +2,14 @@
 module.exports = {
   reactStrictMode: true,
   poweredByHeader: false,
+  async rewrites() {
+    const upstream = process.env.GRAPHQL_INTERNAL_URL;
+    if (!upstream || process.env.NEXT_PUBLIC_GRAPHQL_API_URL !== "/api/graphql") return [];
+    return [
+      { source: "/api/graphql", destination: upstream },
+      { source: "/api/spotify/:path*", destination: new globalThis.URL("spotify/:path*", upstream).href },
+    ];
+  },
   async headers() {
     return [{
       source: "/:path*",

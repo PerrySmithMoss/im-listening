@@ -20,7 +20,7 @@ type Track = {
 const genres = ["rock", "pop", "hip hop", "dance", "electronic", "classical", "indie", "metal", "r&b", "country", "other"];
 
 async function spotify<T>(path: string, signal: AbortSignal): Promise<T> {
-  const url = new URL(`spotify/${path}`, graphqlUrl);
+  const url = new URL(`spotify/${path}`, new URL(graphqlUrl, window.location.origin));
   const response = await fetch(url, { credentials: "include", signal });
   if (!response.ok) {
     const payload = await response.json().catch(() => ({}));

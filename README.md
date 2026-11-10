@@ -7,7 +7,7 @@
 
 ## Run locally
 
-Use Node.js 24.22.2 (see [`.nvmrc`](.nvmrc)), npm 11, and Docker Compose.
+Use Node.js 26.13.0 (see [`.nvmrc`](.nvmrc)), npm 11, and Docker Compose.
 
 ```sh
 ./scripts/setup-local.sh
@@ -42,7 +42,7 @@ address on a verified domain. The block uses TLS on port 465. The
 Resend account. [Resend SMTP setup](https://resend.com/changelog/smtp-service) ·
 [Sender requirements](https://resend.com/docs/knowledge-base/403-error-resend-dev-domain)
 
-Email delivery is optional in local development. Set the same variables in production.
+Email delivery is optional in local development. Production uses a Resend key mounted as a Docker secret.
 
 ## Verify changes
 
@@ -67,18 +67,10 @@ GraphQL stays on 16 to match Apollo Server's peer dependency, TypeScript stays o
 to match the ESLint parser, and Prisma stays on the stable 7 series. The npm overrides
 pin patched versions of `graphql-scalars` and `minimatch` until their callers update.
 
-## Upgrading an existing deployment
+## Production deployment
 
-Set `DATABASE_URL` to an empty PostgreSQL database with ICU collation support and run
-`npm run db:migrate --prefix server` before starting the upgraded API. Existing
-sessions expire on upgrade. Use `CLIENT_ORIGIN` for the HTTPS frontend origin,
-`REDIS_URL` for the Redis connection, and the `SMTP_*` settings for password reset mail.
-Set `NEXT_PUBLIC_GRAPHQL_API_URL` to the absolute public API URL including `/graphql`
-before building the client. If the web server uses a different address to reach the API,
-set `GRAPHQL_INTERNAL_URL` on the web server for server-side rendering. Use HTTPS
-and a trusted proxy configuration in production. Keep the frontend and API on the
-same site so browsers can send session cookies. If a previous deployment exposed
-Spotify credentials in the client or Redis credentials in startup logs, rotate them.
+See the [VPS deployment runbook](docs/deploy-vps.md) for database provisioning,
+secret rotation, releases and the Vercel proxy configuration.
 
 <div>
 <h2>Features</h2>

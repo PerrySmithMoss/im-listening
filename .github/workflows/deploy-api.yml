@@ -1,0 +1,118 @@
+name: Deploy API to VPS
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - server/**
+      - docker-stack.yaml
+      - compose.yaml
+      - .nvmrc
+      - scripts/setup-local.sh
+      - .github/workflows/checks.yml
+      - .github/workflows/deploy-api.yml
+  workflow_dispatch:
+    inputs:
+      rollback_digest:
+        description: Verified sha256 digest (leave both fields empty to build a new release)
+        type: string
+      rollback_revision:
+        description: Commit SHA associated with the verified digest
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: im-listening-api-production
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/master' && !inputs.rollback_digest && !inputs.rollback_revision
+    uses: ./.github/workflows/checks.yml
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: build
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ./server
+          platforms: linux/amd64
+          push: true
+          tags: ghcr.io/perrysmithmoss/im-listening-api:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Record release coordinates
+        env:
+          RELEASE_DIGEST: ${{ steps.build.outputs.digest }}
+        run: printf 'API image `ghcr.io/perrysmithmoss/im-listening-api@%s` built from `%s`.\n' "$RELEASE_DIGEST" "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    needs: publish
+    if: |
+      !cancelled() && github.ref == 'refs/heads/master' &&
+      (needs.publish.result == 'success' ||
+       (github.event_name == 'workflow_dispatch' && (inputs.rollback_digest || inputs.rollback_revision)))
+    environment: VPS Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions: {}
+    steps:
+      - name: Release the image through restricted SSH
+        env:
+          BUILT_DIGEST: ${{ needs.publish.outputs.digest }}
+          ROLLBACK_DIGEST: ${{ inputs.rollback_digest }}
+          ROLLBACK_REVISION: ${{ inputs.rollback_revision }}
+          VPS_HOST: ${{ vars.VPS_HOST }}
+          VPS_KNOWN_HOSTS: ${{ vars.VPS_KNOWN_HOSTS }}
+          APP_RELEASE_KEY: ${{ secrets.APP_RELEASE_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -n "$ROLLBACK_DIGEST" || -n "$ROLLBACK_REVISION" ]]; then
+            digest=$ROLLBACK_DIGEST
+            revision=$ROLLBACK_REVISION
+          else
+            digest=$BUILT_DIGEST
+            revision=$GITHUB_SHA
+          fi
+          if [[ ! "$digest" =~ ^sha256:[a-f0-9]{64}$ || ! "$revision" =~ ^[a-f0-9]{40}$ ]]; then
+            echo '::error::Provide both a valid sha256 digest and a 40-character commit SHA.'
+            exit 1
+          fi
+          [[ "$VPS_HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]
+          [[ -n "$VPS_KNOWN_HOSTS" && -n "$APP_RELEASE_KEY" ]]
+          umask 077
+          ssh_dir=$(mktemp -d)
+          trap 'rm -rf -- "$ssh_dir"' EXIT
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$ssh_dir/known_hosts"
+          printf '%s\n' "$APP_RELEASE_KEY" > "$ssh_dir/key"
+          unset APP_RELEASE_KEY
+          ssh -F /dev/null -nT -i "$ssh_dir/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o ConnectTimeout=15 \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$ssh_dir/known_hosts" \
+            -o GlobalKnownHostsFile=/dev/null "im-listening-release@$VPS_HOST" \
+            "release $digest $revision"
+      - name: Verify public HTTPS health
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 8 --retry-all-errors --max-time 10 \
+            https://im-listening-api.perrysmithmoss.com/healthz | jq -e '.status == "ok"'
