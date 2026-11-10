@@ -6,7 +6,7 @@ interface MetaProps {
   description: string;
 }
 
-export const Meta: React.FC<MetaProps> = ({ title, keywords, description }) => {
+export function Meta({ title, keywords, description }: MetaProps) {
   return (
     <Head>
       <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -16,10 +16,4 @@ export const Meta: React.FC<MetaProps> = ({ title, keywords, description }) => {
       <title>{title}</title>
     </Head>
   );
-};
-
-Meta.defaultProps = {
-  title: "I'm Listening",
-  keywords: "music, social media, social, share music, music",
-  description: "Share what you're listening to.",
-};
+}

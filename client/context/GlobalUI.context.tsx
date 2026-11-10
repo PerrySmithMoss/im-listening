@@ -1,75 +1,23 @@
-import React, {
-  useState,
-  createContext,
-  SetStateAction,
-  useContext,
-} from "react";
-import { IChosenSong } from "../interfaces/IChosenSong";
+import { createContext, useContext, useState, type Dispatch, type PropsWithChildren, type SetStateAction } from "react";
 
-type GlobalUIProps = {
-  isMobileDrawerOpen: boolean;
-  setIsMobileDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  isMusicPlaying: boolean;
-  setIsMusicPlaying: React.Dispatch<React.SetStateAction<boolean>>;
-  playingTrackState: string;
-  setPlayingTrackState: React.Dispatch<React.SetStateAction<string>>;
-  isShowMusicPlayerOpen: boolean;
-  setIsShowMusicPlayerOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  chosenSong: IChosenSong | any;
-  setChosenSong: React.Dispatch<React.SetStateAction<IChosenSong | any>>;
+type GlobalUIState = {
   filterCategories: string[];
-  setFilterCategories: React.Dispatch<React.SetStateAction<string[]>>;
+  setFilterCategories: Dispatch<SetStateAction<string[]>>;
 };
 
-const globalUIcontext = createContext<GlobalUIProps>({
-  isMobileDrawerOpen: false,
-  setIsMobileDrawerOpen: () => {},
-  isMusicPlaying: false,
-  setIsMusicPlaying: () => {},
-  playingTrackState: "",
-  setPlayingTrackState: () => {},
-  isShowMusicPlayerOpen: false,
-  setIsShowMusicPlayerOpen: () => {},
-  chosenSong: {} as IChosenSong,
-  setChosenSong: () => {},
-  filterCategories: [],
-  setFilterCategories: () => {},
-});
+const GlobalUIContext = createContext<GlobalUIState | null>(null);
 
-export const GlobalUIProvider = ({
-  children,
-}: React.PropsWithChildren<unknown>) => {
-  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<boolean>(false);
-  const [isMusicPlaying, setIsMusicPlaying] = useState<boolean>(false);
-  const [playingTrackState, setPlayingTrackState] = useState<string>("");
-  const [isShowMusicPlayerOpen, setIsShowMusicPlayerOpen] =
-    useState<boolean>(false);
-  const [chosenSong, setChosenSong] = useState({});
+export function GlobalUIProvider({ children }: PropsWithChildren) {
   const [filterCategories, setFilterCategories] = useState<string[]>([]);
-
   return (
-    <globalUIcontext.Provider
-      value={{
-        isMobileDrawerOpen,
-        setIsMobileDrawerOpen,
-        isMusicPlaying,
-        setIsMusicPlaying,
-        playingTrackState,
-        setPlayingTrackState,
-        isShowMusicPlayerOpen,
-        setIsShowMusicPlayerOpen,
-        chosenSong,
-        setChosenSong,
-        filterCategories,
-        setFilterCategories,
-      }}
-    >
+    <GlobalUIContext.Provider value={{ filterCategories, setFilterCategories }}>
       {children}
-    </globalUIcontext.Provider>
+    </GlobalUIContext.Provider>
   );
-};
+}
 
-// Export useContext Hook.
 export function useGlobalUIContext() {
-  return useContext(globalUIcontext);
+  const context = useContext(GlobalUIContext);
+  if (!context) throw new Error("Global UI provider is missing");
+  return context;
 }

@@ -1,7 +1,6 @@
 import React from "react";
-import { Card, Group, Badge, Text } from "@mantine/core";
+import { Text } from "@mantine/core";
 import { IPromotedArtist } from "../../../interfaces/IPromotedArtist";
-import { SeeAll } from "../../Button/SeeAll/SeeAll";
 
 interface PromotedArtistsProps {}
 
@@ -36,7 +35,7 @@ export const PromotedArtists: React.FC<PromotedArtistsProps> = ({}) => {
                 className="mt-3 ml-1"
                 style={{ marginBottom: 5, marginTop: 10 }}
               >
-                <Text weight={700}>{promotedArtist.artistName}</Text>
+                <Text fw={700}>{promotedArtist.artistName}</Text>
                 <Text
                   className="mt-1"
                   size="sm"

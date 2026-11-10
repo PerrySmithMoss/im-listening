@@ -5,6 +5,77 @@
 ![tech_stack](https://user-images.githubusercontent.com/59027997/121856561-858eab80-ccec-11eb-9518-fdc165223401.png)
 </div>
 
+## Run locally
+
+Use Node.js 24.22.2 (see [`.nvmrc`](.nvmrc)), npm 11, and Docker Compose.
+
+```sh
+./scripts/setup-local.sh
+docker compose up -d --wait
+npm ci --prefix server
+npm ci --prefix client
+npm run db:migrate --prefix server
+npm run build --prefix server
+```
+
+In separate terminals, run `npm run dev --prefix server` and `npm run dev --prefix client`.
+Open [the web app](http://localhost:3100). The API is at
+[port 5050](http://localhost:5050/healthz). Compose starts MySQL and Redis on
+loopback ports 3307 and 6380, respectively. Use `docker compose down` to stop
+the services and keep your local data.
+
+The setup script creates ignored env files without overwriting existing ones and generates
+a random session secret. See [server/.env.example](server/.env.example) and
+[client/.env.example](client/.env.example) for configuration. Set `SPOTIFY_CLIENT_ID` and
+`SPOTIFY_CLIENT_SECRET` in **server/.env** to enable Spotify search. You can still share
+songs by entering their details manually. Audio previews appear when Spotify supplies one.
+
+## Password reset email
+
+To enable delivery, uncomment the Resend block in `server/.env` and restart the API.
+Set `SMTP_PASSWORD` to a Resend API key with sending access and `SMTP_FROM` to an
+address on a verified domain. The block uses TLS on port 465. The
+`onboarding@resend.dev` sender works for testing with the email address on your
+Resend account. [Resend SMTP setup](https://resend.com/changelog/smtp-service) ·
+[Sender requirements](https://resend.com/docs/knowledge-base/403-error-resend-dev-domain)
+
+Email delivery is optional in local development. Set the same variables in production.
+
+## Verify changes
+
+With Compose running and the server built:
+
+```sh
+npm test --prefix server
+npm run gen --prefix client
+npm run lint --prefix client
+npm run build --prefix client
+npm audit --prefix server
+npm audit --prefix client
+```
+
+The API tests start their own server on port 5051, use Redis database 9, and clean up
+their MySQL accounts and posts. They capture reset emails on a temporary local SMTP
+listener, so CI needs no Resend credentials. GraphQL code generation reads the built server schema
+locally; it needs neither a running API nor external credentials. Commit the generated
+client file when you change the schema or operations.
+
+GraphQL stays on 16 to match Apollo Server's peer dependency, TypeScript stays on 6
+to match the ESLint parser, and Prisma stays on the stable 7 series. The npm overrides
+pin patched versions of `graphql-scalars` and `minimatch` until their callers update.
+
+## Upgrading an existing deployment
+
+Run `npm run db:migrate --prefix server` before starting the upgraded API. Existing
+sessions expire on upgrade. Use `CLIENT_ORIGIN` for the HTTPS frontend origin,
+`REDIS_URL` for the Redis connection, and the `SMTP_*` settings for password reset mail.
+Set `NEXT_PUBLIC_GRAPHQL_API_URL` to the absolute public API URL including `/graphql`
+before building the client. If the web server uses a different address to reach the API,
+set `GRAPHQL_INTERNAL_URL` on the web server for server-side rendering. Use HTTPS
+and a trusted proxy configuration in production. Keep the frontend and API on the
+same site so browsers can send session cookies. If a previous deployment exposed
+Spotify credentials in the client or Redis credentials in startup logs, rotate them.
+
 <div>
 <h2>Features</h2>
 <ul>

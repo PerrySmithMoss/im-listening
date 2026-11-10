@@ -1,12 +1,15 @@
+/** @type {import('next').NextConfig} */
 module.exports = {
-  nextConfig: {
-    reactStrictMode: true,
-    swcMinify: true,
-    images: {
-      domains: ["localhost", "im-listening.up.railway.app"],
-    },
-  },
-  env: {
-    GRAPHQL_API_URL: "http://localhost:5000/graphql",
+  reactStrictMode: true,
+  poweredByHeader: false,
+  async headers() {
+    return [{
+      source: "/:path*",
+      headers: [
+        { key: "X-Content-Type-Options", value: "nosniff" },
+        { key: "X-Frame-Options", value: "DENY" },
+        { key: "Referrer-Policy", value: "no-referrer" },
+      ],
+    }];
   },
 };

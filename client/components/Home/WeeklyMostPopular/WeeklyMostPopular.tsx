@@ -1,7 +1,6 @@
 import React from "react";
 import { IWeeklyTopTrack } from "../../../interfaces/IWeeklyTopTrack";
 import { WeeklyTopTrackCard } from "./WeeklyMostPopularCard/WeeklyTopTrackCard";
-import { SeeAll } from "../../Button/SeeAll/SeeAll";
 
 interface WeeklyMostPopularProps {}
 

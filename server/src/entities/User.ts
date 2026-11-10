@@ -1,36 +1,36 @@
-import 'reflect-metadata'
-import { ObjectType, Field, ID, Int } from 'type-graphql'
-import { Post } from './Post'
-import { Profile } from './Profile'
+import { ObjectType, Field, ID } from "type-graphql";
+import { Post } from "./Post";
+import { Profile } from "./Profile";
 
 @ObjectType()
-export class User {
+export class PublicUser {
   @Field(() => ID)
-  id: number
-  
-  @Field(() => Date)
-  createdAt: Date
+  id: number;
 
   @Field(() => Date)
-  updatedAt: Date
+  createdAt: Date;
 
-  @Field(() => String)
-  email: string
+  @Field(() => Date)
+  updatedAt: Date;
 
-  password: string
+  @Field()
+  firstName: string;
 
-  @Field(() => String)
-  firstName: string
+  @Field()
+  lastName: string;
 
-  @Field(() => String)
-  lastName: string
+  @Field()
+  username: string;
 
-  @Field(() => String)
-  username: string
+  @Field(() => Profile, { nullable: true })
+  profile: Profile | null;
+}
+
+@ObjectType()
+export class User extends PublicUser {
+  @Field()
+  email: string;
 
   @Field(() => [Post])
-  posts: Post[]
-
-  @Field(() => Profile)
-  profile: Profile
+  posts: Post[];
 }
