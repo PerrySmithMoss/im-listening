@@ -1,44 +1,5 @@
-import { faStar } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Rating } from "@mantine/core";
 
-import Rating from "react-rating";
-
-interface RatingProps {
-  chosenSongRating: number | undefined;
-  setChosenSongRating: React.Dispatch<React.SetStateAction<number | undefined>>;
+export function PostRating({ value, onChange }: { value: number; onChange?: (value: number) => void }) {
+  return <Rating value={value} onChange={onChange} fractions={2} readOnly={!onChange} size="lg" />;
 }
-
-export const RatingComp: React.FC<RatingProps> = ({ setChosenSongRating }) => {
-  const handleRatingChange = (rating: number) => {
-    setChosenSongRating(rating);
-  };
-
-  return (
-    <Rating
-      onChange={(rate) => handleRatingChange(rate)}
-      fractions={2}
-      placeholderRating={3.5}
-      emptySymbol={
-        <FontAwesomeIcon
-          size="2x"
-          color="gray"
-          icon={faStar}
-        />
-      }
-      placeholderSymbol={
-        <FontAwesomeIcon
-          size="2x"
-          color="gray"
-          icon={faStar}
-        />
-      }
-      fullSymbol={
-        <FontAwesomeIcon
-          size="2x"
-          color="yellow"
-          icon={faStar}
-        />
-      }
-    />
-  );
-};

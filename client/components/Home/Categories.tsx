@@ -1,67 +1,36 @@
-import { Chips, Chip, MultiSelect } from "@mantine/core";
-import React, { useState } from "react";
+import { Chip, Group, MultiSelect } from "@mantine/core";
 import { useGlobalUIContext } from "../../context/GlobalUI.context";
 
-interface CategoriesProps {}
+const genres = [
+  ["rock", "Rock"], ["pop", "Pop"], ["hip hop", "Hip-hop"], ["dance", "Dance"],
+  ["electronic", "Electronic"], ["classical", "Classical"], ["indie", "Indie"],
+  ["metal", "Metal"], ["r&b", "R&B"], ["country", "Country"],
+].map(([value, label]) => ({ value, label }));
 
-export const Categories: React.FC<CategoriesProps> = ({}) => {
+export function Categories() {
   const { filterCategories, setFilterCategories } = useGlobalUIContext();
+
   return (
-    <>
-      <section className="px-4 sm:px-8 lg:px-16 xl:px-20 mx-auto mt-5 md:mt-10">
-        <h2 className="text-2xl xss:text-3xl font-bold">Currently Playing</h2>
-      </section>
-      <section
-        // className={`${styles.categoriesWrap}`}
-        className="px-4 sm:px-8 lg:px-16 xl:px-20 mx-auto"
-      >
-        <div className="flex sm:hidden  mx-auto py-6 w-full">
-        {/* Mobile select */}
+    <section className="px-4 sm:px-8 lg:px-16 xl:px-20 mx-auto mt-5 md:mt-10">
+      <h2 className="text-2xl xss:text-3xl font-bold">Currently Playing</h2>
+      <div className="sm:hidden py-6">
         <MultiSelect
-          data={[
-            { value: "rock", label: "Rock" },
-            { value: "pop", label: "Pop" },
-            { value: "hip hop", label: "Hip-Hop" },
-            { value: "dance", label: "Dance" },
-            { value: "electronic", label: "Electronic" },
-            { value: "classical", label: "Classical" },
-            { value: "indie", label: "Indie" },
-            { value: "metal", label: "Metal" },
-            { value: "r&b", label: "R&B" },
-            { value: "country", label: "Country" },
-          ]}
+          data={genres}
           value={filterCategories}
           onChange={setFilterCategories}
+          aria-label="Filter by genre"
           placeholder="Filter by genre"
           searchable
-          nothingFound="Nothing found"
-          className="w-2/4"
+          nothingFoundMessage="Nothing found"
         />
-        </div>
-        {/* Desktop chips */}
-        <div className="hidden sm:flex  mx-auto py-6">
-          <Chips
-            color="orange"
-            variant="filled"
-            spacing="md"
-            size="md"
-            value={filterCategories}
-            onChange={setFilterCategories}
-            multiple
-          >
-            <Chip value="rock">Rock</Chip>
-            <Chip value="pop">Pop</Chip>
-            <Chip value="hip hop">Hip hop</Chip>
-            <Chip value="dance">Dance</Chip>
-            <Chip value="electronic">Electronic</Chip>
-            <Chip value="classical">Classical</Chip>
-            <Chip value="indie">Indie</Chip>
-            <Chip value="metal">Metal</Chip>
-            <Chip value="r&b">R&B</Chip>
-            <Chip value="country">Country</Chip>
-          </Chips>
-        </div>
-      </section>
-    </>
+      </div>
+      <div className="hidden sm:block py-6">
+        <Chip.Group value={filterCategories} onChange={setFilterCategories} multiple>
+          <Group gap="md">
+            {genres.map(({ value, label }) => <Chip key={value} value={value} color="orange" variant="filled">{label}</Chip>)}
+          </Group>
+        </Chip.Group>
+      </div>
+    </section>
   );
-};
+}

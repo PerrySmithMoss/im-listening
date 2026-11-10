@@ -1,11 +1,12 @@
-query FilterPosts($limit: Int!, $cursor: DateTime, $genres: [String!]!) {
-  filterPosts(limit: $limit, cursor: $cursor, genres: $genres) {
+query FilterPosts($limit: Int!, $cursor: DateTimeISO, $cursorId: Int, $genres: [String!]!) {
+  filterPosts(limit: $limit, cursor: $cursor, cursorId: $cursorId, genres: $genres) {
     hasMore
     posts {
       id
       createdAt
       updatedAt
       title
+      previewSongUrl
       artistName
       albumName
       genre
@@ -13,7 +14,6 @@ query FilterPosts($limit: Int!, $cursor: DateTime, $genres: [String!]!) {
       rating
       author {
         id
-        email
         firstName
         lastName
         username

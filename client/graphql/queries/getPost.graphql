@@ -12,7 +12,6 @@ query GetPost($id: Int!) {
     rating
     author {
       id
-      email
       firstName
       lastName
       username

@@ -1,149 +1,89 @@
-import { useRouter } from "next/dist/client/router";
-import React from "react";
-import {
-  useDeletePostMutation,
-  useGetCurrentUserQuery,
-  useGetPostQuery,
-} from "../../graphql/generated/graphql";
-import { withApollo } from "../../lib/withApollo";
-import { Meta } from "../../components/Home/Meta";
-import { Navbar } from "../../components/Navbar/Navbar";
-import styles from "../../components/Home/UserPosts/user-posts.module.css";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faStar } from "@fortawesome/free-solid-svg-icons";
-import { isServer } from "../../utils/isServer";
-import Rating from "react-rating";
+import type { GetServerSideProps } from "next";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { Meta } from "../../components/Home/Meta";
+import styles from "../../components/Home/UserPosts/user-posts.module.css";
+import { Navbar } from "../../components/Navbar/Navbar";
+import { PostRating } from "../../components/Rating/Rating";
+import { DeletePostDocument, GetCurrentUserDocument, GetPostDocument } from "../../graphql/generated/graphql";
+import { createApolloClient } from "../../lib/apollo";
 
-const Post = ({}) => {
+export const getServerSideProps: GetServerSideProps = async ({ params }) => {
+  const id = Number(params?.id);
+  if (!Number.isInteger(id) || id < 1 || id > 2147483647) return { notFound: true };
+  const apollo = createApolloClient(undefined, true);
+  try {
+    const { data } = await apollo.query({ query: GetPostDocument, variables: { id } });
+    if (!data?.getPost) return { notFound: true };
+    return { props: { id, apolloState: apollo.extract() } };
+  } catch {
+    return { props: { id } };
+  }
+};
+
+export default function Post({ id }: { id: number }) {
   const router = useRouter();
-  const postId =
-    typeof router.query.id === "string" ? parseInt(router.query.id) : -1;
+  const { data, loading, error } = useQuery(GetPostDocument, { variables: { id } });
+  const { data: account } = useQuery(GetCurrentUserDocument, { ssr: false });
+  const [deletePost, { loading: deleting }] = useMutation(DeletePostDocument);
+  const [deleteError, setDeleteError] = useState("");
+  const post = data?.getPost;
 
-  const [deletePost] = useDeletePostMutation();
-  const { data, loading, error } = useGetPostQuery({
-    skip: postId === -1,
-    variables: {
-      id: postId,
-    },
-  });
-  const { data: User, loading: UserLoading } = useGetCurrentUserQuery({
-    skip: isServer(),
-  });
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error {error}</div>;
-  }
-
-  if (!data?.getPost) {
-    <div>Could not find post...</div>;
+  async function removePost() {
+    setDeleteError("");
+    try {
+      const response = await deletePost({
+        variables: { id },
+        update(cache, { data }) {
+          if (!data?.deletePost) return;
+          cache.evict({ id: cache.identify({ __typename: "Post", id: String(id) }) });
+          cache.evict({ fieldName: "getRecentPosts" });
+          cache.evict({ fieldName: "filterPosts" });
+        },
+      });
+      if (!response.data?.deletePost) throw new Error();
+      void router.push("/");
+    } catch {
+      setDeleteError("Could not delete this post. Please try again.");
+    }
   }
 
   return (
-    <div>
-      <Meta
-        title={`${data?.getPost?.title} | I'm Listening`}
-        keywords={"music, social media, social, share music, music"}
-        description={"Share what you're listening to."}
-      />
-      <Navbar
-        primary={true}
-        onLogin={() => {}}
-        onLogout={() => {}}
-        onCreateAccount={() => {}}
-        songAudio={false}
-      />
-      <section className={`${styles.individualPostWrapper} px-4 sm:px-8 `}>
-        <div key={data?.getPost?.id} className={`${styles.individualPostItem}`}>
-            <img
-              className={`${styles.albumImage}`}
-              src={data?.getPost?.albumImage}
-              alt="Two people dancing to music"
-            />
-          <div className={`${styles.individualUserReview}`}>
-            <div className={`${styles.userHeader}`}>
-              <div>
-                <img
-                  className={`${styles.userAvatarImage}`}
-                  src={data?.getPost?.author.profile.avatar as string}
-                  alt="User Avatar"
-                />
+    <>
+      <Meta title={post ? `${post.title} | I'm Listening` : "Post | I'm Listening"} keywords="music, share music" description="Share what you're listening to." />
+      <Navbar />
+      {loading && <p role="status">Loading…</p>}
+      {error && <p role="alert">Could not load this post. Please try again later.</p>}
+      {!loading && !error && !post && <p>Post not found.</p>}
+      {post && (
+        <section className={`${styles.individualPostWrapper} px-4 sm:px-8`}>
+          <article className={styles.individualPostItem}>
+            <img className={styles.albumImage} src={post.albumImage || "/assets/image-placeholder.png"} alt="Album cover art" />
+            <div className={styles.individualUserReview}>
+              <div className={styles.userHeader}>
+                <img className={styles.userAvatarImage} src={post.author.profile?.avatar || "/assets/user-avatar.jpeg"} alt="" />
+                <div className={styles.userHandles}>
+                  <p className="font-bold">{post.author.firstName} {post.author.lastName}</p>
+                  <span className="text-[#0f8deb] text-sm">{post.author.username}</span>
+                </div>
               </div>
-              <div className={`${styles.userHandles}`}>
-                <p
-                  className={`${styles.userUsername}`}
-                  style={{ color: "slate", fontWeight: "bold" }}
-                >
-                  {`${data?.getPost?.author.firstName} ${data?.getPost?.author.lastName}`}
-                </p>
-                <a className={`${styles.ListOfPostsA}`}>
-                  <span style={{ color: "#0f8deb", fontSize: "0.8rem" }}>
-                    {`${data?.getPost?.author.username}`}
-                  </span>
-                </a>
-              </div>
+              <p className="font-bold pt-3 pb-1">{post.artistName} · {post.albumName}</p>
+              <h1 className={`${styles.userUsername} ${styles.withPadding}`}>{post.title}</h1>
+              <PostRating value={post.rating} />
+              {post.previewSongUrl && <audio controls src={post.previewSongUrl} aria-label="Song preview" />}
+              {account?.getCurrentUser?.id === post.author.id && (
+                <button type="button" aria-label="Delete post" disabled={deleting} onClick={removePost} className={styles.iconBadgeWrapper}>
+                  <FontAwesomeIcon color="red" icon={faTrash} className={styles.iconBadgeDelete} />
+                </button>
+              )}
+              {deleteError && <p role="alert">{deleteError}</p>}
             </div>
-            <p
-              className={`${styles.userUsername}`}
-              style={{
-                fontWeight: "bold",
-                paddingTop: "10px",
-                paddingBottom: "5px",
-              }}
-            >
-              {`${data?.getPost?.artistName} - ${data?.getPost?.albumName}`}
-            </p>
-            <p
-              // style={{ color: "#383838", fontWeight: "bold" }}
-              className={`${styles.userUsername} ${styles.withPadding}`}
-            >
-              {`${data?.getPost?.title}`}
-            </p>
-            <Rating
-              initialRating={data?.getPost?.rating}
-              readonly
-              fractions={2}
-              // placeholderRating={3.5}
-              emptySymbol={
-                <FontAwesomeIcon size="2x" color="gray" icon={faStar} />
-              }
-              placeholderSymbol={
-                <FontAwesomeIcon size="2x" color="gray" icon={faStar} />
-              }
-              fullSymbol={
-                <FontAwesomeIcon size="2x" color="yellow" icon={faStar} />
-              }
-            />
-            {User?.getCurrentUser?.id === data?.getPost?.author.id ? (
-              <div className={`${styles.iconBadgeWrapper}`}>
-                <FontAwesomeIcon
-                  color="red"
-                  icon={faTrash}
-                  onClick={async () => {
-                    await deletePost({
-                      variables: {
-                        id: parseInt(data?.getPost?.id!),
-                      },
-                      update: (cache) => {
-                        cache.evict({
-                          id: "Post:" + parseInt(data?.getPost?.id!),
-                        });
-                      },
-                    });
-                    router.push("/");
-                  }}
-                  className={`${styles.iconBadgeDelete}`}
-                ></FontAwesomeIcon>
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </section>
-    </div>
+          </article>
+        </section>
+      )}
+    </>
   );
-};
-
-export default withApollo({ ssr: true })(Post);
+}

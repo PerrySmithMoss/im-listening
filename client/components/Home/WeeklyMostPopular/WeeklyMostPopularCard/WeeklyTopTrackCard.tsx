@@ -22,11 +22,11 @@ export const WeeklyTopTrackCard: React.FC<WeeklyTopTrackCardProps> = ({
       </div>
 
       <Group
-        position="apart"
+        justify="space-between"
         style={{ marginBottom: 5, marginTop: 10 }}
         className="ml-1"
       >
-        <Text weight={700}>{card.trackTitle}</Text>
+        <Text fw={700}>{card.trackTitle}</Text>
         <Badge color="orange" variant="light">
           Hot Track
         </Badge>

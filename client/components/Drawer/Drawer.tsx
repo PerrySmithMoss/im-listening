@@ -12,7 +12,6 @@ export const Drawer: React.FC<DrawerProps> = ({
   children,
   isOpen,
   setIsOpen,
-  title,
   size,
 }) => {
   return (

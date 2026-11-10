@@ -1,5 +1,5 @@
-query GetRecentPosts($limit: Int!, $cursor: DateTime) {
-  getRecentPosts(limit: $limit, cursor: $cursor) {
+query GetRecentPosts($limit: Int!, $cursor: DateTimeISO, $cursorId: Int) {
+  getRecentPosts(limit: $limit, cursor: $cursor, cursorId: $cursorId) {
     hasMore
     posts {
       id
@@ -14,7 +14,6 @@ query GetRecentPosts($limit: Int!, $cursor: DateTime) {
       rating
       author {
         id
-        email
         firstName
         lastName
         username

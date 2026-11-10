@@ -1,7 +1,4 @@
-import "reflect-metadata";
-import { ObjectType, Field, ID, Int } from "type-graphql";
-import { Post } from "./Post";
-import { Profile } from "./Profile";
+import { ObjectType, Field, ID } from "type-graphql";
 
 @ObjectType()
 export class SongGenre {
@@ -14,9 +11,6 @@ export class SongGenre {
   @Field(() => Date)
   updatedAt: Date;
 
-  @Field(() => String)
+  @Field()
   genre: string;
-
-  @Field(() => Post)
-  post: Post;
 }

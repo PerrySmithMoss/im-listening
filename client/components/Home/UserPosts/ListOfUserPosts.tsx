@@ -1,96 +1,48 @@
-import React, { useEffect } from "react";
+import { useState } from "react";
+import { skipToken, useQuery } from "@apollo/client/react";
 import { useGlobalUIContext } from "../../../context/GlobalUI.context";
-import {
-  useFilterPostsLazyQuery,
-  useGetRecentPostsQuery,
-} from "../../../graphql/generated/graphql";
+import { FilterPostsDocument, GetRecentPostsDocument } from "../../../graphql/generated/graphql";
 import styles from "./user-posts.module.css";
 import { UserPostsCard } from "./UserPostsCard";
 
-interface ListOfUserPostsProps {
-}
+export function ListOfUserPosts() {
+  const [pageError, setPageError] = useState("");
+  const { filterCategories } = useGlobalUIContext();
+  const filtered = filterCategories.length > 0;
+  const recent = useQuery(GetRecentPostsDocument, filtered ? skipToken : { variables: { limit: 6 } });
+  const filteredPosts = useQuery(FilterPostsDocument, filtered
+    ? { variables: { limit: 6, genres: filterCategories } }
+    : skipToken);
+  const { error, loading } = filtered ? filteredPosts : recent;
+  const result = filtered ? filteredPosts.data?.filterPosts : recent.data?.getRecentPosts;
+  const lastPost = result?.posts.at(-1);
 
-export const ListOfUserPosts: React.FC<ListOfUserPostsProps> = ({
-}) => {
-  const { data, error, loading, fetchMore, variables } = useGetRecentPostsQuery(
-    {
-      variables: {
-        limit: 6,
-        cursor: null,
-      },
-      notifyOnNetworkStatusChange: true,
-    }
-  );
-  const { data: recentPosts, error: recentPostsError, loading: loadingRecentPosts } = useGetRecentPostsQuery({
-    variables: {
-      limit: 6,
-      cursor: null,
-    },
-  });
-  const [
-    filterPosts,
-    { loading: loadingFilteredPosts, data: filteredPosts },
-  ] = useFilterPostsLazyQuery();
-
-  const { filterCategories, setFilterCategories } = useGlobalUIContext();
-
-  useEffect(() => {
-    if (filterCategories.length > 0) {
-      filterPosts({
-        variables: {
-          limit: 6,
-          cursor: null,
-          genres: filterCategories,
-        },
-      });
-    }
-  }, [filterCategories]);
-
-  const handleFetchMorePosts = async () => {
-    await fetchMore({
-      variables: {
-        limit: variables?.limit,
-        cursor:
-          data?.getRecentPosts.posts[data.getRecentPosts.posts.length - 1]
-            .createdAt,
-      },
-    });
-  };
+  function fetchMore() {
+    if (!lastPost) return;
+    setPageError("");
+    const variables = { limit: 6, cursor: lastPost.createdAt, cursorId: Number(lastPost.id) };
+    const request = filtered
+      ? filteredPosts.fetchMore({ variables: { ...variables, genres: filterCategories } })
+      : recent.fetchMore({ variables });
+    void request.catch(() => setPageError("Could not load more posts. Please try again."));
+  }
 
   return (
-    <section className=" mx-auto mt-2">
+    <section className="mx-auto mt-2">
       <div className="grid grid-cols-1 largeTablet:grid-cols-2 gap-6 px-4 sm:px-8 lg:px-16 xl:px-20">
-        {filterCategories.length > 0 ? (
-          <>
-            { !Array.isArray(filteredPosts?.filterPosts.posts) ||
-              !filteredPosts?.filterPosts.posts.length ? (
-              <div>There are no posts under this genre</div>
-            ) : (
-              <>
-                {filteredPosts?.filterPosts.posts.map((post: any) => (
-                  <UserPostsCard key={post.id} post={post} />
-                ))}
-              </>
-            )}
-          </>
-        ) : (
-          <>
-            {recentPosts && recentPosts.getRecentPosts.posts.map((post: any) => (
-              <UserPostsCard key={post.id} post={post} />
-            ))}
-          </>
-        )}
+        {error && <p role="alert">Could not load posts. Please try again later.</p>}
+        {loading && !result && <p role="status">Loading posts…</p>}
+        {!loading && !error && !result?.posts.length && <p>{filtered ? "No posts match these genres yet." : "No posts yet."}</p>}
+        {result?.posts.map((post) => <UserPostsCard key={post.id} post={post} />)}
       </div>
-      {recentPosts && recentPosts.getRecentPosts.hasMore ? (
+      {pageError && <p role="alert" className="text-center mt-3">{pageError}</p>}
+      {result?.hasMore && (
         <div className={`${styles.seeMoreWrapper} mt-6`}>
-          <a
-            className="px-8 cursor-pointer py-2.5 bg-brand-orange hover:bg-brand-orange_hover text-white rounded"
-            onClick={() => handleFetchMorePosts()}
-          >
-            Load More
-          </a>
+          <button type="button" disabled={loading} className="px-8 py-2.5 bg-brand-orange hover:bg-brand-orange_hover text-white rounded" onClick={fetchMore}>
+            Load more
+          </button>
         </div>
-      ) : null}
+      )}
     </section>
   );
-};
+}

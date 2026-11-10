@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE `Post` ADD COLUMN `albumImage` VARCHAR(255) NOT NULL DEFAULT '';

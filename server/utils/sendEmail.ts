@@ -1,22 +1,23 @@
 import nodemailer from "nodemailer";
+import type { loadConfig } from "../src/config";
 
-export async function sendEmail(to: string, html: string) {
+export function createMailer({ smtp, clientOrigin }: ReturnType<typeof loadConfig>) {
+  if (!smtp) return undefined;
+  const { from, ...options } = smtp;
   const transporter = nodemailer.createTransport({
-    service: "gmail",
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.EMAIL_HOST,
-      pass: process.env.EMAIL_APP_PASSWORD,
-    },
+    ...options,
+    connectionTimeout: 5_000,
+    greetingTimeout: 5_000,
+    socketTimeout: 10_000,
   });
 
-  // send mail with defined transport object
-  await transporter.sendMail({
-    from: '"Im Listening 🎧" <services@imlistening.com>', // sender address
-    to: to, // list of receivers
-    subject: "Change password", // Subject line
-    html,
-  });
+  return async (email: string, token: string) => {
+    const url = new URL(`/change-password/${token}`, clientOrigin);
+    await transporter.sendMail({
+      from,
+      to: { name: "", address: email },
+      subject: "Reset your I'm Listening password",
+      text: `Use this link within one hour to reset your password: ${url.href}`,
+    });
+  };
 }

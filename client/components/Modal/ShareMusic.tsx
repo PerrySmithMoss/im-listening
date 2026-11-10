@@ -1,534 +1,210 @@
-import {
-  faCheckCircle,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  Avatar,
-  Button,
-  Divider,
-  Group,
-  Stepper,
-  Text,
-  TextInput,
-  useMantineColorScheme,
-} from "@mantine/core";
-import { PlayIcon, PauseIcon, MagnifyingGlassIcon } from "@modulz/radix-icons";
-import { useRouter } from "next/dist/client/router";
-import React, { useCallback, useEffect, useState } from "react";
-import { useGlobalUIContext } from "../../context/GlobalUI.context";
-import {
-  useCreatePostMutation,
-  useGetCurrentUserQuery,
-} from "../../graphql/generated/graphql";
-import { useSpotify } from "../../hooks/useSpotify";
-import { debounce } from "../../utils/debounce";
-import { isServer } from "../../utils/isServer";
-import { RatingComp } from "../Rating/Rating";
-import { useNotifications } from "@mantine/notifications";
-import { useLocalStorageValue } from "@mantine/hooks";
-import { getLastWordOfString as getLastWordOfString } from "../../helpers/getLastWordOfString";
-import "emoji-mart/css/emoji-mart.css";
-import { Picker } from "emoji-mart";
-import { faSmile } from "@fortawesome/free-regular-svg-icons";
+import { useMutation } from "@apollo/client/react";
+import { Button, Group, Select, Stepper, TextInput, useComputedColorScheme } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import emojiData from "@emoji-mart/data";
+import { useRouter } from "next/router";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { CreatePostDocument } from "../../graphql/generated/graphql";
+import { graphqlUrl } from "../../lib/apollo";
+import { PostRating } from "../Rating/Rating";
 
-interface ShareMusicProps {
-  handleCloseModal: () => void;
-  songAudio: boolean;
+type Track = {
+  id: string;
+  artist: { id: string; name: string };
+  title: string;
+  albumName: string;
+  albumUrl: string;
+  previewUrl: string | null;
+};
+
+const genres = ["rock", "pop", "hip hop", "dance", "electronic", "classical", "indie", "metal", "r&b", "country", "other"];
+
+async function spotify<T>(path: string, signal: AbortSignal): Promise<T> {
+  const url = new URL(`spotify/${path}`, new URL(graphqlUrl, window.location.origin));
+  const response = await fetch(url, { credentials: "include", signal });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(payload.error ?? "Could not reach Spotify.");
+  }
+  return response.json();
 }
 
-export const ShareMusic: React.FC<ShareMusicProps> = ({
-  songAudio,
-  handleCloseModal,
-}) => {
-  const spotifyAPI = useSpotify();
-  const notifications = useNotifications();
-  const [songInput, setSongInput] = useState("");
-  const [chosenSongModalFinal, setChosenSongModalFinal] = useState<any>({});
-  const [
-    chosenSongArtistGenresModalFinal,
-    setChosenSongArtistGenresModalFinal,
-  ] = useState<string[]>([]);
-  const [chosenSongRating, setChosenSongRating] = useState<number | undefined>(
-    undefined
-  );
-  const [token, setToken] = useLocalStorageValue({
-    key: "il-spotify-token",
-    defaultValue: "",
-  });
-  const [chosenSongTitle, setChosenSongTitle] = useState("");
-  const [serverDataIsCorrect, setServerDataIsCorrect] = useState(false);
-  const { data, loading } = useGetCurrentUserQuery({ skip: isServer() });
-  const [createPost] = useCreatePostMutation();
-  const [songResults, setSongResults] = useState<any>([]);
-  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+function EmojiPicker({ onSelect }: { onSelect: (emoji: string) => void }) {
+  const container = useRef<HTMLDivElement>(null);
+  const theme = useComputedColorScheme("light");
+  useEffect(() => {
+    let cancelled = false;
+    let picker: HTMLElement | undefined;
+    void import("emoji-mart").then(({ Picker }) => {
+      if (cancelled) return;
+      // The browser picker is a custom element; its published types omit HTMLElement members.
+      picker = new Picker({
+        data: emojiData,
+        theme,
+        dynamicWidth: true,
+        previewPosition: "none",
+        onEmojiSelect: (emoji: { native: string }) => onSelect(emoji.native),
+      }) as unknown as HTMLElement;
+      picker.style.cssText = "width: min(100%, 352px); height: 270px";
+      container.current?.append(picker);
+    }).catch(() => { /* Emoji entry remains available through the system keyboard. */ });
+    return () => {
+      cancelled = true;
+      picker?.remove();
+    };
+  }, [onSelect, theme]);
+  return <div ref={container} />;
+}
+
+export function ShareMusic({ handleCloseModal }: { handleCloseModal: () => void }) {
   const router = useRouter();
+  const [createPost, { loading: saving }] = useMutation(CreatePostDocument);
   const [active, setActive] = useState(0);
-  const [showEmojis, setShowEmojis] = useState(false);
-  const nextStep = () =>
-    setActive((current) => (current < 1 ? current + 1 : current));
-  const prevStep = () =>
-    setActive((current) => (current > 0 ? current - 1 : current));
-  const {
-    isMusicPlaying,
-    setIsMusicPlaying,
-    playingTrackState,
-    setPlayingTrackState,
-    isShowMusicPlayerOpen,
-    setIsShowMusicPlayerOpen,
-    chosenSong,
-    setChosenSong,
-  } = useGlobalUIContext();
-  const fetchSongs: any = useCallback(
-    debounce(async (string: string) => {
-      // try {
-      // const res = await spotifyAPI.searchTracks(string, { limit: 5, market: "GB" })
-      // // console.log("Res: ", res)
-      // } catch(e) {
-      //   console.error("Error: ", e)
-      // }
+  const [search, setSearch] = useState("");
+  const [results, setResults] = useState<Track[]>([]);
+  const [searchError, setSearchError] = useState("");
+  const [manual, setManual] = useState(false);
+  const [selected, setSelected] = useState<Track | null>(null);
+  const [artistName, setArtistName] = useState("");
+  const [songName, setSongName] = useState("");
+  const [genre, setGenre] = useState<string | null>(null);
+  const [artistGenres, setArtistGenres] = useState<string[]>([]);
+  const [review, setReview] = useState("");
+  const [rating, setRating] = useState(0);
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
-      spotifyAPI
-        .searchTracks(string, { limit: 5, market: "GB" })
-        .then((res: any) => {
-          setSongResults(
-            res.body.tracks.items.map((track: any) => {
-              return {
-                id: track.id,
-                artist: track.artists[0],
-                title: track.name,
-                uri: track.uri,
-                albumUrl: track.album.images[0].url,
-                popularity: track.popularity,
-                previewUrl: track.preview_url,
-              };
-            })
-          );
-        })
-        .catch((error: any) => {
-          console.error("Error: ", error.statusCode);
-          if (error.status === 401 || 403) {
-            console.log("You need to refresh your access token!!");
-            const fetchSpotifyToken = async (callback: any) => {
-              console.log("Fetching new token...");
-              // const token = spotifyAPI.getAccessToken()
-
-              const res = await fetch(
-                "https://accounts.spotify.com/api/token",
-                {
-                  headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    Authorization:
-                      "Basic " +
-                      btoa(
-                        process.env.NEXT_PUBLIC_CLIENT_ID +
-                          ":" +
-                          process.env.NEXT_PUBLIC_CLIENT_SECRET
-                      ),
-                  },
-                  method: "POST",
-                  body: "grant_type=client_credentials",
-                }
-              );
-              const data = await res.json();
-              setToken(data.access_token);
-              spotifyAPI.setAccessToken(data.access_token);
-              callback();
-            };
-            fetchSpotifyToken(async () => {
-              await spotifyAPI
-                .searchTracks(string, { limit: 5, market: "GB" })
-                .then((res: any) => {
-                  setSongResults(
-                    res.body.tracks.items.map((track: any) => {
-                      return {
-                        id: track.id,
-                        artist: track.artists[0],
-                        title: track.name,
-                        uri: track.uri,
-                        albumUrl: track.album.images[0].url,
-                        popularity: track.popularity,
-                        previewUrl: track.preview_url,
-                      };
-                    })
-                  );
-                });
-            });
-          }
-        });
-    }, 1000),
-    []
-  );
   useEffect(() => {
-    songInput && fetchSongs(songInput);
-  }, [songInput]);
-
-  const fetchArtistGenres: any = useCallback(
-    debounce(async (string: string) => {
-      spotifyAPI
-        .getArtist(string)
-        .then((res: any) => {
-          setChosenSongArtistGenresModalFinal(res.body.genres);
-        })
-        .catch((error: any) => {
-          console.error("Error: ", error.statusCode);
-          if (error.status === 401 || 403) {
-            console.log("You need to refresh your access token!!");
-            const fetchSpotifyToken = async (callback: any) => {
-              console.log("Fetching new token...");
-              // const token = spotifyAPI.getAccessToken()
-
-              const res = await fetch(
-                "https://accounts.spotify.com/api/token",
-                {
-                  headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    Authorization:
-                      "Basic " +
-                      btoa(
-                        process.env.NEXT_PUBLIC_CLIENT_ID +
-                          ":" +
-                          process.env.NEXT_PUBLIC_CLIENT_SECRET
-                      ),
-                  },
-                  method: "POST",
-                  body: "grant_type=client_credentials",
-                }
-              );
-              const data = await res.json();
-              setToken(data.access_token);
-              spotifyAPI.setAccessToken(data.access_token);
-              callback();
-            };
-            fetchSpotifyToken(async () => {
-              await spotifyAPI.getArtist(string).then((res: any) => {
-                console.log(res);
-                setChosenSongArtistGenresModalFinal(res.body.genres);
-              });
-            });
-          }
+    if (!search.trim() || manual || active !== 0) return;
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams({ q: search.trim() });
+      void spotify<Track[]>(`tracks?${params}`, controller.signal)
+        .then(setResults)
+        .catch((error: Error) => {
+          if (!controller.signal.aborted) setSearchError(error.message);
         });
-    }, 1500),
-    []
-  );
+    }, 450);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [search, manual, active]);
+
+  const artistId = selected?.artist.id;
   useEffect(() => {
-    Object.keys(chosenSongModalFinal).length !== 0 &&
-      fetchArtistGenres(chosenSongModalFinal.artist.id);
-  }, [chosenSongModalFinal]);
+    if (!artistId || manual) return;
+    const controller = new AbortController();
+    void spotify<string[]>(`artists/${encodeURIComponent(artistId)}/genres`, controller.signal)
+      .then(setArtistGenres)
+      .catch(() => { /* The user can still pick a genre. */ });
+    return () => controller.abort();
+  }, [artistId, manual]);
 
-  const handlePlaySongPreview = (song: any) => {
-    setIsMusicPlaying(!isMusicPlaying);
-    setPlayingTrackState(song.Uri);
-    setIsShowMusicPlayerOpen(!isShowMusicPlayerOpen);
-    setChosenSong(song);
-  };
+  const primaryGenre = artistGenres[0]?.toLowerCase();
+  const broadGenre = primaryGenre?.endsWith("hip hop") ? "hip hop" : primaryGenre?.split(" ").at(-1);
+  const suggestedGenre = broadGenre && genres.includes(broadGenre) ? broadGenre : "other";
+  const reviewGenre = genre ?? suggestedGenre;
 
-  const takeFirstSongGenre = (string: string) => {
-    const regexp = /[a-zA-Z]+\s+[a-zA-Z]+/g;
-    if (regexp.test(string)) {
-      // at least 2 words consisting of letters
-      return getLastWordOfString(string);
-    } else if (string === "electro") {
-      return "electronic";
-    } else {
-      // one word
-      return string.trim();
-    }
-  };
+  const trackReady = manual ? Boolean(artistName.trim() && songName.trim()) : selected !== null;
 
-  const handleSelectedChosenSongFnal = (song: any) => {
-    setChosenSongModalFinal(song);
-  };
-
-  const handleShareMusic = async (event: any) => {
+  async function share(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    // setErrors(validation(formValues));
-    // if (dataIsCorrect === true) {
-    const res = await createPost({
-      variables: {
-        artistName: chosenSongModalFinal.artist.name,
-        albumName: chosenSongModalFinal.title,
-        title: chosenSongTitle,
-        previewSongUrl: chosenSongModalFinal.previewUrl,
-        genres: chosenSongArtistGenresModalFinal,
-        genre: takeFirstSongGenre(chosenSongArtistGenresModalFinal[0]),
-        rating: chosenSongRating as number,
-        albumImage: chosenSongModalFinal.albumUrl,
-      },
-      update: (cache) => {
-        cache.evict({ fieldName: "getRecentPosts:{}" });
-      },
-    });
-    if (res.errors) {
-      console.log(res.errors);
-      setServerDataIsCorrect(false);
-      // setServerErrors(toErrorMap(res.data.registerUser.errors));
-      // } else if (res.data?.registerUser.user) {
-      //   router.push("/");
-    } else {
-      setServerDataIsCorrect(true);
-      handleCloseModal();
-      notifications.showNotification({
-        title: "Success",
-        message: "Your post was successfully uploaded.",
-        icon: <FontAwesomeIcon size="2x" color="white" icon={faCheckCircle} />,
-        color: "teal",
+    if (!trackReady || !review.trim() || !rating) return;
+    setSaveError("");
+    try {
+      await createPost({
+        variables: {
+          artistName: manual ? artistName.trim() : selected!.artist.name,
+          albumName: manual ? songName.trim() : selected!.title,
+          title: review.trim(),
+          previewSongUrl: manual ? null : selected!.previewUrl,
+          genres: manual ? [] : artistGenres,
+          genre: reviewGenre,
+          rating,
+          albumImage: manual ? "" : selected!.albumUrl,
+        },
+        refetchQueries: ["GetRecentPosts", "FilterPosts"],
       });
-      router.push("/");
+      handleCloseModal();
+      notifications.show({ title: "Posted", message: "Your music review is live.", color: "teal" });
+      void router.push("/");
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Could not publish your review.");
     }
-  };
-
-  const addEmoji = (e: any) => {
-    let sym = e.unified.split("-");
-    let codesArray: any = [];
-    sym.forEach((el: any) => codesArray.push("0x" + el));
-    let emoji = String.fromCodePoint(...codesArray);
-    setChosenSongTitle(chosenSongTitle + emoji);
-  };
+  }
 
   return (
     <div className="mt-6">
-      <>
-        <Stepper
-          active={active}
-          onStepClick={setActive}
-          breakpoint="sm"
-          color="orange"
-        >
-          <Stepper.Step label="Find song" allowStepSelect={active > 0}>
-            {/* <div className="py-3">
-            <hr />
-            </div> */}
-            <div className="mt-1 pl-1">
+      <Stepper active={active} onStepClick={(step) => { if (step === 0) setActive(0); }} color="orange">
+        <Stepper.Step label="Find song" allowStepSelect={active > 0}>
+          <Button variant="subtle" onClick={() => { setManual(!manual); setArtistGenres([]); setSelected(null); }}>
+            {manual ? "Search Spotify instead" : "Enter song details manually"}
+          </Button>
+          {manual ? (
+            <div className="space-y-3">
+              <TextInput label="Artist" value={artistName} maxLength={190} onChange={(event) => setArtistName(event.currentTarget.value)} required />
+              <TextInput label="Song name" value={songName} maxLength={190} onChange={(event) => setSongName(event.currentTarget.value)} required />
+            </div>
+          ) : (
+            <>
               <TextInput
-                size="sm"
-                icon={<MagnifyingGlassIcon style={{ height: 22, width: 22 }} />}
-                placeholder="Smells Like Teen Spirit"
                 label="Song name"
-                description="Enter a song name"
-                value={songInput}
-                onChange={(event) => setSongInput(event.currentTarget.value)}
-                required
+                description="Search the Spotify catalog"
+                value={search}
+                maxLength={100}
+                onChange={(event) => {
+                  setSearch(event.currentTarget.value);
+                  setResults([]);
+                  setSearchError("");
+                  setSelected(null);
+                  setArtistGenres([]);
+                }}
               />
-              <div className="">
-                {songResults.map((song: any) => (
-                  <div key={song.id}>
-                    <div key={song.id} className="flex py-4">
-                      {/* <div>
-              1
-            </div> */}
-                      <div
-                        onClick={() => handleSelectedChosenSongFnal(song)}
-                        className={
-                          chosenSongModalFinal.id === song.id
-                            ? colorScheme === "dark"
-                              ? `flex w-full cursor-pointer bg-[#2b2c3d] border border-green-500`
-                              : `flex w-full cursor-pointer bg-gray-200 border border-green-500`
-                            : colorScheme === "dark"
-                            ? `flex w-full cursor-pointer hover:bg-[#2b2c3d]`
-                            : `flex w-full cursor-pointer hover:hover:bg-gray-200`
-                        }
-                      >
-                        <div className="relative">
-                          <img
-                            className="w-32 h-auto"
-                            src={song.albumUrl}
-                            alt="Album cover art"
-                          />
-                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ">
-                            <a className=" rounded-full p-3">
-                              {song.previewUrl !== null && (
-                                <>
-                                  {song.uri === chosenSong.uri &&
-                                  isMusicPlaying ? (
-                                    <>
-                                      {songAudio === true ? (
-                                        <PlayIcon
-                                          onClick={() =>
-                                            handlePlaySongPreview(song)
-                                          }
-                                          className="bg-brand-orange cursor-pointer hover:bg-brand-orange_hover"
-                                          color="white"
-                                          style={{
-                                            height: 34,
-                                            width: 34,
-                                            //   backgroundColor: "orange",
-                                            borderRadius: "50%",
-                                            padding: 5,
-                                          }}
-                                        />
-                                      ) : (
-                                        <PauseIcon
-                                          onClick={() =>
-                                            handlePlaySongPreview(song)
-                                          }
-                                          className="bg-brand-orange cursor-pointer hover:bg-brand-orange_hover"
-                                          color="white"
-                                          style={{
-                                            height: 34,
-                                            width: 34,
-                                            //   backgroundColor: "orange",
-                                            borderRadius: "50%",
-                                            padding: 5,
-                                          }}
-                                        />
-                                      )}
-                                    </>
-                                  ) : (
-                                    <PlayIcon
-                                      onClick={() =>
-                                        handlePlaySongPreview(song)
-                                      }
-                                      className="bg-brand-orange cursor-pointer hover:bg-brand-orange_hover"
-                                      color="white"
-                                      style={{
-                                        height: 34,
-                                        width: 34,
-                                        //   backgroundColor: "orange",
-                                        borderRadius: "50%",
-                                        padding: 5,
-                                      }}
-                                    />
-                                  )}
-                                </>
-                              )}
-                            </a>
-                          </div>
-                        </div>
-                        <div className="pl-3 flex w-full content-center items-center">
-                          <div className="flex w-full justify-between content-center items-center">
-                            <div className="">
-                              <h3 className="font-bold">{song.artist.name}</h3>
-                              <h3 className=" text-sm">{song.title}</h3>
-                            </div>
-                            {chosenSongModalFinal.id === song.id && (
-                              <div className="mr-4">
-                                <button className="text-green-500 text-sm bg-transparent">
-                                  Selected
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <Divider />
-                  </div>
+              {searchError && <p role="status" className="mt-2">{searchError}</p>}
+              <ul className="space-y-2 mt-2">
+                {results.map((track) => (
+                  <li key={track.id}>
+                    <button
+                      type="button"
+                      aria-pressed={selected?.id === track.id}
+                      className="flex items-center gap-3 w-full p-2 text-left aria-pressed:border-orange-500 border border-transparent rounded"
+                      onClick={() => { setSelected(track); setArtistGenres([]); }}
+                    >
+                      <img className="w-12 rounded" src={track.albumUrl || "/assets/image-placeholder.png"} alt="" />
+                      <span><strong>{track.title}</strong> · {track.artist.name}</span>
+                    </button>
+                    {track.id === selected?.id && track.previewUrl && (
+                      <audio controls src={track.previewUrl} aria-label="Song preview" />
+                    )}
+                  </li>
                 ))}
-              </div>
-            </div>
-          </Stepper.Step>
-          <Stepper.Step label="Rate song" allowStepSelect={active > 1}>
-            <div className="p-2.5">
-              {/* <Text>Chosen Song</Text> */}
-              <div className="flex w-full mt-2">
-                <div className="relative">
-                  <img
-                    className="w-28 h-auto"
-                    src={chosenSongModalFinal?.albumUrl}
-                    alt="Album cover art"
-                  />
-                </div>
-                <div className="pl-3 flex w-full content-center items-center">
-                  <div className="flex w-full justify-between content-center items-center">
-                    {chosenSongModalFinal?.artist?.name && (
-                      <div className="">
-                        <h3 className="font-bold">
-                          {chosenSongModalFinal.artist.name}
-                        </h3>
-                        <h3 className=" text-sm">
-                          {chosenSongModalFinal.title}
-                        </h3>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="mt-4">
-                <hr />
-              </div>
-              <div className="mt-2">
-                <Text style={{ fontWeight: "bold", fontSize: "16px" }}>
-                  Write your review
-                </Text>
-              </div>
-              <div className="flex w-full mt-2">
-                <div className="relative">
-                  <Avatar
-                    size={40}
-                    radius="xl"
-                    src={data?.getCurrentUser?.profile?.avatar as string}
-                  />
-                </div>
-                <div className="pl-3 mt-1 flex w-full content-center items-center">
-                  <div className="flex w-full justify-between content-center items-center">
-                    {chosenSongModalFinal?.artist?.name && (
-                      <div className="w-full">
-                        <div className="flex content-center items-center space-x-1">
-                          <TextInput
-                            value={chosenSongTitle}
-                            onChange={(e) =>
-                              setChosenSongTitle(e.currentTarget.value)
-                            }
-                            className="w-full"
-                            placeholder="This is my jam!"
-                            required
-                          />
-                          <div>
-                            <FontAwesomeIcon
-                              onClick={() => setShowEmojis(!showEmojis)}
-                              size="2x"
-                              color="gray"
-                              icon={faSmile}
-                              className="cursor-pointer pl-1"
-                            />
-
-                            <>
-                              {showEmojis && (
-                                <Picker
-                                  onSelect={(e) => addEmoji(e)}
-                                  style={{
-                                    position: "absolute",
-                                    marginTop: "40px",
-                                    marginLeft: -30,
-                                    maxWidth: "320px",
-                                    borderRadius: "20px",
-                                  }}
-                                  theme={colorScheme}
-                                />
-                              )}
-                            </>
-                          </div>
-                        </div>
-                        <div className="mt-4">
-                          <RatingComp
-                            chosenSongRating={chosenSongRating}
-                            setChosenSongRating={setChosenSongRating}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Stepper.Step>
-          <Stepper.Completed>
-            Completed, click back button to get to previous step
-          </Stepper.Completed>
-        </Stepper>
-
-        <Group position="center" mt="xl">
-          <Button disabled={active === 0} variant="default" onClick={prevStep}>
-            Back
-          </Button>
-          <Button
-            disabled={Object.keys(chosenSongModalFinal).length === 0}
-            onClick={active === 1 ? handleShareMusic : nextStep}
-          >
-            {active === 1 ? <span>Post</span> : <span>Next step</span>}
-          </Button>
-        </Group>
-      </>
+              </ul>
+            </>
+          )}
+          <Group justify="center" mt="lg">
+            <Button color="orange" disabled={!trackReady} onClick={() => setActive(1)}>Next</Button>
+          </Group>
+        </Stepper.Step>
+        <Stepper.Step label="Rate song" allowStepSelect={false}>
+          <form className="space-y-3" onSubmit={share}>
+            <p className="font-bold">{manual ? songName : selected?.title} · {manual ? artistName : selected?.artist.name}</p>
+            <TextInput label="Write your review" value={review} maxLength={190} onChange={(event) => setReview(event.currentTarget.value)} required />
+            <Button variant="subtle" type="button" onClick={() => setShowEmoji(!showEmoji)}>Add emoji</Button>
+            {showEmoji && <EmojiPicker onSelect={(emoji) => {
+              setReview((value) => value.length + emoji.length <= 190 ? value + emoji : value);
+              setShowEmoji(false);
+            }} />}
+            <Select label="Genre" data={[...new Set([...genres, ...artistGenres])]} value={reviewGenre} onChange={setGenre} />
+            <PostRating value={rating} onChange={setRating} />
+            {saveError && <p role="alert">{saveError}</p>}
+            <Group justify="center" mt="lg">
+              <Button type="button" variant="default" onClick={() => setActive(0)}>Back</Button>
+              <Button type="submit" color="orange" loading={saving} disabled={!review.trim() || !rating}>Share</Button>
+            </Group>
+          </form>
+        </Stepper.Step>
+      </Stepper>
     </div>
   );
-};
+}

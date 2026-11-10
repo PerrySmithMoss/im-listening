@@ -1,7 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@layer theme, base, mantine, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@config "../tailwind.config.js";
 
+@layer base {
 html,
 body {
   padding: 0;
@@ -416,4 +418,5 @@ Ensure the default browser behavior of the `hidden` attribute.
 
 [hidden] {
   display: none;
+}
 }

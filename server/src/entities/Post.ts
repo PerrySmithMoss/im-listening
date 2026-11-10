@@ -1,7 +1,6 @@
-import "reflect-metadata";
-import { ObjectType, Field, ID, Int, Float } from "type-graphql";
+import { ObjectType, Field, ID, Float } from "type-graphql";
 import { SongGenre } from "./SongGenre";
-import { User } from "./User";
+import { PublicUser } from "./User";
 
 @ObjectType()
 export class Post {
@@ -38,8 +37,8 @@ export class Post {
   @Field(() => Float)
   rating: number;
 
-  @Field(() => User)
-  author?: User;
+  @Field(() => PublicUser)
+  author: PublicUser;
 
   @Field(() => [SongGenre])
   songGenres: SongGenre[];

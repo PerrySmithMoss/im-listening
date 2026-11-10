@@ -1,99 +1,38 @@
-import React, { useState, useEffect } from "react";
-import signupStyles from "./signup.module.css";
-import validation from "../../utils/Validation";
+import { useApolloClient, useMutation } from "@apollo/client/react";
 import Link from "next/link";
-import {
-  GetCurrentUserDocument,
-  GetCurrentUserQuery,
-  useRegisterUserMutation,
-} from "../../graphql/generated/graphql";
+import { useRouter } from "next/router";
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import signupStyles from "./signup.module.css";
+import { RegisterUserDocument } from "../../graphql/generated/graphql";
 import { toErrorMap } from "../../utils/toErrorMap";
-import { useRouter } from "next/dist/client/router";
 
-interface SignUpProps {}
-
-type Errors = {
-  firstName?: string;
-  lastName?: string;
-  username?: string;
-  email?: string;
-  password?: string;
-};
-
-export const SignUp: React.FC<SignUpProps> = ({}) => {
+export function SignUp() {
   const router = useRouter();
-  const [formValues, setFormValues] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    username: "",
-    password: "",
-  });
-  const [errors, setErrors] = useState({} as Errors);
-  const [serverErrors, setServerErrors] = useState(
-    {} as Record<string, string>
-  );
-  const [dataIsCorrect, setDataIsCorrect] = useState(false);
-  const [serverDataIsCorrect, setServerDataIsCorrect] = useState(false);
-  const [registerUser] = useRegisterUserMutation();
-  const onFormChange = (event: any) => {
-    setFormValues({
-      ...formValues,
-      [event.target.name]: event.target.value,
-    });
-  };
+  const apollo = useApolloClient();
+  const [values, setValues] = useState({ firstName: "", lastName: "", email: "", username: "", password: "" });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [mutate, { loading }] = useMutation(RegisterUserDocument);
 
-  const handleRegisterUser = async (event: any) => {
-    event.preventDefault();
-    setErrors(validation(formValues));
-    if (dataIsCorrect === true) {
-      const res = await registerUser({
-        variables: {
-          firstName: formValues.firstName,
-          lastName: formValues.lastName,
-          email: formValues.email,
-          password: formValues.password,
-          username: formValues.username,
-        },
-        update: (cache, { data }) => {
-          cache.writeQuery<GetCurrentUserQuery>({
-            query: GetCurrentUserDocument,
-            data: {
-              __typename: "Query",
-              getCurrentUser: data?.registerUser.user as any,
-            },
-          });
-        },
-      });
-      if (res.data?.registerUser.errors) {
-        setServerDataIsCorrect(false);
-        setServerErrors(toErrorMap(res.data.registerUser.errors));
-        // } else if (res.data?.registerUser.user) {
-        //   router.push("/");
-      } else if (res.data?.registerUser.user) {
-        setServerDataIsCorrect(true);
-        router.push("/");
-      }
-    }
-  };
-
-  function checkIfErrors() {
-    if (Object.keys(errors).length === 0 && dataIsCorrect) {
-      setDataIsCorrect(true);
-    } else if (Object.keys(serverErrors).length === 0 && serverDataIsCorrect) {
-      setServerDataIsCorrect(true);
-    }
+  function onFormChange(event: ChangeEvent<HTMLInputElement>) {
+    const { name, value } = event.currentTarget;
+    setValues((current) => ({ ...current, [name]: value }));
   }
 
-  useEffect(() => {
-    if (Object.keys(errors).length === 0) {
-      console.log("Client errors :", errors);
-      setDataIsCorrect(true);
-    } else if (Object.keys(serverErrors).length === 0) {
-      console.log("Server errors: ", serverErrors);
-      setServerDataIsCorrect(true);
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setErrors({});
+    try {
+      const { data } = await mutate({ variables: values });
+      if (data?.registerUser.errors?.length) {
+        setErrors(toErrorMap(data.registerUser.errors));
+      } else if (data?.registerUser.user) {
+        await apollo.resetStore();
+        void router.push("/");
+      }
+    } catch (error) {
+      setErrors({ password: error instanceof Error ? error.message : "Please try again." });
     }
-  }, [errors, serverErrors]);
+  }
 
   return (
     <section className={`${signupStyles.signupContainer}`}>
@@ -578,61 +517,10 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
               </p>
             </Link>
           </div>
-          {/* <div className="flex justify-between space-x-4">
-            <button
-              className={`w-full py-2.5 rounded border bg-white text-white inline-flex justify-center items-center`}
-            >
-              <div>
-                <svg
-                  viewBox="0 0 24 24"
-                  width="24"
-                  height="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
-                    <path
-                      fill="#4285F4"
-                      d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"
-                    />
-                    <path
-                      fill="#EA4335"
-                      d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"
-                    />
-                  </g>
-                </svg>
-              </div>
-              <div className="ml-2 text-black">Log in with Google</div>
-            </button>
 
-            <button
-              className={`w-full py-2.5 rounded bg-[#4267B2] text-white justify-center inline-flex items-center`}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="white"
-                viewBox="0 0 24 24"
-              >
-                <path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
-              </svg>
-              <div className="ml-2 text-white">Log in with Facebook</div>
-            </button>
-          </div> */}
-          {/* <div className="mt-7 pb-6">
-            <p className={`${signupStyles.signUpOr}`}>
-              <span className={`${signupStyles.signUpSpan} text-lg`}>or</span>
-            </p>
-          </div> */}
+
         </div>
+        <form onSubmit={submit}>
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
           <div>
             <input
@@ -640,21 +528,10 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
               type="text"
               placeholder="First name"
               id="firstName"
-              name="firstName"
+              name="firstName" aria-label="First name" autoComplete="given-name" required
               onChange={onFormChange}
             />
-            <small>
-              {errors.firstName && (
-                <p className={`${signupStyles.sigupErrors}`}>
-                  {errors.firstName}
-                </p>
-              )}
-              {serverErrors.firstName && (
-                <p className={`${signupStyles.sigupErrors}`}>
-                  {serverErrors.firstName}
-                </p>
-              )}
-            </small>
+            {errors.firstName && <p className={signupStyles.sigupErrors} role="alert">{errors.firstName}</p>}
           </div>
           <div>
             <input
@@ -662,71 +539,40 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
               type="text"
               placeholder="Last name"
               id="lastName"
-              name="lastName"
+              name="lastName" aria-label="Last name" autoComplete="family-name" required
               onChange={onFormChange}
             />
-            <small>
-              {errors.lastName && (
-                <p className={`${signupStyles.sigupErrors}`}>
-                  {errors.lastName}
-                </p>
-              )}
-              {serverErrors.lastName && (
-                <p className={`${signupStyles.sigupErrors}`}>
-                  {serverErrors.lastName}
-                </p>
-              )}
-            </small>
+            {errors.lastName && <p className={signupStyles.sigupErrors} role="alert">{errors.lastName}</p>}
           </div>
         </div>
         <div className="">
-          {/* <label>Email</label> */}
+
           <input
             className={`${signupStyles.formInput} text-black`}
             type="email"
             placeholder="Email"
             id="email"
-            name="email"
+            name="email" aria-label="email" autoComplete="email" required
             onChange={onFormChange}
           />
           <i className="fa fa-check-circle"></i>
           <i className="fa fa-exclamation-circle"></i>
-          <small>
-            {errors.email && (
-              <p className={`${signupStyles.sigupErrors}`}>{errors.email}</p>
-            )}
-            {serverErrors.email && (
-              <p className={`${signupStyles.sigupErrors}`}>
-                {serverErrors.email}
-              </p>
-            )}
-          </small>
+          {errors.email && <p className={signupStyles.sigupErrors} role="alert">{errors.email}</p>}
         </div>
         <div className="grid-cols-1 md:grid-cols-2 md:gap-4">
           <div>
-            {/* <label>Username</label> */}
+
             <input
               className={`${signupStyles.formInput} text-black`}
               type="text"
               placeholder="Username"
               id="username"
-              name="username"
+              name="username" aria-label="username" autoComplete="username" required
               onChange={onFormChange}
             />
             <i className="fa fa-check-circle"></i>
             <i className="fa fa-exclamation-circle"></i>
-            <small>
-              {errors.username && (
-                <p className={`${signupStyles.sigupErrors}`}>
-                  {errors.username}
-                </p>
-              )}
-              {serverErrors.username && (
-                <p className={`${signupStyles.sigupErrors}`}>
-                  {serverErrors.username}
-                </p>
-              )}
-            </small>
+            {errors.username && <p className={signupStyles.sigupErrors} role="alert">{errors.username}</p>}
           </div>
           <div>
             <input
@@ -734,51 +580,22 @@ export const SignUp: React.FC<SignUpProps> = ({}) => {
               type="password"
               placeholder="Password"
               id="password"
-              name="password"
+              name="password" aria-label="password" autoComplete="new-password" required minLength={8} maxLength={128}
               onChange={onFormChange}
             />
             <i className="fa fa-check-circle"></i>
             <i className="fa fa-exclamation-circle"></i>
-            <small>
-              {errors.password && (
-                <p className={`${signupStyles.sigupErrors}`}>
-                  {errors.password}
-                </p>
-              )}
-              {serverErrors.password && (
-                <p className={`${signupStyles.sigupErrors}`}>
-                  {serverErrors.password}
-                </p>
-              )}
-            </small>
+            {errors.password && <p className={signupStyles.sigupErrors} role="alert">{errors.password}</p>}
           </div>
-        </div>
-        <div style={{ display: "flex", textAlign: "center" }}>
-          {/* <label className={`${signupStyles.checkboxContainer}`}> */}
-          {/* One */}
-          <p style={{ textAlign: "center", paddingRight: "5px" }}>
-            <input
-              className={`${signupStyles.checkboxInput}`}
-              type="checkbox"
-              defaultChecked
-            />
-          </p>
-          <span className={`${signupStyles.checkmark}`}></span>
-          {/* </label> */}
-          <p className={`${signupStyles.termsAndConditions}`}>
-            I agree to the{" "}
-            <span className={`${signupStyles.signupTC}`}>Terms of Service</span>{" "}
-            and{" "}
-            <span className={`${signupStyles.signupTC}`}>Privacy Policy</span>
-          </p>
         </div>
         <button
           className={`mt-5 bg-brand-orange hover:bg-brand-orange_hover w-full py-3 rounded text-white`}
-          onClick={async (e) => await handleRegisterUser(e)}
+          type="submit" disabled={loading}
         >
           Sign up
         </button>
+        </form>
       </div>
     </section>
   );
-};
+}

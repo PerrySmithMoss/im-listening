@@ -1,64 +1,45 @@
 import "../styles/globals.css";
-// import "../stories/components/Old/button.css";
-// import "../stories/components/Navbar/navbar.css";
+import "@mantine/core/styles.layer.css";
+import "@mantine/notifications/styles.layer.css";
+import "@fortawesome/fontawesome-svg-core/styles.css";
 import type { AppProps } from "next/app";
-import "@fortawesome/fontawesome-svg-core/styles.css"; // import Font Awesome CSS
+import { useState } from "react";
 import { config } from "@fortawesome/fontawesome-svg-core";
-import {
-  ColorScheme,
-  ColorSchemeProvider,
-  MantineProvider,
-} from "@mantine/core";
-import { useHotkeys, useLocalStorageValue } from "@mantine/hooks";
+import { createTheme, MantineProvider, useMantineColorScheme } from "@mantine/core";
+import { useHotkeys } from "@mantine/hooks";
+import { Notifications } from "@mantine/notifications";
+import { ApolloProvider } from "@apollo/client/react";
+import { createApolloClient } from "../lib/apollo";
 import { GlobalUIProvider } from "../context/GlobalUI.context";
-import { NotificationsProvider } from "@mantine/notifications";
-import { Layout } from "../components/Layout/Layout";
-config.autoAddCss = false; // Tell Font Awesome to skip adding the CSS automatically since it's being imported above
 
-function MyApp({ Component, pageProps }: AppProps) {
-  const [colorScheme, setColorScheme] = useLocalStorageValue<ColorScheme>({
-    key: "mantine-color-scheme",
-    defaultValue: "light",
-  });
+config.autoAddCss = false;
 
-  const toggleColorScheme = (value?: ColorScheme) =>
-    setColorScheme(value || (colorScheme === "dark" ? "light" : "dark"));
+const theme = createTheme({
+  primaryColor: "orange",
+  colors: {
+    dark: ["#FFFFFF", "#acaebf", "#8c8fa3", "#666980", "#4d4f66", "#34354a",
+      "#2b2c3d", "#1d1e30", "#0c0d21", "#01010a"],
+  },
+});
 
+function ColorSchemeShortcut() {
+  const { toggleColorScheme } = useMantineColorScheme();
   useHotkeys([["mod+J", () => toggleColorScheme()]]);
+  return null;
+}
+
+export default function MyApp({ Component, pageProps }: AppProps) {
+  const [apollo] = useState(() => createApolloClient(pageProps.apolloState, typeof window === "undefined"));
 
   return (
-    <ColorSchemeProvider
-      colorScheme={colorScheme}
-      toggleColorScheme={toggleColorScheme}
-    >
-      {/* <MantineProvider theme={{ colorScheme }} withGlobalStyles> */}
-      <MantineProvider
-        theme={{
-          colorScheme: colorScheme,
-          colors: {
-            dark: [
-              "#FFFFFF",
-              "#acaebf",
-              "#8c8fa3",
-              "#666980",
-              "#4d4f66",
-              "#34354a",
-              "#2b2c3d",
-              "#1d1e30",
-              "#0c0d21",
-              "#01010a",
-            ],
-          },
-        }}
-        withGlobalStyles
-      >
-        <NotificationsProvider>
-          <GlobalUIProvider>
-              <Component {...pageProps} />
-          </GlobalUIProvider>
-        </NotificationsProvider>
+    <ApolloProvider client={apollo}>
+      <MantineProvider theme={theme} defaultColorScheme="light">
+        <ColorSchemeShortcut />
+        <Notifications />
+        <GlobalUIProvider>
+          <Component {...pageProps} />
+        </GlobalUIProvider>
       </MantineProvider>
-    </ColorSchemeProvider>
+    </ApolloProvider>
   );
 }
-export default MyApp;

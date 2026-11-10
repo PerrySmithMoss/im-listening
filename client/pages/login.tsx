@@ -2,7 +2,6 @@ import React from "react";
 import { Meta } from "../components/Home/Meta";
 import { Navbar } from "../components/Navbar/Navbar";
 import { Login } from "../components/Login/Login";
-import { withApollo } from "../lib/withApollo";
 interface SignUpProps {}
 
 const Log_In: React.FC<SignUpProps> = ({}) => {
@@ -15,16 +14,10 @@ const Log_In: React.FC<SignUpProps> = ({}) => {
         }
         description={"Share what you're listening to. Log in now."}
       />
-      <Navbar
-        primary={true}
-        onLogin={() => {}}
-        onLogout={() => {}}
-        onCreateAccount={() => {}}
-        songAudio={false}
-      />
+      <Navbar />
       <Login />
     </>
   );
 };
 
-export default withApollo({ ssr: false })(Log_In);
+export default Log_In;

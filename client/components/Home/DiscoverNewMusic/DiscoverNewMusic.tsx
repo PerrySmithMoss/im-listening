@@ -1,5 +1,4 @@
 import React from "react";
-import { SeeAll } from "../../Button/SeeAll/SeeAll";
 import discoverNewMusicStyles from "./discover-new-music.module.css";
 
 interface DiscoverNewMusicProps {}

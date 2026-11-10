@@ -1,18 +1,17 @@
-import { faStar } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { PostRating } from "../../Rating/Rating";
+import type { GetRecentPostsQuery } from "../../../graphql/generated/graphql";
 import { Avatar, Text, useMantineColorScheme } from "@mantine/core";
 import Link from "next/link";
 import React from "react";
-import Rating from "react-rating";
 
 interface UserPostsCardProps {
-  post: any;
+  post: GetRecentPostsQuery["getRecentPosts"]["posts"][number];
 }
 
 export const UserPostsCard: React.FC<UserPostsCardProps> = ({ post }) => {
-  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const { colorScheme } = useMantineColorScheme();
   return (
-    <Link key={post.id} href="/post/[id]" as={`/post/${post.id}`}>
+    <Link key={post.id} href={`/post/${post.id}`}>
       <div className="mt-0">
         {/* Mobile */}
         <div className="block xss:hidden">
@@ -26,15 +25,15 @@ export const UserPostsCard: React.FC<UserPostsCardProps> = ({ post }) => {
             <div className={` pt-3`}>
               <div className="flex ">
                 <div>
-                  <Avatar size={40} radius="xl" src={post.author.profile.avatar} />
+                  <Avatar size={40} radius="xl" src={post.author.profile?.avatar || "/assets/user-avatar.jpeg"} />
                 </div>
                 <div className={`pl-2.5`}>
                   <p className={`font-bold text-sm`}>
                     {post.author.firstName} {post.author.lastName}
                   </p>
-                  <a className="text-[#0f8deb] text-sm font-semibold">
+                  <span className="text-[#0f8deb] text-sm font-semibold">
                     {post.author.username}
-                  </a>
+                  </span>
                 </div>
               </div>
             </div>
@@ -55,42 +54,13 @@ export const UserPostsCard: React.FC<UserPostsCardProps> = ({ post }) => {
               </Text>
             </div>
             <div className="mt-3 text-sm">
-              <a className="text-[#0f8deb] text-[15px] font-semibold">
+              <span className="text-[#0f8deb] text-[15px] font-semibold">
                 {post.author.username}
-              </a>{" "}
+              </span>{" "}
                {post.title}
             </div>
             <div className="flex ml-3 items-center mt-3">
-              <Rating
-                initialRating={post.rating}
-                readonly
-                fractions={2}
-                // placeholderRating={3.5}
-                emptySymbol={
-                  <FontAwesomeIcon
-                    // size="2x"
-                    style={{ fontSize: "24px" }}
-                    color="gray"
-                    icon={faStar}
-                  />
-                }
-                placeholderSymbol={
-                  <FontAwesomeIcon
-                    // size="2x"
-                    style={{ fontSize: "24px" }}
-                    color="gray"
-                    icon={faStar}
-                  />
-                }
-                fullSymbol={
-                  <FontAwesomeIcon
-                    style={{ fontSize: "24px" }}
-                    // size="2x"
-                    color="yellow"
-                    icon={faStar}
-                  />
-                }
-              />
+              <PostRating value={post.rating} />
             </div>
           </div>
         </div>
@@ -117,15 +87,15 @@ export const UserPostsCard: React.FC<UserPostsCardProps> = ({ post }) => {
             <div className={` pl-3 pt-3 flex-1`}>
               <div className="flex ">
                 <div>
-                  <Avatar radius="xl" src={post.author.profile.avatar} />
+                  <Avatar radius="xl" src={post.author.profile?.avatar || "/assets/user-avatar.jpeg"} />
                 </div>
                 <div className={`pl-3`}>
                   <p className={`font-bold`}>
                     {post.author.firstName} {post.author.lastName}
                   </p>
-                  <a style={{ color: "#0f8deb", fontSize: "0.8rem" }}>
+                  <span style={{ color: "#0f8deb", fontSize: "0.8rem" }}>
                     {post.author.username}
-                  </a>
+                  </span>
                 </div>
               </div>
               <div className="ml-3 mt-4">
@@ -135,36 +105,7 @@ export const UserPostsCard: React.FC<UserPostsCardProps> = ({ post }) => {
               </div>
               <div className="mt-4 ml-3 ">{post.title}</div>
               <div className="flex ml-3 items-center mt-3">
-                <Rating
-                  initialRating={post.rating}
-                  readonly
-                  fractions={2}
-                  // placeholderRating={3.5}
-                  emptySymbol={
-                    <FontAwesomeIcon
-                      // size="2x"
-                      style={{ fontSize: "24px" }}
-                      color="gray"
-                      icon={faStar}
-                    />
-                  }
-                  placeholderSymbol={
-                    <FontAwesomeIcon
-                      // size="2x"
-                      style={{ fontSize: "24px" }}
-                      color="gray"
-                      icon={faStar}
-                    />
-                  }
-                  fullSymbol={
-                    <FontAwesomeIcon
-                      style={{ fontSize: "24px" }}
-                      // size="2x"
-                      color="yellow"
-                      icon={faStar}
-                    />
-                  }
-                />
+                <PostRating value={post.rating} />
               </div>
             </div>
           </div>

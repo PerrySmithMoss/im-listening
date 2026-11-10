@@ -72,13 +72,6 @@
   content: "";
 }
 
-.signUpOr:left:after {
-  background: none;
-}
-.signUpOr:right:before {
-  background: none;
-}
-
 .signupTC {
   color: rgb(15, 141, 235);
 }

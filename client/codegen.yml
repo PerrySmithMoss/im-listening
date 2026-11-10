@@ -1,9 +1,0 @@
-overwrite: true
-schema: "https://im-listening.up.railway.app/graphql"
-documents: "graphql/**/*/*.graphql"
-generates:
-  graphql/generated/graphql.tsx:
-    plugins:
-      - "typescript"
-      - "typescript-operations"
-      - "typescript-react-apollo"
