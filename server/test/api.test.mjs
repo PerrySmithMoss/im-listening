@@ -195,6 +195,7 @@ test("registration, login, posts, password reset and logout work with PostgreSQL
   assert.equal((await visitor.query(resetRequest, { email: mixedCaseEmail })).forgotPassword, true);
   const message = await waitFor(() => inbox.get(email));
   const mail = message.replace(/=\r?\n/g, "");
+  assert.match(mail, /^From: (?:"I'm Listening"|I'm Listening) <test@example\.test>\r?$/m);
   const link = mail.match(/http:\/\/localhost:3100\/change-password\/([\w-]{43})/);
   assert.ok(link, "Password reset email links to the web app");
   const token = link[1];

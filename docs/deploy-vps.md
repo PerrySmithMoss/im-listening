@@ -39,8 +39,8 @@ values out of command history, process arguments, files in the repo and CI.
 | `im_listening_redis_config_v1` | `requirepass <password>` with a final newline | Redis |
 
 Generate a separate hex password for Redis and use it in both Redis secrets.
-The stack sets the verified sender to
-`password-reset@imlistening-mail.perrysmithmoss.com` and uses TLS on port 465.
+The stack sends from `password-reset@imlistening-mail.perrysmithmoss.com` over
+TLS on port 465. The mailer displays **I'm Listening** as the sender name.
 
 ## Bootstrap the stack and restricted release account
 
