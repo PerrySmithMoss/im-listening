@@ -8,6 +8,9 @@ declare module "express-session" {
   interface SessionData {
     userId?: number;
     sessionVersion?: number;
+    authenticatedAt?: number;
+    googleStarted?: boolean;
+    googlePending?: import("../auth/googleRoutes").GooglePending;
   }
 }
 
@@ -19,7 +22,7 @@ export type PrismaContext = {
   res: Response;
   redis: RedisClient;
   authLimit: ReturnType<typeof createAuthLimiter>;
-  sendResetEmail: ReturnType<typeof createMailer>;
+  sendResetEmail: NonNullable<ReturnType<typeof createMailer>>["sendReset"] | undefined;
   cookieName: string;
-  cookie: { path: string; httpOnly: boolean; secure: boolean; sameSite: "lax" | "none" };
+  cookie: { path: string; httpOnly: boolean; secure: boolean; sameSite: "lax" };
 };

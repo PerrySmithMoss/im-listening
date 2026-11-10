@@ -1,3 +1,4 @@
+import { GoogleContinue } from "../GoogleAuth/GoogleAuth";
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -521,6 +522,7 @@ export function Login() {
 
         </div>
 
+        <GoogleContinue entry="/login" />
         <div className={`${signupStyles.formContainer} mt-5`}>
           <form className="signUpForm" onSubmit={submit}>
             <div className="form__control">

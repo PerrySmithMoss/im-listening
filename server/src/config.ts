@@ -54,8 +54,18 @@ export function loadConfig() {
   const secret = required("SESSION_SECRET");
   if (Buffer.byteLength(secret) < 32) throw new ConfigError("SESSION_SECRET must be at least 32 bytes");
   const sameSite = process.env.COOKIE_SAME_SITE ?? "lax";
-  if (sameSite !== "lax" && (sameSite !== "none" || !production)) {
-    throw new ConfigError("COOKIE_SAME_SITE must be lax, or none in production");
+  if (sameSite !== "lax") {
+    throw new ConfigError("Sessions require SameSite=Lax");
+  }
+  const googleConfigured = production || process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_SECRET;
+  const google = googleConfigured ? {
+    id: required("GOOGLE_CLIENT_ID"),
+    secret: required("GOOGLE_CLIENT_SECRET"),
+    redirectUri: new URL("/api/auth/google/callback", clientUrl).href,
+  } : undefined;
+  if (google && clientUrl.protocol !== "https:" &&
+      !["localhost", "127.0.0.1", "[::1]"].includes(clientUrl.hostname)) {
+    throw new ConfigError("Google sign-in requires HTTPS outside local development");
   }
   const spotifyId = process.env.SPOTIFY_CLIENT_ID;
   const spotifySecret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -75,6 +85,7 @@ export function loadConfig() {
     cookieName: production ? "__Host-im-listening" : "im-listening",
     cookie: { path: "/", httpOnly: true, secure: production, sameSite },
     smtp: loadSmtpConfig(production),
+    google,
     spotify: spotifyId && spotifySecret ? { id: spotifyId, secret: spotifySecret } : undefined,
   } as const;
 }

@@ -44,6 +44,19 @@ Resend account. [Resend SMTP setup](https://resend.com/changelog/smtp-service) Â
 
 Email delivery is optional in local development. Production uses a Resend key mounted as a Docker secret.
 
+## Google sign-in
+
+Register a development-only **Web application** client in Google Cloud using
+`http://localhost:3100/api/auth/google/callback` as its exact redirect URI.
+Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in
+`server/.env`. Existing local installs should copy the same-origin proxy values
+from [client/.env.example](client/.env.example) into `client/.env.local`. Restart
+both apps and open `http://localhost:3100`. Set up SMTP to test mailbox verification
+for third-party addresses and password setup for Google-only accounts.
+
+See the [Google sign-in design](docs/google-sign-in.md) and the
+[VPS rollout instructions](docs/deploy-vps.md#roll-out-google-sign-in).
+
 ## Verify changes
 
 With Compose running and the server built:
@@ -57,9 +70,9 @@ npm audit --prefix server
 npm audit --prefix client
 ```
 
-The API tests start their own server on port 5051, use Redis database 9, and clean up
-their PostgreSQL accounts and posts. They capture reset emails on a temporary local SMTP
-listener, so CI needs no Resend credentials. GraphQL code generation reads the built server schema
+The API tests start servers on ports 5051 and 5052, use Redis databases 9 and 10,
+and clean up their PostgreSQL accounts and posts. They use local SMTP listeners
+and a mock Google OIDC provider, so CI needs no Resend or Google credentials. GraphQL code generation reads the built server schema
 locally; it needs neither a running API nor external credentials. Commit the generated
 client file when you change the schema or operations.
 

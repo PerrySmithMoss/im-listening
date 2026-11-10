@@ -7,7 +7,7 @@ import type { RedisClient } from "../types/PrismaContext";
 function store(redis: RedisClient, name: string) {
   return new RedisStore({
     prefix: `im-listening:rate:${name}:`,
-    sendCommand: (...args) => redis.sendCommand(args),
+    sendCommand: (...args) => redis.withAbortSignal(AbortSignal.timeout(3000)).sendCommand(args),
   });
 }
 
@@ -24,6 +24,9 @@ const authLimits = {
   login: { account: 30, ip: 60, windowMs: 15 * 60_000 },
   register: { account: 10, ip: 20, windowMs: 60 * 60_000 },
   reset: { account: 5, ip: 30, windowMs: 60 * 60_000 },
+  googleEmail: { account: 3, ip: 15, windowMs: 15 * 60_000 },
+  googleCode: { account: 12, ip: 30, windowMs: 15 * 60_000 },
+  googleManage: { account: 10, ip: 30, windowMs: 15 * 60_000 },
   change: { account: 10, ip: 30, windowMs: 60 * 60_000 },
 };
 

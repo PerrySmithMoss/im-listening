@@ -15,6 +15,9 @@ const { createSchema } = require("../dist/src/schema.js");
 
 const origin = "http://localhost:3100";
 const api = "http://127.0.0.1:5051";
+// Keep rate counters from earlier runs from throttling this suite.
+const clientId = randomUUID().slice(0, 8);
+const clientIp = `2001:db8:${clientId.slice(0, 4)}:${clientId.slice(4)}::1`;
 const password = "development-only password 1";
 const resetPassword = "development-only password 2";
 
@@ -34,7 +37,7 @@ function session() {
     async query(query, variables) {
       const response = await fetch(api + "/graphql", {
         method: "POST",
-        headers: { "content-type": "application/json", origin, ...(cookie && { cookie }) },
+        headers: { "content-type": "application/json", origin, "x-forwarded-for": clientIp, ...(cookie && { cookie }) },
         body: JSON.stringify({ query, variables }),
       });
       assert.equal(response.status, 200);
@@ -82,7 +85,10 @@ test("only the private account type has an email field", async () => {
 });
 
 test("registration, login, posts, password reset and logout work with PostgreSQL", { timeout: 30_000 }, async (t) => {
-  const env = { ...process.env, HOST: "127.0.0.1", PORT: "5051", NODE_ENV: "test", CLIENT_ORIGIN: origin };
+  const env = {
+    ...process.env, HOST: "127.0.0.1", PORT: "5051", NODE_ENV: "test", CLIENT_ORIGIN: origin, TRUST_PROXY_HOPS: "1",
+    GOOGLE_CLIENT_ID: "", GOOGLE_CLIENT_SECRET: "",
+  };
   const database = new URL(env.DATABASE_URL);
   const redis = new URL(env.REDIS_URL);
   assert.ok(["postgresql:", "postgres:"].includes(database.protocol), "Tests require PostgreSQL");
