@@ -83,7 +83,9 @@ pin patched versions of `graphql-scalars` and `minimatch` until their callers up
 ## Production deployment
 
 See the [VPS deployment runbook](docs/deploy-vps.md) for database provisioning,
-secret rotation, releases and the Vercel proxy configuration.
+secret rotation, releases and the Vercel proxy configuration. Roll out the API
+and its database migration before this frontend release: the frontend uses the new
+Spotify track field, password status and reset link check.
 
 <div>
 <h2>Features</h2>

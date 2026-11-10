@@ -2,6 +2,9 @@
 module.exports = {
   reactStrictMode: true,
   poweredByHeader: false,
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "i.scdn.co", port: "", pathname: "/image/**", search: "" }],
+  },
   async rewrites() {
     const upstream = process.env.GRAPHQL_INTERNAL_URL;
     if (!upstream || process.env.NEXT_PUBLIC_GRAPHQL_API_URL !== "/api/graphql") return [];

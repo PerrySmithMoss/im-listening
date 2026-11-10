@@ -1,0 +1,6 @@
+query GetSignInMethods {
+  getCurrentUser {
+    id
+    hasPassword
+  }
+}

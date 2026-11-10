@@ -4,6 +4,7 @@ mutation CreatePost(
   $rating: Float!
   $title: String!
   $previewSongUrl: String
+  $spotifyTrackId: String
   $genre: String!
   $genres: [String!]!
   $albumImage: String!
@@ -14,6 +15,7 @@ mutation CreatePost(
     rating: $rating
     title: $title
     previewSongUrl: $previewSongUrl
+    spotifyTrackId: $spotifyTrackId
     genre: $genre
     genres: $genres
     albumImage: $albumImage

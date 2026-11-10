@@ -5,6 +5,7 @@ query GetPost($id: Int!) {
     updatedAt
     title
     previewSongUrl
+    spotifyTrackId
     artistName
     albumName
     genre
