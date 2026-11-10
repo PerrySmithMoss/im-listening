@@ -39,8 +39,8 @@ values out of command history, process arguments, files in the repo and CI.
 | `im_listening_redis_config_v1` | `requirepass <password>` with a final newline | Redis |
 
 Generate a separate hex password for Redis and use it in both Redis secrets.
-The stack sets the verified sender to
-`password-reset@imlistening-mail.perrysmithmoss.com` and uses TLS on port 465.
+The stack sends from `password-reset@imlistening-mail.perrysmithmoss.com` over
+TLS on port 465. The mailer displays **I'm Listening** as the sender name.
 
 ## Bootstrap the stack and restricted release account
 
@@ -85,7 +85,10 @@ portfolio broker and its installer. Review the service spec before recording
 policy. The account is restricted to updating `im-listening_api` to a digest
 from `ghcr.io/perrysmithmoss/im-listening-api`. Follow the portfolio runbook for
 reviewing an updated broker binary, installing the public key and verifying SSH
-restrictions. Store the matching private key as `APP_RELEASE_KEY` in the
+restrictions. On a host with an existing broker, back up its root-owned binary
+and atomically replace it with the reviewed build that includes Im Listening
+before running `sudo sh ./install.sh im-listening ./portfolio-release ./im-listening-release.pub`.
+Store the matching private key as `APP_RELEASE_KEY` in the
 `VPS Production` GitHub environment. Restrict the environment to `master`, and
 set its variables `VPS_HOST` and `VPS_KNOWN_HOSTS` using the pinned SSH host key.
 The initial workflow can publish the image before the stack and account exist.
