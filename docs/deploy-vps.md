@@ -111,7 +111,21 @@ NEXT_PUBLIC_GRAPHQL_API_URL=/api/graphql
 GRAPHQL_INTERNAL_URL=https://im-listening-api.perrysmithmoss.com/graphql
 ```
 
-Build and promote the frontend. The Next.js rewrites send `/api/graphql` and
+Vercel builds from `master` and waits for the required GitHub deployment check
+`Vercel - im-listening-w9af: API and migrations` before promoting to the production
+domains. Keep that check required under **Build and Deployment → Deployment Checks**
+and keep **Auto-assign Custom Production Domains** enabled in the Production
+environment so Vercel can promote when it passes.
+
+The [API release workflow](../.github/workflows/deploy-api.yml) runs for every
+`master` push, including frontend-only changes, so each Vercel build gets a
+status on its own commit. It reports success only after the VPS has rolled out the
+matching image and the public API is healthy. The container applies migrations
+before it starts listening. A failed or cancelled release leaves the frontend
+held. Fix the release or rerun its workflow to retry. An API rollback does not
+publish a promotion status.
+
+The Next.js rewrites send `/api/graphql` and
 `/api/spotify/*` to the VPS. A server-side API route forwards `/api/auth/google/*`
 and authenticates to the VPS using the production `GOOGLE_PROXY_SECRET`. The
 VPS uses the Vercel-provided client address for Google route limits and rejects

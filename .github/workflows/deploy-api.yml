@@ -3,14 +3,6 @@ name: Deploy API to VPS
 on:
   push:
     branches: [master]
-    paths:
-      - server/**
-      - docker-stack.yaml
-      - compose.yaml
-      - .nvmrc
-      - scripts/setup-local.sh
-      - .github/workflows/checks.yml
-      - .github/workflows/deploy-api.yml
   workflow_dispatch:
     inputs:
       rollback_digest:
@@ -122,3 +114,31 @@ jobs:
           set -euo pipefail
           curl --fail --silent --show-error --retry 8 --retry-all-errors --max-time 10 \
             https://im-listening-api.perrysmithmoss.com/healthz | jq -e '.status == "ok"'
+
+  report-production-status:
+    needs: deploy
+    if: ${{ !cancelled() && github.ref == 'refs/heads/master' && !inputs.rollback_digest && !inputs.rollback_revision }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      statuses: write
+    steps:
+      - name: Report the VPS release result to Vercel
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
+        run: |
+          set -euo pipefail
+          if [[ "$DEPLOY_RESULT" == success ]]; then
+            state=success
+            description='Matching API image is healthy after database migrations.'
+          else
+            state=failure
+            description='API release did not pass. Hold frontend promotion.'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f 'context=Vercel - im-listening-w9af: API and migrations' \
+            -f state="$state" \
+            -f description="$description" \
+            -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --silent
