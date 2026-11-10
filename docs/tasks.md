@@ -53,9 +53,11 @@ The identity migration applied and the API passed its health check.
 The live Vercel route started the Google flow with PKCE and issued the expected
 secure, host-only Lax session cookie. A browser verified Google consent,
 successful return to onboarding, cancellation, and rejection of a duplicate
-registration for the existing test account. The API recorded redacted outcomes.
+registration for the existing test account. After password confirmation,
+the browser linked Google to the existing account. Google re-login, session
+persistence across reload, and logout passed at desktop and 390-pixel browser
+widths. The API recorded redacted outcomes.
 
 Google requested a 24-hour wait for Search Console ownership to propagate
-before retrying brand verification. Returning Google sign-in after account
-linking, mobile browser checks, production log review across providers, and
-live rollback evidence are pending.
+before retrying brand verification. Production log review across providers
+and live rollback evidence are pending.
