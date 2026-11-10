@@ -10,6 +10,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { createClient } from "redis";
 import { SMTPServer } from "smtp-server";
 import { PrismaClient } from "../dist/src/generated/prisma/client.js";
+import { claimGoogleCompletion, logoutSession } from "../dist/src/auth/googleCompletion.js";
 import { loadConfig } from "../dist/src/config.js";
 
 const origin = "http://localhost:3100";
@@ -18,6 +19,7 @@ const callback = "/api/auth/google/callback";
 const issuer = "https://accounts.google.com";
 const clientId = "mock-client";
 const clientSecret = "mock-secret";
+const proxySecret = randomBytes(32).toString("hex");
 const password = "test account password";
 const testRun = randomUUID().slice(0, 8);
 const challenge = (verifier) => createHash("sha256").update(verifier).digest("base64url");
@@ -113,13 +115,17 @@ function browser(initialCookie = "") {
   const ip = `203.${(browserIndex >> 8) & 255}.${browserIndex++ & 255}.1`;
   return {
     get cookie() { return cookie; },
-    async request(path, { method = "GET", body, sendCookie = true, requestOrigin = origin } = {}) {
+    async request(path, { method = "GET", body, sendCookie = true, requestOrigin = origin, throughProxy = true } = {}) {
+      const isGoogle = path.startsWith("/api/auth/google/");
       const response = await fetch(api + path.replace(/^\/api\//, "/"), {
         method,
         redirect: "manual",
         headers: {
-          "x-forwarded-for": ip,
+          "x-forwarded-for": isGoogle ? "192.0.2.10" : ip,
           "x-forwarded-proto": "https",
+          ...(isGoogle && throughProxy && {
+            authorization: `Bearer ${proxySecret}`, "x-im-listening-client-ip": ip,
+          }),
           ...(requestOrigin && { origin: requestOrigin }),
           ...(sendCookie && cookie && { cookie }),
           ...(body && !(body instanceof URLSearchParams) && { "content-type": "application/json" }),
@@ -249,7 +255,7 @@ test("Google OIDC integration with real PostgreSQL, Redis and an isolated provid
     ...process.env,
     NODE_ENV: "test", HOST: "127.0.0.1", PORT: "5052", CLIENT_ORIGIN: origin, COOKIE_SAME_SITE: "lax",
     TRUST_PROXY_HOPS: "1", REDIS_URL: redisUrl.href,
-    GOOGLE_CLIENT_ID: clientId, GOOGLE_CLIENT_SECRET: clientSecret,
+    GOOGLE_CLIENT_ID: clientId, GOOGLE_CLIENT_SECRET: clientSecret, GOOGLE_PROXY_SECRET: proxySecret,
     TEST_GOOGLE_URL: `http://127.0.0.1:${google.server.address().port}`,
     SMTP_HOST: "127.0.0.1", SMTP_PORT: String(smtp.server.address().port),
     SMTP_FROM: "test@localhost", SMTP_SECURE: "false", SMTP_USER: "", SMTP_PASSWORD: "",
@@ -281,6 +287,24 @@ test("Google OIDC integration with real PostgreSQL, Redis and an isolated provid
   }
 
   const gmail = `${testRun}@gmail.com`;
+
+  await t.test("logout serializes with Google session rotation and revokes its successor", async () => {
+    const original = `test-original-${testRun}`;
+    const successor = `test-successor-${testRun}`;
+    await redis.set(`im-listening:sess:${original}`, "{}", { expiration: { type: "EX", value: 60 } });
+    const release = await claimGoogleCompletion(redis, original);
+    assert.equal(typeof release, "function");
+    assert.equal(await claimGoogleCompletion(redis, original), undefined);
+    const loggedOut = logoutSession({ sessionID: original, session: { destroy: (done) => done() } }, redis);
+    assert.equal(await Promise.race([loggedOut.then(() => "finished"), delay(75, "waiting")]), "waiting");
+
+    await redis.del(`im-listening:sess:${original}`);
+    await redis.set(`im-listening:sess:${successor}`, "{}", { expiration: { type: "EX", value: 60 } });
+    await release(successor);
+    await loggedOut;
+    assert.equal(await claimGoogleCompletion(redis, original), undefined);
+    assert.equal(await claimGoogleCompletion(redis, successor), undefined);
+  });
   let googleUser;
   await t.test("fail closed during discovery, missing PKCE, provider and Redis failures", async () => {
     const b = browser();
@@ -298,6 +322,16 @@ test("Google OIDC integration with real PostgreSQL, Redis and an isolated provid
     } finally {
       await redis.sendCommand(["ACL", "SETUSER", aclUser, "+getdel"]);
     }
+  });
+
+  await t.test("Google rate limits separate authenticated client addresses behind one proxy", async () => {
+    const b = browser();
+    const start = "/api/auth/google/start";
+    const direct = await b.request(start, { method: "POST", body: { intent: "sign-in" }, throughProxy: false });
+    assert.equal(direct.status, 403);
+    for (let attempt = 0; attempt < 20; attempt++) await b.post("start", {}, 400);
+    assert.equal((await b.request(start, { method: "POST", body: {} })).status, 429);
+    await browser().start();
   });
 
   await t.test("origin, state, expiry, browser binding and login CSRF", async () => {
@@ -373,19 +407,25 @@ test("Google OIDC integration with real PostgreSQL, Redis and an isolated provid
     assert.equal(await browser(oldCookie).user(), null);
     assert.equal((await b.user()).email, gmail);
     assert.equal((await b.complete(receipts[0])).headers.get("location"), "/login?google=retry");
+    await browser(oldCookie).graphql(logout);
+    assert.equal(await b.user(), null);
   });
 
   await t.test("concurrent starts and cancellation preserve other transactions", async () => {
     const b = browser();
-    const cancelled = await b.start({ entry: "/sign-up" });
+    const cancelled = await b.start({ entry: "/sign-up", returnTo: "/post/42" });
     const [first, second] = await Promise.all([b.start(), b.start()]);
     assert.notEqual(first.searchParams.get("state"), second.searchParams.get("state"));
-    assert.equal((await b.complete(await b.receive(google.form(cancelled, { cancel: true })))).headers.get("location"),
-      "/sign-up?google=cancelled");
+    const cancelledAt = new URL((await b.complete(await b.receive(google.form(cancelled, { cancel: true })))).headers.get("location"), origin);
+    assert.equal(cancelledAt.pathname, "/sign-up");
+    assert.equal(cancelledAt.searchParams.get("google"), "cancelled");
     const receipts = await Promise.all([b.receive(google.form(first)), b.receive(google.form(second))]);
     const replies = await Promise.all(receipts.map((receipt) => b.complete(receipt)));
     assert.deepEqual(replies.map((reply) => reply.headers.get("location")).sort(), ["/", "/login?google=retry"]);
     assert.equal(replies.filter((reply) => reply.headers.has("set-cookie")).length, 1);
+    const retryBrowser = browser();
+    const retry = await retryBrowser.start({ returnTo: cancelledAt.searchParams.get("next") });
+    assert.equal((await retryBrowser.complete(await retryBrowser.receive(google.form(retry)))).headers.get("location"), "/post/42");
   });
 
   await t.test("third-party email verification and no email-based account takeover", async () => {
@@ -483,12 +523,16 @@ test("production requires a Google client and uses the exact HTTPS callback and 
     Object.assign(process.env, {
       NODE_ENV: "production", CLIENT_ORIGIN: "https://im-listening.vercel.app", COOKIE_SAME_SITE: "lax",
       GOOGLE_CLIENT_ID: clientId, GOOGLE_CLIENT_SECRET: clientSecret,
+      GOOGLE_PROXY_SECRET: proxySecret,
       SMTP_HOST: "smtp.example.test", SMTP_FROM: "test@example.test",
     });
     const config = loadConfig();
     assert.equal(config.google.redirectUri, "https://im-listening.vercel.app/api/auth/google/callback");
     assert.equal(config.cookieName, "__Host-im-listening");
     assert.deepEqual(config.cookie, { secure: true, path: "/", httpOnly: true, sameSite: "lax" });
+    delete process.env.GOOGLE_PROXY_SECRET;
+    assert.throws(loadConfig, /GOOGLE_PROXY_SECRET/);
+    process.env.GOOGLE_PROXY_SECRET = proxySecret;
     delete process.env.GOOGLE_CLIENT_SECRET;
     assert.throws(loadConfig, /GOOGLE_CLIENT_SECRET/);
     delete process.env.GOOGLE_CLIENT_ID;

@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import type { Request } from "express";
 import { ipKeyGenerator, rateLimit } from "express-rate-limit";
 import { GraphQLError } from "graphql";
 import { RedisStore } from "rate-limit-redis";
@@ -11,13 +12,17 @@ function store(redis: RedisClient, name: string) {
   });
 }
 
-export const limitRequests = (redis: RedisClient, name: string, limit: number) =>
+export const limitRequests = (redis: RedisClient, name: string, limit: number, clientIp?: (req: Request) => string) =>
   rateLimit({
     limit,
     windowMs: 60_000,
     standardHeaders: "draft-8",
     legacyHeaders: false,
     store: store(redis, name),
+    ...(clientIp && {
+      keyGenerator: (req: Request) => ipKeyGenerator(clientIp(req)),
+      message: { error: "Too many attempts. Please try again later." },
+    }),
   });
 
 const authLimits = {

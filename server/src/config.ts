@@ -62,7 +62,11 @@ export function loadConfig() {
     id: required("GOOGLE_CLIENT_ID"),
     secret: required("GOOGLE_CLIENT_SECRET"),
     redirectUri: new URL("/api/auth/google/callback", clientUrl).href,
+    proxySecret: production ? required("GOOGLE_PROXY_SECRET") : process.env.GOOGLE_PROXY_SECRET,
   } : undefined;
+  if (google?.proxySecret && Buffer.byteLength(google.proxySecret) < 32) {
+    throw new ConfigError("GOOGLE_PROXY_SECRET must be at least 32 bytes");
+  }
   if (google && clientUrl.protocol !== "https:" &&
       !["localhost", "127.0.0.1", "[::1]"].includes(clientUrl.hostname)) {
     throw new ConfigError("Google sign-in requires HTTPS outside local development");

@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       rollback_digest:
-        description: Verified sha256 digest (leave both fields empty to build a new release)
+        description: Approved Google-compatible rollback digest (leave both fields empty for a new release)
         type: string
       rollback_revision:
         description: Commit SHA associated with the verified digest
@@ -82,6 +82,7 @@ jobs:
           BUILT_DIGEST: ${{ needs.publish.outputs.digest }}
           ROLLBACK_DIGEST: ${{ inputs.rollback_digest }}
           ROLLBACK_REVISION: ${{ inputs.rollback_revision }}
+          API_ROLLBACK_ALLOWLIST: ${{ vars.API_ROLLBACK_ALLOWLIST }}
           VPS_HOST: ${{ vars.VPS_HOST }}
           VPS_KNOWN_HOSTS: ${{ vars.VPS_KNOWN_HOSTS }}
           APP_RELEASE_KEY: ${{ secrets.APP_RELEASE_KEY }}
@@ -96,6 +97,11 @@ jobs:
           fi
           if [[ ! "$digest" =~ ^sha256:[a-f0-9]{64}$ || ! "$revision" =~ ^[a-f0-9]{40}$ ]]; then
             echo '::error::Provide both a valid sha256 digest and a 40-character commit SHA.'
+            exit 1
+          fi
+          if [[ -n "$ROLLBACK_DIGEST" || -n "$ROLLBACK_REVISION" ]] &&
+            ! grep -Fxq -- "$digest $revision" <<< "$API_ROLLBACK_ALLOWLIST"; then
+            echo '::error::The digest and revision are not approved in API_ROLLBACK_ALLOWLIST.'
             exit 1
           fi
           [[ "$VPS_HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]

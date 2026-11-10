@@ -12,8 +12,10 @@ import express, { type ErrorRequestHandler } from "express";
 import session from "express-session";
 import helmet from "helmet";
 import { createClient, type RedisModules, type RedisFunctions, type RedisScripts, type RespVersions, type TypeMapping } from "redis";
+import { generateSessionId } from "./auth/googleCompletion";
+import { authenticateGoogleProxy } from "./auth/googleProxy";
 import { googleRoutes } from "./auth/googleRoutes";
-import { absoluteSessionMs, regenerateSession, idleSessionMs, requireWriteOrigin } from "./auth/session";
+import { absoluteSessionMs, regenerateSession, idleSessionMs, requireWriteOrigin, sessionPrefix } from "./auth/session";
 import { ConfigError, loadConfig } from "./config";
 import { PrismaClient } from "./generated/prisma/client";
 import { createAuthLimiter, limitRequests } from "./middleware/rateLimits";
@@ -87,6 +89,7 @@ async function main() {
       }
       next();
     });
+    app.use("/auth/google", authenticateGoogleProxy(config.google?.proxySecret));
     app.post("/graphql", (req, res, next) => {
       // Anonymous server-side rendering sends neither an Origin nor a cookie.
       if ((!req.get("origin") && !req.get("cookie")) || requireWriteOrigin(req, res, config.clientOrigin)) next();
@@ -94,8 +97,9 @@ async function main() {
     app.use("/graphql", limitRequests(redis, "graphql", 120));
     app.use(["/graphql", "/spotify", "/auth/google"], session({
       name: config.cookieName,
+      genid: generateSessionId,
       store: new RedisStore({
-        client: redis, prefix: "im-listening:sess:", ttl: () => idleSessionMs / 1000,
+        client: redis, prefix: sessionPrefix, ttl: () => idleSessionMs / 1000,
       }),
       cookie: { ...config.cookie, maxAge: absoluteSessionMs },
       saveUninitialized: false,

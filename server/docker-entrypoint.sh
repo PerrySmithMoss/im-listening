@@ -22,6 +22,9 @@ case "$1" in
         if [ -n "${GOOGLE_CLIENT_SECRET_FILE:-}" ]; then
             export GOOGLE_CLIENT_SECRET="$(cat "$GOOGLE_CLIENT_SECRET_FILE")"
         fi
+        if [ -n "${GOOGLE_PROXY_SECRET_FILE:-}" ]; then
+            export GOOGLE_PROXY_SECRET="$(cat "$GOOGLE_PROXY_SECRET_FILE")"
+        fi
         ./node_modules/.bin/prisma migrate deploy
         exec node dist/src/index.js
         ;;

@@ -7,8 +7,10 @@ import type { loadConfig } from "../config";
 import { Prisma, type PrismaClient } from "../generated/prisma/client";
 import { limitRequests, type createAuthLimiter } from "../middleware/rateLimits";
 import type { RedisClient } from "../types/PrismaContext";
+import { claimGoogleCompletion } from "./googleCompletion";
 import { createGoogleOidc, googleIssuer, type GoogleProof } from "./googleOidc";
-import { establishSession, regenerateSession, requireWriteOrigin, saveSession } from "./session";
+import { googleClientIp } from "./googleProxy";
+import { destroySession, establishSession, regenerateSession, requireWriteOrigin, saveSession } from "./session";
 
 const flowSeconds = 5 * 60;
 const receiptSeconds = 60;
@@ -45,6 +47,10 @@ function localReturnPath(value: unknown) {
   return typeof value === "string" && /^\/post\/[1-9][0-9]{0,9}$/.test(value) ? value : "/";
 }
 
+function signInEntry(entry: Entry, returnTo: string) {
+  return returnTo === "/" ? entry : `${entry}?${new URLSearchParams({ next: returnTo })}`;
+}
+
 function pendingFor(req: Request) {
   const pending = req.session.googlePending;
   if (!pending || pending.until <= Date.now()) return undefined;
@@ -68,12 +74,15 @@ export function googleRoutes(
   const google = config.google;
   const provider = google && createGoogleOidc(google, google.redirectUri);
   const store = () => redis.withAbortSignal(AbortSignal.timeout(3000));
+  const limit = (name: string, max: number) => limitRequests(redis, name, max, googleClientIp);
   const key = (req: Request, suffix: string) => `im-listening:google:${digest(req.sessionID)}:${suffix}`;
   const settings = "/account/sign-in";
 
   function redirect(res: Response, path: string, outcome: string) {
     audit(outcome);
-    res.redirect(303, `${path}?google=${outcome}`);
+    const target = new URL(path, config.clientOrigin);
+    target.searchParams.set("google", outcome);
+    res.redirect(303, target.pathname + target.search);
   }
 
   router.get("/status", async (req, res) => {
@@ -101,7 +110,7 @@ export function googleRoutes(
 
   // A cross-site form POST avoids logging Google codes in proxy URLs. Redirect to a
   // top-level GET, which can carry the browser's SameSite=Lax session cookie.
-  router.post("/callback", limitRequests(redis, "google-return", 40),
+  router.post("/callback", limit("google-return", 40),
     express.urlencoded({ extended: false, limit: "4kb", parameterLimit: 10 }), async (req, res) => {
       if (!provider) return redirect(res, "/login", "unavailable");
       const { state, code, error, iss } = req.body ?? {};
@@ -132,7 +141,7 @@ export function googleRoutes(
   });
   router.use(express.json({ limit: "4kb" }));
 
-  router.post("/start", limitRequests(redis, "google-start", 20), async (req, res) => {
+  router.post("/start", limit("google-start", 20), async (req, res) => {
     const intent = req.body?.intent;
     const proof = { state: randomProof(), nonce: randomProof(), verifier: randomProof() };
     let tx: Transaction;
@@ -184,11 +193,21 @@ export function googleRoutes(
     }
   });
 
-  router.get("/callback", limitRequests(redis, "google-callback", 40), async (req, res) => {
+  router.get("/callback", limit("google-callback", 40), async (req, res) => {
     let destination = "/login";
     const originalSessionId = req.sessionID;
-    const completionKey = key(req, "completed");
-    let ownsCompletion = false;
+    let releaseCompletion: Awaited<ReturnType<typeof claimGoogleCompletion>>;
+
+    async function publishSession() {
+      const release = releaseCompletion!;
+      releaseCompletion = undefined;
+      try {
+        await release(req.sessionID);
+      } catch (error) {
+        await destroySession(req);
+        throw error;
+      }
+    }
     try {
       const receipt = req.query.receipt;
       if ((!req.session.googleStarted && !req.session.userId) || !isProof(receipt) ||
@@ -204,7 +223,7 @@ export function googleRoutes(
       if (!raw) return redirect(res, destination, "retry");
       await store().del(receiptKey(receipt));
       const tx: Transaction = JSON.parse(raw);
-      destination = tx.intent === "sign-in" ? tx.entry : settings;
+      destination = tx.intent === "sign-in" ? signInEntry(tx.entry, tx.returnTo) : settings;
       if (params.get("error") === "access_denied" && !params.has("code")) {
         return redirect(res, destination, "cancelled");
       }
@@ -217,10 +236,8 @@ export function googleRoutes(
       const claims = await provider!.exchange(callback, tx);
       // Different states may complete concurrently for the same old session. Only one may
       // change the session or account. A cancelled or invalid provider response takes no slot.
-      ownsCompletion = !!await store().set(completionKey, "1", {
-        condition: "NX", expiration: { type: "EX", value: flowSeconds * 2 },
-      });
-      if (!ownsCompletion) return redirect(res, destination, "retry");
+      releaseCompletion = await claimGoogleCompletion(redis, originalSessionId);
+      if (!releaseCompletion) return redirect(res, destination, "retry");
 
       const identity = identityKey(claims.sub);
       if (tx.intent === "link") {
@@ -236,6 +253,7 @@ export function googleRoutes(
           });
           if (version === undefined) return redirect(res, settings, "retry");
           await establishSession(req, tx.userId, version);
+          await publishSession();
           return redirect(res, settings, "linked");
         } catch (error) {
           if (uniqueConflict(error)) return redirect(res, settings, "link-failed");
@@ -258,11 +276,13 @@ export function googleRoutes(
           userId: user.id, version: tx.version, until: Date.now() + codeSeconds * 1000,
         };
         await saveSession(req);
+        await publishSession();
         return redirect(res, settings, "verify");
       }
 
       if (linked) {
         await establishSession(req, linked.user.id, linked.user.sessionVersion);
+        await publishSession();
         audit("signed in");
         res.redirect(303, tx.returnTo);
         return;
@@ -278,17 +298,16 @@ export function googleRoutes(
         until: Date.now() + onboardingSeconds * 1000, returnTo: tx.returnTo, entry: tx.entry,
       };
       await saveSession(req);
+      await publishSession();
       return redirect(res, "/google-onboarding", "onboarding");
     } catch {
       return redirect(res, destination, "retry");
     } finally {
-      if (ownsCompletion && originalSessionId === req.sessionID) {
-        await store().del(completionKey).catch(() => audit("completion release unavailable"));
-      }
+      await releaseCompletion?.().catch(() => audit("completion release unavailable"));
     }
   });
 
-  router.post("/email-code", limitRequests(redis, "google-email", 10), async (req, res) => {
+  router.post("/email-code", limit("google-email", 10), async (req, res) => {
     const pending = pendingFor(req);
     if (!pending || (pending.kind === "register" && pending.mailboxVerified)) {
       res.status(409).json({ error: "Start Google sign-in again to verify your email." });
@@ -298,7 +317,7 @@ export function googleRoutes(
       res.status(503).json({ error: "Email verification is temporarily unavailable." });
       return;
     }
-    await authLimit("googleEmail", req.ip!, pending.email);
+    await authLimit("googleEmail", googleClientIp(req), pending.email);
     const code = randomInt(100_000_000).toString().padStart(8, "0");
     const challenge = key(req, `email:${pending.id}`);
     await store().set(challenge, digest(code), { expiration: { type: "EX", value: codeSeconds } });
@@ -314,14 +333,14 @@ export function googleRoutes(
 
   async function confirmedEmail(req: Request, pending: GooglePending) {
     if (pending.kind === "register" && pending.mailboxVerified) return true;
-    await authLimit("googleCode", req.ip!, pending.id);
+    await authLimit("googleCode", googleClientIp(req), pending.id);
     const code: unknown = req.body?.code;
     if (typeof code !== "string" || !/^\d{8}$/.test(code)) return false;
     const expected = await store().get(key(req, `email:${pending.id}`));
     return !!expected && timingSafeEqual(Buffer.from(expected, "hex"), Buffer.from(digest(code), "hex"));
   }
 
-  router.post("/register", limitRequests(redis, "google-register", 15), async (req, res) => {
+  router.post("/register", limit("google-register", 15), async (req, res) => {
     const pending = pendingFor(req);
     if (pending?.kind !== "register") {
       res.status(409).json({ error: "This registration expired. Please start again." });
@@ -361,13 +380,13 @@ export function googleRoutes(
   });
 
   async function confirmPassword(req: Request, userId: number, hash: string | null) {
-    await authLimit("googleManage", req.ip!, String(userId));
+    await authLimit("googleManage", googleClientIp(req), String(userId));
     const password: unknown = req.body?.password;
     return Boolean(hash && typeof password === "string" && password.length > 0 &&
       password.length <= 128 && await argon2.verify(hash, password));
   }
 
-  router.post("/unlink", limitRequests(redis, "google-unlink", 10), async (req, res) => {
+  router.post("/unlink", limit("google-unlink", 10), async (req, res) => {
     const id = req.session.userId;
     if (!id) {
       res.status(401).json({ error: "Sign in to manage your sign-in methods." });
@@ -407,7 +426,7 @@ export function googleRoutes(
     res.json({ removed: true });
   });
 
-  router.post("/password", limitRequests(redis, "google-password", 10), async (req, res) => {
+  router.post("/password", limit("google-password", 10), async (req, res) => {
     const pending = pendingFor(req);
     if (pending?.kind !== "password") {
       res.status(409).json({ error: "Verify your Google account again to set a password." });
@@ -435,14 +454,14 @@ export function googleRoutes(
     res.json({ saved: true });
   });
 
-  router.post("/cancel", limitRequests(redis, "google-cancel", 15), async (req, res) => {
+  router.post("/cancel", limit("google-cancel", 15), async (req, res) => {
     const pending = pendingFor(req);
     if (pending?.kind === "password") {
       await establishSession(req, pending.userId, pending.version);
     } else if (!req.session.userId) {
       await regenerateSession(req);
     }
-    res.json({ next: pending?.kind === "register" ? pending.entry : settings });
+    res.json({ next: pending?.kind === "register" ? signInEntry(pending.entry, pending.returnTo) : settings });
   });
 
   return router;
