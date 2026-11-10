@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { ActionIcon, Avatar, Modal, Popover, useMantineColorScheme } from "@mantine/core";
-import { SunIcon, MoonIcon } from "@radix-ui/react-icons";
+import { SunIcon, MoonIcon, PlusIcon } from "@radix-ui/react-icons";
 import { GetCurrentUserDocument, LogoutUserDocument } from "../../graphql/generated/graphql";
 import { ShareMusic } from "../Modal/ShareMusic";
 import { Logo } from "../Logo/Logo";
@@ -57,7 +57,14 @@ export function Navbar() {
                   {logoutError && <p role="alert">{logoutError}</p>}
                 </Popover.Dropdown>
               </Popover>
-              <button type="button" onClick={() => setSharing(true)} className="px-4 py-2 bg-brand-orange hover:bg-brand-orange_hover rounded text-white text-sm">Share</button>
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                onClick={() => setSharing(true)}
+                className="hidden rounded bg-brand-orange px-4 py-2 text-sm text-white hover:bg-brand-orange_hover md:inline-block"
+              >
+                Share
+              </button>
             </>
           ) : (
             <>
@@ -70,6 +77,17 @@ export function Navbar() {
           </ActionIcon>
         </div>
       </nav>
+      {!loading && user && (
+        <button
+          type="button"
+          aria-label="Share music"
+          aria-haspopup="dialog"
+          onClick={() => setSharing(true)}
+          className="fixed right-[calc(1rem+env(safe-area-inset-right))] bottom-[calc(1rem+env(safe-area-inset-bottom))] z-20 flex size-14 items-center justify-center rounded-full bg-brand-orange text-black shadow-lg hover:bg-brand-orange_hover focus-visible:outline-2 focus-visible:outline-offset-2 md:hidden"
+        >
+          <PlusIcon aria-hidden="true" width={24} height={24} />
+        </button>
+      )}
       <Modal opened={sharing && Boolean(user)} onClose={() => setSharing(false)} title="What are you listening to?" size={525}>
         <ShareMusic handleCloseModal={() => setSharing(false)} />
       </Modal>
