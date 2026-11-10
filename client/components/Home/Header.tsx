@@ -1,6 +1,19 @@
+import { Skeleton } from "@mantine/core";
 import { ShareButton } from "../Modal/ShareButton";
 
-export function Header({ signedIn }: { signedIn: boolean }) {
+export function Header({ signedIn, loading }: { signedIn: boolean; loading: boolean }) {
+  if (loading && !signedIn) {
+    return (
+      <section className="hero" aria-label="Homepage introduction" aria-busy="true">
+        <div className="hero-copy" aria-hidden="true">
+          <Skeleton height={42} width="min(100%, 24rem)" />
+          <Skeleton height={24} width="min(100%, 22rem)" />
+          <Skeleton height={44} width={126} />
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className={`hero${signedIn ? "" : " hero--public"}`}>
       <div className="hero-copy">
