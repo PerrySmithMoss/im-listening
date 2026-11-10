@@ -23,8 +23,10 @@ jobs:
       - run: npm ci --prefix server
       - run: npm ci --prefix client
       - run: npm audit --prefix server && npm audit --prefix client
-      - run: docker compose up -d --wait
-      - run: npm run db:migrate --prefix server
+      - name: Start PostgreSQL and Redis
+        run: docker compose up -d --wait postgres redis
+      - name: Apply migrations to the fresh PostgreSQL database
+        run: npm run db:migrate --prefix server
       - run: npm run build --prefix server
       - run: npm test --prefix server
       - run: npm run gen --prefix client && git diff --exit-code -- client/graphql/generated

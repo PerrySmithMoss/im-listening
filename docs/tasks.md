@@ -4,9 +4,9 @@
 
 Start with an empty database. Existing MySQL data does not need to be migrated.
 
-- [ ] Switch the Prisma provider and runtime adapter to PostgreSQL. Create an initial PostgreSQL migration and verify that it applies to an empty database.
-- [ ] Replace MySQL in local Docker Compose and update the environment examples, setup instructions, CI, and integration tests for PostgreSQL.
-- [ ] Check that the switch preserves account lookup and uniqueness behavior, including differences in case sensitivity. Run the API tests for registration, login, posts, and password reset against PostgreSQL.
+- [x] Switch the Prisma provider and runtime adapter to PostgreSQL. Create an initial PostgreSQL migration and verify that it applies to an empty database.
+- [x] Replace MySQL in local Docker Compose and update the environment examples, setup instructions, CI, and integration tests for PostgreSQL.
+- [x] Check that the switch preserves account lookup and uniqueness behavior, including differences in case sensitivity. Run the API tests for registration, login, posts, and password reset against PostgreSQL.
 
 ## Task 2 — Deploy the API to the VPS
 

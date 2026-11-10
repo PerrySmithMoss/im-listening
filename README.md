@@ -20,13 +20,16 @@ npm run build --prefix server
 
 In separate terminals, run `npm run dev --prefix server` and `npm run dev --prefix client`.
 Open [the web app](http://localhost:3100). The API is at
-[port 5050](http://localhost:5050/healthz). Compose starts MySQL and Redis on
-loopback ports 3307 and 6380, respectively. Use `docker compose down` to stop
+[port 5050](http://localhost:5050/healthz). Compose starts PostgreSQL 17 and Redis on
+loopback ports 5433 and 6380, respectively. Use `docker compose down` to stop
 the services and keep your local data.
 
 The setup script creates ignored env files without overwriting existing ones and generates
-a random session secret. See [server/.env.example](server/.env.example) and
-[client/.env.example](client/.env.example) for configuration. Set `SPOTIFY_CLIENT_ID` and
+a random session secret. If your existing `server/.env` still points to MySQL, replace
+its `DATABASE_URL` with the PostgreSQL value from [server/.env.example](server/.env.example)
+before running the migration. Compose creates a fresh PostgreSQL data volume.
+
+See [client/.env.example](client/.env.example) for frontend configuration. Set `SPOTIFY_CLIENT_ID` and
 `SPOTIFY_CLIENT_SECRET` in **server/.env** to enable Spotify search. You can still share
 songs by entering their details manually. Audio previews appear when Spotify supplies one.
 
@@ -55,7 +58,7 @@ npm audit --prefix client
 ```
 
 The API tests start their own server on port 5051, use Redis database 9, and clean up
-their MySQL accounts and posts. They capture reset emails on a temporary local SMTP
+their PostgreSQL accounts and posts. They capture reset emails on a temporary local SMTP
 listener, so CI needs no Resend credentials. GraphQL code generation reads the built server schema
 locally; it needs neither a running API nor external credentials. Commit the generated
 client file when you change the schema or operations.
@@ -66,7 +69,8 @@ pin patched versions of `graphql-scalars` and `minimatch` until their callers up
 
 ## Upgrading an existing deployment
 
-Run `npm run db:migrate --prefix server` before starting the upgraded API. Existing
+Set `DATABASE_URL` to an empty PostgreSQL database with ICU collation support and run
+`npm run db:migrate --prefix server` before starting the upgraded API. Existing
 sessions expire on upgrade. Use `CLIENT_ORIGIN` for the HTTPS frontend origin,
 `REDIS_URL` for the Redis connection, and the `SMTP_*` settings for password reset mail.
 Set `NEXT_PUBLIC_GRAPHQL_API_URL` to the absolute public API URL including `/graphql`
@@ -94,7 +98,7 @@ Spotify credentials in the client or Redis credentials in startup logs, rotate t
   <li>Node.js, Apollo server, Express</li>
   <li>GraphQL</li>
   <li>Redis</li>
-  <li>MySQL</li>
+  <li>PostgreSQL</li>
   <li>Prisma ORM</li>
   <li>TailwindCSS</li>
 </ul>

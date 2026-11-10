@@ -65,7 +65,7 @@ export function loadConfig() {
 
   return {
     production,
-    databaseUrl: parseUrl("DATABASE_URL", ["mysql:"]),
+    databaseUrl: parseUrl("DATABASE_URL", ["postgresql:", "postgres:"]),
     redisUrl: parseUrl("REDIS_URL", ["redis:", "rediss:"]).href,
     clientOrigin: clientUrl.origin,
     port: integer("PORT", 5050, 1, 65535),

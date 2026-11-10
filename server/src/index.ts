@@ -4,7 +4,7 @@ import { ApolloServer } from "@apollo/server";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { expressMiddleware } from "@as-integrations/express5";
 import { depthLimit } from "@graphile/depth-limit";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { RedisStore } from "connect-redis";
 import cors from "cors";
 import express, { type ErrorRequestHandler } from "express";
@@ -21,7 +21,7 @@ import { createMailer } from "../utils/sendEmail";
 
 async function main() {
   const config = loadConfig();
-  const prisma = new PrismaClient({ adapter: new PrismaMariaDb(config.databaseUrl.href) });
+  const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: config.databaseUrl.href }) });
   const redis = createClient<RedisModules, RedisFunctions, RedisScripts, RespVersions, TypeMapping>({
     url: config.redisUrl,
     disableOfflineQueue: true,

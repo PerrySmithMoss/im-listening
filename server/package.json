@@ -19,7 +19,7 @@
     "@apollo/server": "5.5.1",
     "@as-integrations/express5": "1.1.2",
     "@graphile/depth-limit": "0.4.0",
-    "@prisma/adapter-mariadb": "7.10.1",
+    "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
     "argon2": "0.45.2",
     "connect-redis": "10.0.0",

@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
 }
 
 generator client {
@@ -22,13 +22,14 @@ model Post {
   rating         Decimal     @db.Decimal(10, 1)
   title          String
   previewSongUrl String?     @db.VarChar(255)
-  genre          String     @db.VarChar(255)
+  genre          String      @db.VarChar(255)
   published      Boolean     @default(false)
   author         User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId       Int
   songGenres     SongGenre[]
 
   @@index([createdAt, id])
+  @@index([authorId])
 }
 
 model SongGenre {
@@ -38,6 +39,8 @@ model SongGenre {
   genre     String   @db.VarChar(255)
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    Int
+
+  @@index([postId])
 }
 
 model Profile {
@@ -52,12 +55,12 @@ model User {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  email     String   @unique
+  email     String   @unique @db.VarChar(191)
   password  String
   sessionVersion Int @default(0)
   firstName String
   lastName  String
-  username  String   @unique
+  username  String   @unique @db.VarChar(191)
   posts     Post[]
   profile   Profile?
 }
