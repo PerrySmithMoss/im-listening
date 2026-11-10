@@ -3,6 +3,7 @@ import "@mantine/core/styles.layer.css";
 import "@mantine/notifications/styles.layer.css";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import type { AppProps } from "next/app";
+import Link from "next/link";
 import { useState } from "react";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { createTheme, MantineProvider, useMantineColorScheme } from "@mantine/core";
@@ -38,6 +39,10 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         <Notifications />
         <GlobalUIProvider>
           <Component {...pageProps} />
+          <footer className="mx-auto mt-12 flex max-w-[90rem] flex-wrap gap-4 border-t border-gray-300 px-4 py-5 text-sm sm:px-8">
+            <Link className="underline" href="/privacy">Privacy policy</Link>
+            <Link className="underline" href="/terms">Terms of service</Link>
+          </footer>
         </GlobalUIProvider>
       </MantineProvider>
     </ApolloProvider>
