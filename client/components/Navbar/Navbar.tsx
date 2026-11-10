@@ -14,7 +14,7 @@ export function Navbar() {
   const { toggleColorScheme } = useMantineColorScheme();
   const dark = useComputedColorScheme("light") === "dark";
   const apollo = useApolloClient();
-  const { data, loading } = useQuery(GetCurrentUserDocument, { ssr: false });
+  const { data, loading } = useQuery(GetCurrentUserDocument);
   const [logout, { loading: loggingOut }] = useMutation(LogoutUserDocument);
   const [logoutError, setLogoutError] = useState("");
   const [menu, setMenu] = useState(false);

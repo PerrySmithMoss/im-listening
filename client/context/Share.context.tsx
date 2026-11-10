@@ -9,7 +9,7 @@ const ShareContext = createContext({ open: () => {}, signedIn: false, loading: f
 
 export function ShareProvider({ children }: PropsWithChildren) {
   const [opened, setOpened] = useState(false);
-  const { data, loading } = useQuery(GetCurrentUserDocument, { ssr: false });
+  const { data, loading } = useQuery(GetCurrentUserDocument);
   const user = data?.getCurrentUser;
   const router = useRouter();
   const { isReady, pathname, query, events } = router;
