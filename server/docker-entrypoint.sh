@@ -19,6 +19,9 @@ case "$1" in
         if [ -n "${REDIS_URL_FILE:-}" ]; then
             export REDIS_URL="$(cat "$REDIS_URL_FILE")"
         fi
+        if [ -n "${GOOGLE_CLIENT_SECRET_FILE:-}" ]; then
+            export GOOGLE_CLIENT_SECRET="$(cat "$GOOGLE_CLIENT_SECRET_FILE")"
+        fi
         ./node_modules/.bin/prisma migrate deploy
         exec node dist/src/index.js
         ;;

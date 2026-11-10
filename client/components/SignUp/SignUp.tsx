@@ -1,3 +1,4 @@
+import { GoogleContinue } from "../GoogleAuth/GoogleAuth";
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -520,6 +521,7 @@ export function SignUp() {
 
 
         </div>
+        <GoogleContinue entry="/sign-up" />
         <form onSubmit={submit}>
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
           <div>

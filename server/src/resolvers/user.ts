@@ -3,6 +3,7 @@ import argon2 from "argon2";
 import {
   Resolver, Query, Mutation, Arg, Ctx, ObjectType, Field, FieldResolver, Root,
 } from "type-graphql";
+import { destroySession, establishSession } from "../auth/session";
 import { Prisma } from "../generated/prisma/client";
 import { Post } from "../entities/Post";
 import { User } from "../entities/User";
@@ -23,17 +24,6 @@ const publicAccount = {
   id: true, createdAt: true, updatedAt: true, firstName: true, lastName: true,
   username: true, email: true, profile: true,
 } satisfies Prisma.UserSelect;
-
-async function establishSession(ctx: PrismaContext, id: number, version: number) {
-  await new Promise<void>((resolve, reject) =>
-    ctx.req.session.regenerate((err) => err ? reject(err) : resolve()),
-  );
-  ctx.req.session.userId = id;
-  ctx.req.session.sessionVersion = version;
-  await new Promise<void>((resolve, reject) =>
-    ctx.req.session.save((err) => err ? reject(err) : resolve()),
-  );
-}
 
 @ObjectType()
 class FieldError {
@@ -109,7 +99,7 @@ export class UserResolver {
       }
       throw error;
     }
-    await establishSession(ctx, user.id, user.sessionVersion);
+    await establishSession(ctx.req, user.id, user.sessionVersion);
     return { user };
   }
 
@@ -123,8 +113,8 @@ export class UserResolver {
       select: { ...publicAccount, password: true, sessionVersion: true },
     });
     const valid = await argon2.verify(user?.password ?? await dummyPasswordHash, password);
-    if (!user || !valid) return invalidLogin();
-    await establishSession(ctx, user.id, user.sessionVersion);
+    if (!user?.password || !valid) return invalidLogin();
+    await establishSession(ctx.req, user.id, user.sessionVersion);
     return { user };
   }
 
@@ -136,9 +126,7 @@ export class UserResolver {
 
   @Mutation(() => Boolean)
   async logoutUser(@Ctx() ctx: PrismaContext) {
-    await new Promise<void>((resolve, reject) =>
-      ctx.req.session.destroy((error) => error ? reject(error) : resolve()),
-    );
+    await destroySession(ctx.req);
     ctx.res.clearCookie(ctx.cookieName, ctx.cookie);
     return true;
   }
@@ -149,7 +137,7 @@ export class UserResolver {
     await ctx.authLimit("reset", ctx.req.ip!, email);
     if (!ctx.sendResetEmail || !validateEmail(email)) return true;
     const user = await ctx.prisma.user.findUnique({
-      where: { email }, select: { id: true, sessionVersion: true },
+      where: { email, password: { not: null } }, select: { id: true, sessionVersion: true },
     });
     if (!user) return true;
     const token = randomBytes(32).toString("base64url");
@@ -177,13 +165,13 @@ export class UserResolver {
     if (!ticket) return invalidToken();
     const [id, sessionVersion] = ticket.split(":").map(Number);
     const updated = await ctx.prisma.user.updateMany({
-      where: { id, sessionVersion },
+      where: { id, sessionVersion, password: { not: null } },
       data: { password: await argon2.hash(password), sessionVersion: { increment: 1 } },
     });
     if (!updated.count) return invalidToken();
     const user = await ctx.prisma.user.findUnique({ where: { id }, select: publicAccount });
     if (!user) return invalidToken();
-    await establishSession(ctx, id, sessionVersion + 1);
+    await establishSession(ctx.req, id, sessionVersion + 1);
     return { user };
   }
 }

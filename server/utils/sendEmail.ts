@@ -13,12 +13,23 @@ export function createMailer({ smtp, clientOrigin }: ReturnType<typeof loadConfi
     from: { name: "I'm Listening", address: from },
   });
 
-  return async (email: string, token: string) => {
+  const sendReset = async (email: string, token: string) => {
     const url = new URL(`/change-password/${token}`, clientOrigin);
     await transporter.sendMail({
       to: { name: "", address: email },
       subject: "Reset your I'm Listening password",
       text: `Use this link within one hour to reset your password: ${url.href}`,
     });
+  };
+
+  return {
+    sendReset,
+    async sendVerification(email: string, code: string) {
+      await transporter.sendMail({
+        to: { name: "", address: email },
+        subject: "Verify your email for I'm Listening",
+        text: `Your I'm Listening verification code is ${code}. It expires in 10 minutes. Only enter it on I'm Listening.`,
+      });
+    },
   };
 }

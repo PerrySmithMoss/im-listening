@@ -10,6 +10,8 @@ services:
       DATABASE_CA_FILE: /etc/im-listening/postgres-ca.crt
       SESSION_SECRET_FILE: /run/secrets/session_secret
       REDIS_URL_FILE: /run/secrets/redis_url
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?set the production Google OAuth client ID}
+      GOOGLE_CLIENT_SECRET_FILE: /run/secrets/google_client_secret
       SMTP_HOST: smtp.resend.com
       SMTP_PORT: "465"
       SMTP_SECURE: "true"
@@ -21,6 +23,7 @@ services:
       - {source: im_listening_session_secret_v1, target: session_secret, uid: "1000", mode: 0400}
       - {source: im_listening_redis_url_v1, target: redis_url, uid: "1000", mode: 0400}
       - {source: im_listening_resend_key_v1, target: smtp_password, uid: "1000", mode: 0400}
+      - {source: im_listening_google_oauth_v1, target: google_client_secret, uid: "1000", mode: 0400}
     configs:
       - {source: im_listening_postgres_ca_v1, target: /etc/im-listening/postgres-ca.crt}
     networks: [portfolio_network, sessions]
@@ -43,6 +46,12 @@ services:
         traefik.http.routers.im-listening-api.rule: Host(`im-listening-api.perrysmithmoss.com`)
         traefik.http.routers.im-listening-api.entrypoints: websecure
         traefik.http.routers.im-listening-api.tls.certresolver: myresolver
+        traefik.http.routers.im-listening-auth.rule: Host(`im-listening-api.perrysmithmoss.com`) && PathPrefix(`/auth/google/`)
+        traefik.http.routers.im-listening-auth.entrypoints: websecure
+        traefik.http.routers.im-listening-auth.tls.certresolver: myresolver
+        traefik.http.routers.im-listening-auth.service: im-listening-api
+        traefik.http.routers.im-listening-auth.observability.accesslogs: "false"
+        traefik.http.routers.im-listening-auth.observability.tracing: "false"
         traefik.http.services.im-listening-api.loadbalancer.server.port: "5050"
       resources:
         limits: {memory: 384M, cpus: "0.75", pids: 128}
@@ -98,5 +107,6 @@ secrets:
   im_listening_database_url_v1: {external: true}
   im_listening_session_secret_v1: {external: true}
   im_listening_resend_key_v1: {external: true}
+  im_listening_google_oauth_v1: {external: true}
   im_listening_redis_url_v1: {external: true}
   im_listening_redis_config_v1: {external: true}

@@ -1,3 +1,5 @@
+import { GoogleSettingsLink } from "../GoogleAuth/GoogleAuth";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import Link from "next/link";
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
@@ -17,6 +19,9 @@ export function Navbar() {
   const [logoutError, setLogoutError] = useState("");
   const user = data?.getCurrentUser;
   const dark = colorScheme === "dark";
+
+  const { asPath, isReady } = useRouter();
+  const intended = isReady && /^\/post\/[1-9][0-9]{0,9}$/.test(asPath) ? { next: asPath } : undefined;
 
   async function signOut() {
     setLogoutError("");
@@ -47,6 +52,7 @@ export function Navbar() {
                 </Popover.Target>
                 <Popover.Dropdown>
                   <p className="mb-2">{user.firstName} {user.lastName}</p>
+                  <GoogleSettingsLink />
                   <button type="button" disabled={loggingOut} onClick={signOut} className="hover:text-brand-orange">Log out</button>
                   {logoutError && <p role="alert">{logoutError}</p>}
                 </Popover.Dropdown>
@@ -55,8 +61,8 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/login" className="hover:text-brand-orange">Log in</Link>
-              <Link href="/sign-up" className="rounded bg-brand-orange px-4 py-2 text-white hover:bg-brand-orange_hover">Sign up</Link>
+              <Link href={{ pathname: "/login", query: intended }} className="hover:text-brand-orange">Log in</Link>
+              <Link href={{ pathname: "/sign-up", query: intended }} className="rounded bg-brand-orange px-4 py-2 text-white hover:bg-brand-orange_hover">Sign up</Link>
             </>
           )}
           <ActionIcon variant="outline" size="lg" color="orange" onClick={() => toggleColorScheme()} aria-label="Toggle color scheme">

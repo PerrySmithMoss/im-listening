@@ -12,6 +12,8 @@ import express, { type ErrorRequestHandler } from "express";
 import session from "express-session";
 import helmet from "helmet";
 import { createClient, type RedisModules, type RedisFunctions, type RedisScripts, type RespVersions, type TypeMapping } from "redis";
+import { googleRoutes } from "./auth/googleRoutes";
+import { absoluteSessionMs, regenerateSession, idleSessionMs, requireWriteOrigin } from "./auth/session";
 import { ConfigError, loadConfig } from "./config";
 import { PrismaClient } from "./generated/prisma/client";
 import { createAuthLimiter, limitRequests } from "./middleware/rateLimits";
@@ -44,7 +46,7 @@ async function main() {
     const app = express();
     const httpServer = createServer(app);
     const authLimit = createAuthLimiter(redis);
-    const sendResetEmail = createMailer(config);
+    const mailer = createMailer(config);
 
     app.disable("x-powered-by");
     if (config.trustProxyHops) app.set("trust proxy", config.trustProxyHops);
@@ -77,31 +79,44 @@ async function main() {
       }
       next();
     });
+    app.use("/auth/google", (req, res, next) => {
+      res.set({ "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" });
+      if (config.production && !req.secure) {
+        res.status(400).json({ error: "HTTPS is required." });
+        return;
+      }
+      next();
+    });
+    app.post("/graphql", (req, res, next) => {
+      // Anonymous server-side rendering sends neither an Origin nor a cookie.
+      if ((!req.get("origin") && !req.get("cookie")) || requireWriteOrigin(req, res, config.clientOrigin)) next();
+    });
     app.use("/graphql", limitRequests(redis, "graphql", 120));
-    app.use(["/graphql", "/spotify"], session({
+    app.use(["/graphql", "/spotify", "/auth/google"], session({
       name: config.cookieName,
-      store: new RedisStore({ client: redis, prefix: "im-listening:sess:", disableTouch: true }),
-      cookie: { ...config.cookie, maxAge: 7 * 24 * 60 * 60 * 1000 },
+      store: new RedisStore({
+        client: redis, prefix: "im-listening:sess:", ttl: () => idleSessionMs / 1000,
+      }),
+      cookie: { ...config.cookie, maxAge: absoluteSessionMs },
       saveUninitialized: false,
       secret: config.secret,
       resave: false,
     }));
-    app.use(["/graphql", "/spotify"], async (req, res, next) => {
+    app.use(["/graphql", "/spotify", "/auth/google"], async (req, res, next) => {
       if (req.session.userId) {
         const user = await prisma.user.findUnique({
           where: { id: req.session.userId },
           select: { sessionVersion: true },
         });
-        if (!user || user.sessionVersion !== req.session.sessionVersion) {
-          await new Promise<void>((resolve, reject) =>
-            req.session.regenerate((err) => err ? reject(err) : resolve()),
-          );
-          res.clearCookie(config.cookieName, config.cookie);
+        if (!user || user.sessionVersion !== req.session.sessionVersion ||
+            !req.session.authenticatedAt || Date.now() - req.session.authenticatedAt >= absoluteSessionMs) {
+          await regenerateSession(req);
         }
       }
       next();
     });
     app.use("/spotify", spotifyRouter(config, redis));
+    app.use("/auth/google", googleRoutes(config, prisma, redis, authLimit, mailer));
 
     const apollo = new ApolloServer<PrismaContext>({
       schema: await createSchema(),
@@ -123,13 +138,23 @@ async function main() {
     await apollo.start();
     app.post("/graphql", express.json({ limit: "32kb" }), expressMiddleware(apollo, {
       context: async ({ req, res }) => ({
-        req, res, prisma, redis, authLimit, sendResetEmail,
+        req, res, prisma, redis, authLimit, sendResetEmail: mailer?.sendReset,
         cookieName: config.cookieName, cookie: config.cookie,
       }),
     }));
 
-    const errorHandler: ErrorRequestHandler = (error, _req, res, next) => {
+    const errorHandler: ErrorRequestHandler = (error, req, res, next) => {
       if (res.headersSent) return next(error);
+      if (req.path === "/auth/google/callback") {
+        console.error("Google sign-in: callback unavailable");
+        res.redirect(303, "/login?google=retry");
+        return;
+      }
+      if (req.path.startsWith("/auth/google/") && error.extensions?.code === "RATE_LIMITED") {
+        console.info("Google sign-in: rate limited");
+        res.status(429).json({ error: "Too many attempts. Please try again later." });
+        return;
+      }
       if (error.status === 400 || error.status === 413) {
         res.status(error.status).json({ error: "Invalid request body." });
         return;
