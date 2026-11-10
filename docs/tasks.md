@@ -17,4 +17,6 @@ Complete Task 1 first. Use the Chinwag and VitaTrack deployment workflows and th
 - [x] Add a GitHub Actions workflow that runs the checks, publishes the API image to GHCR, and deploys by digest through an app-specific restricted release account. Support redeploying a known good digest. Configure `APP_RELEASE_KEY` as a secret in the `VPS Production` GitHub environment and `VPS_HOST` and `VPS_KNOWN_HOSTS` as environment variables.
 - [x] Configure the verified Resend sender and set `CLIENT_ORIGIN` to the live frontend origin. Point Vercel at the VPS API using a route that preserves browser session cookies. Verify health, login, and password reset email delivery from the live app using `imlistening.emails@gmail.com`.
 
-The [manual redeploy](https://github.com/PerrySmithMoss/im-listening/actions/runs/42833781264) verified the restricted release account against the production digest. The reset email reached the test Gmail inbox with a link to `im-listening.vercel.app`.
+The [manual redeploy](https://github.com/PerrySmithMoss/im-listening/actions/runs/42833781264) verified the restricted release account against the production digest.
+
+The full password reset flow passed on `im-listening.vercel.app`. The reset email reached the test Gmail inbox, and the emailed link opened the live reset form. After changing the password, the test account signed in with the new password in a fresh session. The site rejected a second attempt to use the same link.
