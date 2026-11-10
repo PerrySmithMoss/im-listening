@@ -19,6 +19,9 @@ export class Post {
   @Field(() => String, { nullable: true })
   previewSongUrl: string | null;
 
+  @Field(() => String, { nullable: true })
+  spotifyTrackId: string | null;
+
   @Field(() => String)
   artistName: string;
 

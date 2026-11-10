@@ -22,6 +22,7 @@ model Post {
   rating         Decimal     @db.Decimal(10, 1)
   title          String
   previewSongUrl String?     @db.VarChar(255)
+  spotifyTrackId String?     @db.VarChar(22)
   genre          String      @db.VarChar(255)
   published      Boolean     @default(false)
   author         User        @relation(fields: [authorId], references: [id], onDelete: Cascade)

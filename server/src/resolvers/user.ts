@@ -18,6 +18,7 @@ const resetKey = (token: string) =>
 const fieldError = (field: string, message: string) => ({ errors: [{ field, message }] });
 const invalidLogin = () => fieldError("password", "The email or password is incorrect.");
 const invalidToken = () => fieldError("token", "This reset link has expired or has already been used.");
+const validResetToken = (value: string) => /^[A-Za-z0-9_-]{43}$/.test(value);
 const validPassword = (value: string) => value.length >= 8 && value.length <= 128;
 const passwordError = () => fieldError("password", "Use a password between 8 and 128 characters.");
 
@@ -58,6 +59,14 @@ export class UserResolver {
       take: 50,
       include: postRelations,
     });
+  }
+
+  @FieldResolver(() => Boolean)
+  async hasPassword(@Root() user: User, @Ctx() ctx: PrismaContext) {
+    return Boolean(await ctx.prisma.user.findFirst({
+      where: { id: user.id, password: { not: null } },
+      select: { id: true },
+    }));
   }
 
   @Mutation(() => UserResponse)
@@ -157,11 +166,24 @@ export class UserResolver {
     return true;
   }
 
+  @Mutation(() => Boolean)
+  async checkPasswordResetLink(@Arg("token") token: string, @Ctx() ctx: PrismaContext) {
+    await ctx.authLimit("checkReset", ctx.req.ip!, token);
+    if (!validResetToken(token)) return false;
+    const ticket = await ctx.redis.get(resetKey(token));
+    if (!ticket) return false;
+    const [id, sessionVersion] = ticket.split(":").map(Number);
+    return Boolean(await ctx.prisma.user.findFirst({
+      where: { id, sessionVersion, password: { not: null } },
+      select: { id: true },
+    }));
+  }
+
   @Mutation(() => UserResponse)
   async changePassword(@Arg("token") token: string, @Arg("password") password: string, @Ctx() ctx: PrismaContext) {
     await ctx.authLimit("change", ctx.req.ip!, token);
     if (!validPassword(password)) return passwordError();
-    if (!/^[A-Za-z0-9_-]{43}$/.test(token)) return invalidToken();
+    if (!validResetToken(token)) return invalidToken();
     const ticket = await ctx.redis.getDel(resetKey(token));
     if (!ticket) return invalidToken();
     const [id, sessionVersion] = ticket.split(":").map(Number);
