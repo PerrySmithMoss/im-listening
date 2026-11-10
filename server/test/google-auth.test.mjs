@@ -532,6 +532,8 @@ test("production requires a Google client and uses the exact HTTPS callback and 
     assert.deepEqual(config.cookie, { secure: true, path: "/", httpOnly: true, sameSite: "lax" });
     delete process.env.GOOGLE_PROXY_SECRET;
     assert.throws(loadConfig, /GOOGLE_PROXY_SECRET/);
+    process.env.GOOGLE_PROXY_SECRET = "invalid-credential-".repeat(4);
+    assert.throws(loadConfig, /GOOGLE_PROXY_SECRET must be a 64-character hexadecimal value/);
     process.env.GOOGLE_PROXY_SECRET = proxySecret;
     delete process.env.GOOGLE_CLIENT_SECRET;
     assert.throws(loadConfig, /GOOGLE_CLIENT_SECRET/);
