@@ -3,8 +3,9 @@
 The `im-listening` stack runs the API and a private, password-protected Redis
 instance. Traefik serves `https://im-listening-api.perrysmithmoss.com`. The API
 uses the shared PostgreSQL service over TLS and owns only its `im_listening`
-database. Redis stores sessions in the stack's `redis-data` volume. Spotify is
-optional and is disabled in this stack. Manual song entry remains available.
+database. Redis stores sessions in the stack's `redis-data` volume. The base
+stack supports manual song entry. Enable Spotify search with the
+[optional stack override](#enable-spotify-search).
 
 ## Provision PostgreSQL and Swarm secrets
 
@@ -126,6 +127,56 @@ Check `/healthz` on the API. On the live frontend, log in using the controlled
 persists. Request a password reset and confirm the message arrives and links to
 the live frontend. Confirm logout clears the session. A successful GraphQL
 response to the reset request alone does not verify delivery.
+
+## Enable Spotify search
+
+Use the client ID and secret from a [Spotify Web API app](https://developer.spotify.com/documentation/web-api/concepts/apps)
+whose quota mode permits the intended use. The API uses Spotify's
+[Client Credentials flow](https://developer.spotify.com/documentation/web-api/tutorials/client-credentials-flow),
+so listeners sign in to I'm Listening without connecting a Spotify account.
+Development Mode requires the Spotify app owner to have Premium; check the
+[current quota rules](https://developer.spotify.com/documentation/web-api/concepts/quota-modes).
+
+First release an API image containing the Spotify file support in
+`server/docker-entrypoint.sh`. From the VPS administrator's Bash session with
+shell tracing off, paste the two values at the prompts:
+
+```bash
+read -rp 'Spotify client ID: ' spotify_id
+printf '%s' "$spotify_id" | docker config create im_listening_spotify_client_id_v1 -
+unset spotify_id
+
+read -rsp 'Spotify client secret: ' spotify_secret
+printf '\n'
+printf '%s' "$spotify_secret" | docker secret create im_listening_spotify_client_secret_v1 -
+unset spotify_secret
+```
+
+With `API_IMAGE` set to the verified running digest and `GOOGLE_CLIENT_ID` set
+as in bootstrap, apply both manifests to the existing stack:
+
+```sh
+docker stack deploy --compose-file docker-stack.yaml \
+  --compose-file docker-stack.spotify.yaml im-listening
+docker stack services im-listening
+curl --fail --silent --show-error https://im-listening-api.perrysmithmoss.com/healthz
+```
+
+Once the new API task is healthy, sign in to the production site, open **Share
+Music**, search for a known song, and confirm it returns results and you can
+select one. The unauthenticated search request returns `401`. When signed in,
+`503` with `Spotify search is not configured.` means the API has no loaded
+credentials; `502` means it attempted the Spotify request and failed. For a
+`502`, check the Spotify app credentials, quota and access from the VPS.
+
+Record the updated service spec with
+`sudo /usr/local/libexec/portfolio-release record im-listening`. Subsequent
+image-only releases preserve the mounts. Include the override in future
+administrator stack deployments to keep search enabled. To rotate credentials,
+create new versioned Docker resources, update the `source` names in the override
+and redeploy following the rotation steps below. To disable Spotify, redeploy
+the base manifest alone and record the resulting service spec again. Older API
+images ignore both file settings and leave manual song entry available.
 
 ## Rotate secrets and configuration
 

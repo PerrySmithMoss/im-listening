@@ -1,0 +1,18 @@
+version: "3.9"
+
+# Apply alongside docker-stack.yaml after provisioning the Spotify credentials.
+services:
+  api:
+    environment:
+      SPOTIFY_CLIENT_ID_FILE: /etc/im-listening/spotify-client-id
+      SPOTIFY_CLIENT_SECRET_FILE: /run/secrets/spotify_client_secret
+    configs:
+      - {source: im_listening_spotify_client_id_v1, target: /etc/im-listening/spotify-client-id}
+    secrets:
+      - {source: im_listening_spotify_client_secret_v1, target: spotify_client_secret, uid: "1000", mode: 0400}
+
+configs:
+  im_listening_spotify_client_id_v1: {external: true}
+
+secrets:
+  im_listening_spotify_client_secret_v1: {external: true}
