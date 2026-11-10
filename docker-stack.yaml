@@ -25,7 +25,7 @@ services:
       - {source: im_listening_redis_url_v1, target: redis_url, uid: "1000", mode: 0400}
       - {source: im_listening_resend_key_v1, target: smtp_password, uid: "1000", mode: 0400}
       - {source: im_listening_google_oauth_v1, target: google_client_secret, uid: "1000", mode: 0400}
-      - {source: im_listening_google_proxy_v1, target: google_proxy_secret, uid: "1000", mode: 0400}
+      - {source: im_listening_google_proxy_v2, target: google_proxy_secret, uid: "1000", mode: 0400}
     configs:
       - {source: im_listening_postgres_ca_v1, target: /etc/im-listening/postgres-ca.crt}
     networks: [portfolio_network, sessions]
@@ -110,6 +110,6 @@ secrets:
   im_listening_session_secret_v1: {external: true}
   im_listening_resend_key_v1: {external: true}
   im_listening_google_oauth_v1: {external: true}
-  im_listening_google_proxy_v1: {external: true}
+  im_listening_google_proxy_v2: {external: true}
   im_listening_redis_url_v1: {external: true}
   im_listening_redis_config_v1: {external: true}

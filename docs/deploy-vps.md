@@ -36,7 +36,7 @@ values out of command history, process arguments, files in the repo and CI.
 | `im_listening_session_secret_v1` | Random hex from `openssl rand -hex 32` | API |
 | `im_listening_resend_key_v1` | Resend key with sending access for `imlistening-mail.perrysmithmoss.com` | API |
 | `im_listening_google_oauth_v1` | Production OAuth client secret from [Google Cloud setup](#google-cloud) | API |
-| `im_listening_google_proxy_v1` | Separate random hex from `openssl rand -hex 32`, also set as `GOOGLE_PROXY_SECRET` in Vercel | API |
+| `im_listening_google_proxy_v2` | Separate 64-character hex from `openssl rand -hex 32`, also set as `GOOGLE_PROXY_SECRET` in Vercel | API |
 | `im_listening_redis_url_v1` | `redis://:<password>@redis:6379` | API |
 | `im_listening_redis_config_v1` | `requirepass <password>` with a final newline | Redis |
 

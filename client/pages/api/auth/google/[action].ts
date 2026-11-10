@@ -37,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (vercel || secret) {
       // Vercel supplies this header at ingress. Local servers use the socket address.
       const address = vercel ? req.headers["x-vercel-forwarded-for"] : req.socket.remoteAddress;
-      if (!secret || Buffer.byteLength(secret) < 32 || typeof address !== "string" || !isIP(address) ||
+      if (!secret || !/^[a-f0-9]{64}$/i.test(secret) || typeof address !== "string" || !isIP(address) ||
           (vercel && target.protocol !== "https:")) {
         return res.status(503).json({ error: "Google sign-in is temporarily unavailable." });
       }

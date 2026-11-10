@@ -64,8 +64,8 @@ export function loadConfig() {
     redirectUri: new URL("/api/auth/google/callback", clientUrl).href,
     proxySecret: production ? required("GOOGLE_PROXY_SECRET") : process.env.GOOGLE_PROXY_SECRET,
   } : undefined;
-  if (google?.proxySecret && Buffer.byteLength(google.proxySecret) < 32) {
-    throw new ConfigError("GOOGLE_PROXY_SECRET must be at least 32 bytes");
+  if (google?.proxySecret && !/^[a-f0-9]{64}$/i.test(google.proxySecret)) {
+    throw new ConfigError("GOOGLE_PROXY_SECRET must be a 64-character hexadecimal value");
   }
   if (google && clientUrl.protocol !== "https:" &&
       !["localhost", "127.0.0.1", "[::1]"].includes(clientUrl.hostname)) {
