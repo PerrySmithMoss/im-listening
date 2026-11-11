@@ -191,6 +191,7 @@ body {
 .detail-content > .artwork { max-inline-size: 12rem; }
 .detail-copy { display: grid; gap: .8rem; align-content: start; min-inline-size: 0; }
 .detail-copy audio, .composer audio { inline-size: 100%; max-inline-size: 25rem; }
+.spotify-player { display: block; inline-size: 100%; border: 0; border-radius: 12px; }
 @media (width >= 42rem) {
   .detail-content { grid-template-columns: minmax(0, 17rem) minmax(0, 1fr); gap: 2rem; }
   .detail-content > .artwork { max-inline-size: none; }
