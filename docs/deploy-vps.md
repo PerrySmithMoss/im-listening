@@ -1,11 +1,19 @@
 # Deploy the API to the VPS
 
-The `im-listening` stack runs the API and a private, password-protected Redis
-instance. Traefik serves `https://im-listening-api.perrysmithmoss.com`. The API
+The `im-listening` stack runs the API. Shared Redis is owned by `perry-infra`
+and reached on the private encrypted `redis_clients` overlay using an
+application-specific ACL credential. Traefik serves `https://im-listening-api.perrysmithmoss.com`. The API
 uses the shared PostgreSQL service over TLS and owns only its `im_listening`
-database. Redis stores sessions in the stack's `redis-data` volume. The base
+database. Redis retains the external `im-listening_redis-data` volume under the
+infrastructure stack. Complete the [shared Redis cutover](https://github.com/PerrySmithMoss/perry-infra/blob/main/redis/README.md)
+before deploying this manifest against an existing installation. The base
 stack supports manual song entry. Enable Spotify search with the
 [optional stack override](#enable-spotify-search).
+
+The production Redis cutover completed on 2026-11-11. The old app-owned Redis
+service was removed after existing-browser-session, password authentication,
+HTTP rate limiting and cross-application ACL checks passed. The original data
+volume and private rollback resources are retained by infrastructure operations.
 
 ## Provision PostgreSQL and Swarm secrets
 
@@ -38,10 +46,13 @@ values out of command history, process arguments, files in the repo and CI.
 | `im_listening_resend_key_v1` | Resend key with sending access for `imlistening-mail.perrysmithmoss.com` | API |
 | `im_listening_google_oauth_v1` | Production OAuth client secret from [Google Cloud setup](#google-cloud) | API |
 | `im_listening_google_proxy_v2` | Separate 64-character hex from `openssl rand -hex 32`, also set as `GOOGLE_PROXY_SECRET` in Vercel | API |
-| `im_listening_redis_url_v1` | `redis://:<password>@redis:6379` | API |
-| `im_listening_redis_config_v1` | `requirepass <password>` with a final newline | Redis |
+| `im_listening_redis_url_v2` | `redis://im_listening:<password>@perry-infra_redis:6379/0` | API |
 
-Generate a separate hex password for Redis and use it in both Redis secrets.
+The Redis URL is provisioned by the infrastructure administrator with a separate
+random password. Its named user can access only `im-listening:*` with the commands
+needed by sessions, reset/Google flows and rate limiting. The API receives no
+Redis administrator credential. Do not create a Redis service, expose a port,
+rotate the session signing key, or delete its data volume during this move.
 The stack sends from `password-reset@imlistening-mail.perrysmithmoss.com` over
 TLS on port 465. The mailer displays **I'm Listening** as the sender name.
 
@@ -197,8 +208,10 @@ images ignore both file settings and leave manual song entry available.
 Pause releases, create new versioned Swarm secrets and change the stack's source
 names while keeping the mount targets unchanged. For a database password
 change, coordinate `\password` and the new database URL in a maintenance
-window. Keep both Redis secrets synchronized and restart the Redis and API
-services in the same window. A new session signing key invalidates existing
+window. For Redis, follow the infrastructure runbook's per-user overlapping-hash
+rotation: deploy the reviewed ACL accepting both credentials, switch this API's
+versioned URL secret, verify it, then retire the old hash. Redis restarts are
+infrastructure maintenance operations. A new session signing key invalidates existing
 browser sessions. For Resend, leave the previous key active until a live reset
 email succeeds with the new key.
 
