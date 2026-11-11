@@ -22,13 +22,13 @@ services:
     secrets:
       - {source: im_listening_database_url_v1, target: database_url, uid: "1000", mode: 0400}
       - {source: im_listening_session_secret_v1, target: session_secret, uid: "1000", mode: 0400}
-      - {source: im_listening_redis_url_v1, target: redis_url, uid: "1000", mode: 0400}
+      - {source: im_listening_redis_url_v2, target: redis_url, uid: "1000", mode: 0400}
       - {source: im_listening_resend_key_v1, target: smtp_password, uid: "1000", mode: 0400}
       - {source: im_listening_google_oauth_v1, target: google_client_secret, uid: "1000", mode: 0400}
       - {source: im_listening_google_proxy_v2, target: google_proxy_secret, uid: "1000", mode: 0400}
     configs:
       - {source: im_listening_postgres_ca_v1, target: /etc/im-listening/postgres-ca.crt}
-    networks: [portfolio_network, sessions]
+    networks: [portfolio_network, redis_clients]
     read_only: true
     cap_drop: [ALL]
     volumes:
@@ -67,40 +67,11 @@ services:
         failure_action: rollback
         monitor: 100s
 
-  redis:
-    image: redis:8.10.3-alpine@sha256:71885d8cc6e42f2bc0aa2eb853bfc4be200b5108a46ac50e117ae1df0531fb80
-    user: "999:1000"
-    command: [redis-server, /run/secrets/redis_config, --appendonly, "yes", --maxmemory, 64mb]
-    secrets:
-      - {source: im_listening_redis_config_v1, target: redis_config, uid: "999", mode: 0400}
-    networks: [sessions]
-    read_only: true
-    cap_drop: [ALL]
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: ["CMD-SHELL", "read -r _ password < /run/secrets/redis_config && REDISCLI_AUTH=\"$$password\" redis-cli ping | grep -qx PONG"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    deploy:
-      resources:
-        limits: {memory: 192M, cpus: "0.25", pids: 64}
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-      placement:
-        constraints: [node.role == manager]
-
 networks:
   portfolio_network:
     external: true
-  sessions:
-    driver: overlay
-    internal: true
-
-volumes:
-  redis-data:
+  redis_clients:
+    external: true
 
 configs:
   im_listening_postgres_ca_v1: {external: true}
@@ -111,5 +82,4 @@ secrets:
   im_listening_resend_key_v1: {external: true}
   im_listening_google_oauth_v1: {external: true}
   im_listening_google_proxy_v2: {external: true}
-  im_listening_redis_url_v1: {external: true}
-  im_listening_redis_config_v1: {external: true}
+  im_listening_redis_url_v2: {external: true}
