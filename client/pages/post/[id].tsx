@@ -146,12 +146,16 @@ function PostDetail({ post }: { post: PublicPost }) {
             <PostRating value={post.rating} />
             <section className="auth-form mt-2">
               <h2 className="section-title">Listen</h2>
-              {preview ? (
+              {spotify ? (
+                <iframe className="spotify-player" title={`Listen to ${post.albumName} by ${post.artistName} on Spotify`}
+                  src={`https://open.spotify.com/embed/track/${post.spotifyTrackId}`} width="100%" height="152"
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" allowFullScreen loading="lazy" />
+              ) : preview ? (
                 <>
                   <p className="muted">Song preview</p>
                   <audio controls preload="none" src={preview} aria-label="Song preview" />
                 </>
-              ) : <p className="muted">{spotify ? "No audio preview is available." : "No listening link or audio preview was included with this share."}</p>}
+              ) : <p className="muted">No listening link or audio preview was included with this share.</p>}
               {spotify && <a className="inline-link justify-self-start" href={spotify}>Listen on Spotify</a>}
             </section>
             <section className="auth-form mt-3">
