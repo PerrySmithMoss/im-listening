@@ -1,7 +1,7 @@
 # Deploy the API to the VPS
 
 The `im-listening` stack runs the API. Shared Redis is owned by `perry-infra`
-and reached on the private encrypted `redis_clients` overlay using an
+and reached on the private encrypted `im_listening_redis_clients` overlay using an
 application-specific ACL credential. Traefik serves `https://im-listening-api.perrysmithmoss.com`. The API
 uses the shared PostgreSQL service over TLS and owns only its `im_listening`
 database. Redis retains the external `im-listening_redis-data` volume under the
@@ -9,6 +9,12 @@ infrastructure stack. Complete the [shared Redis cutover](https://github.com/Per
 before deploying this manifest against an existing installation. The base
 stack supports manual song entry. Enable Spotify search with the
 [optional stack override](#enable-spotify-search).
+
+The target manifest uses separate `im_listening_ingress`,
+`im_listening_database` and `im_listening_redis_clients` overlays. Complete the
+administrator-reviewed [staged network isolation rollout](https://github.com/PerrySmithMoss/perry-infra/blob/main/deploy/isolation/README.md)
+before deploying it against the existing installation. Only the ingress overlay
+is shared with Traefik; migration jobs join only the private database overlay.
 
 The production Redis cutover completed on 2026-11-11. The old app-owned Redis
 service was removed after existing-browser-session, password authentication,
@@ -81,7 +87,7 @@ migrations separately, run it as a one-off Swarm job on the database overlay:
 
 ```sh
 docker service create --name im-listening-migrate --mode replicated-job \
-  --network portfolio_network \
+  --network im_listening_database \
   --secret source=im_listening_database_url_v1,target=database_url,uid=1000,mode=0400 \
   --config source=im_listening_postgres_ca_v1,target=/etc/im-listening/postgres-ca.crt \
   --env DATABASE_URL_FILE=/run/secrets/database_url \
