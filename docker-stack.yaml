@@ -28,7 +28,7 @@ services:
       - {source: im_listening_google_proxy_v2, target: google_proxy_secret, uid: "1000", mode: 0400}
     configs:
       - {source: im_listening_postgres_ca_v1, target: /etc/im-listening/postgres-ca.crt}
-    networks: [portfolio_network, redis_clients]
+    networks: [im_listening_ingress, im_listening_database, im_listening_redis_clients]
     read_only: true
     cap_drop: [ALL]
     volumes:
@@ -44,7 +44,7 @@ services:
     deploy:
       labels:
         traefik.enable: "true"
-        traefik.swarm.network: portfolio_network
+        traefik.swarm.network: im_listening_ingress
         traefik.http.routers.im-listening-api.rule: Host(`im-listening-api.perrysmithmoss.com`)
         traefik.http.routers.im-listening-api.entrypoints: websecure
         traefik.http.routers.im-listening-api.tls.certresolver: myresolver
@@ -68,9 +68,11 @@ services:
         monitor: 100s
 
 networks:
-  portfolio_network:
+  im_listening_ingress:
     external: true
-  redis_clients:
+  im_listening_database:
+    external: true
+  im_listening_redis_clients:
     external: true
 
 configs:
