@@ -41,6 +41,23 @@ Build on Tasks 1 and 2. Add Google registration and sign-in alongside email/pass
 
 Local evidence includes PostgreSQL migrations, password and post regressions,
 mock Google integration and security tests, and browser verification through the
-local Next.js proxy. Google Cloud provisioning, deployed desktop/mobile checks,
-production logging checks, and live rollback evidence are pending. See the [design](google-sign-in.md) and
+local Next.js proxy. See the [design](google-sign-in.md) and
 [rollout runbook](deploy-vps.md#roll-out-google-sign-in).
+
+On 10 November 2026, the production Google OAuth client was published and
+`im-listening.vercel.app` was verified in Search Console under the Im Listening
+account. The [production workflow](https://github.com/PerrySmithMoss/im-listening/actions/runs/42851516282)
+deployed API digest `sha256:f8f2ef49accc4bf9aba9768757849acf36c3b54b074644700430eb81162093bb`.
+The identity migration applied and the API passed its health check.
+
+The live Vercel route started the Google flow with PKCE and issued the expected
+secure, host-only Lax session cookie. A browser verified Google consent,
+successful return to onboarding, cancellation, and rejection of a duplicate
+registration for the existing test account. After password confirmation,
+the browser linked Google to the existing account. Google re-login, session
+persistence across reload, and logout passed at desktop and 390-pixel browser
+widths. The API recorded redacted outcomes.
+
+Google requested a 24-hour wait for Search Console ownership to propagate
+before retrying brand verification. Production log review across providers
+and live rollback evidence are pending.
